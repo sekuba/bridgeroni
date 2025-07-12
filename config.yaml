@@ -29,4 +29,9 @@ networks:
   - name: MessageTransmitter
     address:
     - 0x0a992d191DEeC32aFe36203Ad87D7d289a738F81
+
+field_selection:
+  transaction_fields:
+    - hash     
+          
 unordered_multichain_mode: true

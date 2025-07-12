@@ -19,3 +19,29 @@ type TokenMessenger_DepositForBurn {
   destinationCaller: String!
 }
 
+type CCTPTransfer @entity {
+  id: ID!
+
+  # === identifying ===
+  sourceDomain: BigInt!
+  destinationDomain: BigInt
+  nonce: BigInt!
+
+  # === source-side ===
+  amount: BigInt
+  burnToken: String
+  depositor: String
+  mintRecipient: String
+  sourceTxHash: String
+  depositBlock: BigInt
+  depositTimestamp: BigInt      # <-- new
+
+  # === destination-side ===
+  destinationTxHash: String
+  messageReceivedBlock: BigInt
+  messageReceivedTimestamp: BigInt   # <-- new
+
+  # === derived ===
+  latencySeconds: BigInt
+  matched: Boolean!
+}
