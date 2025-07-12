@@ -1,0 +1,21 @@
+type MessageTransmitter_MessageReceived {
+  id: ID!
+  caller: String!
+  sourceDomain: BigInt!
+  nonce: BigInt!
+  sender: String!
+  messageBody: String!
+}
+
+type TokenMessenger_DepositForBurn {
+  id: ID!
+  nonce: BigInt!
+  burnToken: String!
+  amount: BigInt!
+  depositor: String!
+  mintRecipient: String!
+  destinationDomain: BigInt!
+  destinationTokenMessenger: String!
+  destinationCaller: String!
+}
+
