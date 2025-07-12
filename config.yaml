@@ -1,19 +1,32 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
 name: envio-indexer
+contracts:
+- name: TokenMessenger
+  handler: src/EventHandlers.ts
+  events:
+    - event: DepositForBurn(uint64 indexed nonce, address indexed burnToken, uint256 amount, address indexed depositor, bytes32 mintRecipient, uint32 destinationDomain, bytes32 destinationTokenMessenger, bytes32 destinationCaller)
+- name: MessageTransmitter
+  handler: src/EventHandlers.ts
+  events:
+    - event: MessageReceived(address indexed caller, uint32 sourceDomain, uint64 indexed nonce, bytes32 sender, bytes messageBody)
+
 networks:
 - id: 8453
-  start_block: 0
+  start_block: 32270286
   contracts:
   - name: TokenMessenger
     address:
     - 0x1682Ae6375C4E4A97e4B583BC394c861A46D8962
-    handler: src/EventHandlers.ts
-    events:
-    - event: DepositForBurn(uint64 indexed nonce, address indexed burnToken, uint256 amount, address indexed depositor, bytes32 mintRecipient, uint32 destinationDomain, bytes32 destinationTokenMessenger, bytes32 destinationCaller)
   - name: MessageTransmitter
     address:
     - 0xAD09780d193884d503182aD4588450C416D6F9D4
-    handler: src/EventHandlers.ts
-    events:
-    - event: MessageReceived(address indexed caller, uint32 sourceDomain, uint64 indexed nonce, bytes32 sender, bytes messageBody)
+- id: 1
+  start_block: 22803638
+  contracts:
+  - name: TokenMessenger
+    address:
+    - 0xBd3fa81B58Ba92a82136038B25aDec7066af3155
+  - name: MessageTransmitter
+    address:
+    - 0x0a992d191DEeC32aFe36203Ad87D7d289a738F81
 unordered_multichain_mode: true
