@@ -32,6 +32,6 @@ networks:
 
 field_selection:
   transaction_fields:
-    - hash     
+    - hash
           
 unordered_multichain_mode: true

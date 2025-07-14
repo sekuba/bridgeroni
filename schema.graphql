@@ -1,3 +1,4 @@
+# Raw events with enhanced metadata for TUI display
 type MessageTransmitter_MessageReceived {
   id: ID!
   caller: String!
@@ -5,6 +6,11 @@ type MessageTransmitter_MessageReceived {
   nonce: BigInt!
   sender: String!
   messageBody: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
 }
 
 type TokenMessenger_DepositForBurn {
@@ -17,6 +23,11 @@ type TokenMessenger_DepositForBurn {
   destinationDomain: BigInt!
   destinationTokenMessenger: String!
   destinationCaller: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
 }
 
 type CCTPTransfer @entity {
@@ -34,14 +45,21 @@ type CCTPTransfer @entity {
   mintRecipient: String
   sourceTxHash: String
   depositBlock: BigInt
-  depositTimestamp: BigInt      # <-- new
+  depositTimestamp: BigInt
 
   # === destination-side ===
   destinationTxHash: String
   messageReceivedBlock: BigInt
-  messageReceivedTimestamp: BigInt   # <-- new
+  messageReceivedTimestamp: BigInt
 
   # === derived ===
   latencySeconds: BigInt
   matched: Boolean!
+  
+  # === computed fields for TUI efficiency ===
+  hasAmount: Boolean!           # true if amount is not null (for display logic)
+  sourceChainId: BigInt        # chain ID where deposit occurred
+  destinationChainId: BigInt   # chain ID where message was received
+  eventType: String!           # "deposit", "received", or "matched"
+  lastUpdated: BigInt!         # timestamp of last update to this record
 }

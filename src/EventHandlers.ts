@@ -10,7 +10,20 @@ import {
 
 const DOMAIN_BY_CHAIN_ID: Record<number, bigint> = {
   1: 0n,        // Ethereum
+  43114: 1n,    // Avalanche
+  10: 2n,       // OP
+  42161: 3n,    // Arbitrum
+  1151111081099710: 4n,  // Noble
+  // 5: Solana (not EVM)
   8453: 6n,     // Base
+  137: 7n,      // Polygon
+  // 8: Sui (not EVM)
+  // 9: Aptos (not EVM)  
+  1301: 10n,    // Unichain
+  59144: 11n,   // Linea
+  // 12: Codex (placeholder)
+  // 13: Sonic (placeholder)
+  480: 14n,     // World Chain
 };
 
 const idFor = (domain: bigint, nonce: bigint) => `${domain}_${nonce}` as const;
@@ -52,14 +65,25 @@ TokenMessenger.DepositForBurn.handler(async ({ event, context }) => {
     /* derived */
     matched,
     latencySeconds: matched && messageTs ? messageTs - depositTs : undefined,
+
+    /* computed fields for TUI efficiency */
+    hasAmount: true,  // deposit events always have amount
+    sourceChainId: BigInt(event.chainId),
+    destinationChainId: prev?.destinationChainId,
+    eventType: matched ? "matched" : "deposit",
+    lastUpdated: depositTs,
   };
 
   context.CCTPTransfer.set(transfer);
 
-  /* raw log (handy for debugging) */
+  /* enhanced raw event log */
   context.TokenMessenger_DepositForBurn.set({
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: depositTs,
+    txHash: event.transaction.hash,
   } as TokenMessenger_DepositForBurn);
 });
 
@@ -97,12 +121,24 @@ MessageTransmitter.MessageReceived.handler(async ({ event, context }) => {
     /* derived */
     matched,
     latencySeconds: matched && depositTs ? messageTs - depositTs : undefined,
+
+    /* computed fields for TUI efficiency */
+    hasAmount: !!(prev?.amount),  // only true if we have amount from deposit
+    sourceChainId: prev?.sourceChainId,
+    destinationChainId: BigInt(event.chainId),
+    eventType: matched ? "matched" : "received",
+    lastUpdated: messageTs,
   };
 
   context.CCTPTransfer.set(transfer);
 
+  /* enhanced raw event log */
   context.MessageTransmitter_MessageReceived.set({
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: messageTs,
+    txHash: event.transaction.hash,
   } as MessageTransmitter_MessageReceived);
 });
