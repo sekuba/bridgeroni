@@ -708,7 +708,7 @@ class CCTPMonitor {
 
     ].filter(line => line !== '').join('\n');
 
-    return this.drawBox(0, 12, 'METRICS (CCTPv1 & v2)', content);
+    return this.drawBox(0, 11, 'METRICS (CCTPv1 & v2)', content);
   }
 
   // Render raw activity feed
@@ -798,7 +798,7 @@ class CCTPMonitor {
     stdout.write(this.renderMatchedBridges());
     
     // Footer
-    stdout.write(`\n${COLORS.gray}Press Ctrl+C to exit • Refreshing every ${CONFIG.REFRESH_INTERVAL/1000}s${COLORS.reset}\n`);
+    stdout.write(`${COLORS.gray}Press Ctrl+C to exit • Refreshing every ${CONFIG.REFRESH_INTERVAL/1000}s${COLORS.reset}`);
   }
 
   // Start the monitor
