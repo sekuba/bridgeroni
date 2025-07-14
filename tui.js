@@ -173,7 +173,7 @@ class CCTPMonitor {
       matchedTransfers: `{
         CCTPTransfer(
           where: {matched: {_eq: true}}, 
-          order_by: {depositTimestamp: desc}
+          order_by: {messageReceivedTimestamp: desc}
         ) {
           id sourceDomain destinationDomain nonce amount 
           depositor mintRecipient sourceTxHash destinationTxHash
@@ -713,8 +713,10 @@ class CCTPMonitor {
 
   // Render raw activity feed
   renderRawActivity() {
-    const events = this.data.rawEvents.slice(0, 8);
-    const content = events.map(event => {
+    const events = this.data.rawEvents.slice(0, 6); // Reduced to fit tx links
+    let content = '';
+    
+    events.forEach(event => {
       const amount = this.formatAmount(event.amount, event.hasAmount);
       const time = this.formatTimestamp(event.timestamp);
       const txUrl = this.formatTxHash(event.txHash, event.direction === 'from' ? event.sourceDomain : event.destinationDomain);
@@ -727,6 +729,8 @@ class CCTPMonitor {
           case 3: return COLORS.cyan;     // Arbitrum  
           case 6: return COLORS.blue;     // Base
           case 10: return COLORS.magenta; // Unichain
+          case 11: return COLORS.cyan;    // Linea
+          case 14: return COLORS.green;   // World Chain
           default: return COLORS.white;   // Other chains
         }
       };
@@ -736,19 +740,16 @@ class CCTPMonitor {
       
       const versionLabel = event.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
       
-      let line = '';
-      if (event.type === 'deposit') {
-        // Deposit: money leaving source chain
-        line = `${versionLabel} ${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset}`;
-      } else {
-        // Received: money arriving at destination chain  
-        line = `${versionLabel} ${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset}`;
-      }
+      // Main event line
+      const eventLine = `${versionLabel} ${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset}`;
       
-      return line;
-    }).join('\n');
+      // Transaction link line
+      const txLine = `  ${COLORS.gray}tx: ${txUrl}${COLORS.reset}`;
+      
+      content += eventLine + '\n' + txLine + '\n';
+    });
 
-    return this.drawBox(0, 10, 'RAW ACTIVITY', content);
+    return this.drawBox(0, 14, 'RAW ACTIVITY', content);
   }
 
   // Render matched bridges section
