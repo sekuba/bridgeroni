@@ -13,6 +13,22 @@ type MessageTransmitter_MessageReceived {
   txHash: String!
 }
 
+# CCTPv2 MessageReceived event
+type MessageTransmitter_MessageReceivedV2 {
+  id: ID!
+  caller: String!
+  sourceDomain: BigInt!
+  nonce: String!  # bytes32 in v2
+  sender: String!
+  finalityThresholdExecuted: BigInt!
+  messageBody: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
 type TokenMessenger_DepositForBurn {
   id: ID!
   nonce: BigInt!
@@ -30,13 +46,33 @@ type TokenMessenger_DepositForBurn {
   txHash: String!
 }
 
+# CCTPv2 DepositForBurn event
+type TokenMessenger_DepositForBurnV2 {
+  id: ID!
+  burnToken: String!
+  amount: BigInt!
+  depositor: String!
+  mintRecipient: String!
+  destinationDomain: BigInt!
+  destinationTokenMessenger: String!
+  destinationCaller: String!
+  maxFee: BigInt!
+  minFinalityThreshold: BigInt!
+  hookData: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
 type CCTPTransfer @entity {
   id: ID!
 
   # === identifying ===
   sourceDomain: BigInt!
   destinationDomain: BigInt
-  nonce: BigInt!
+  nonce: String!  # Support both BigInt (v1) and bytes32 (v2) as string
 
   # === source-side ===
   amount: BigInt
@@ -46,6 +82,12 @@ type CCTPTransfer @entity {
   sourceTxHash: String
   depositBlock: BigInt
   depositTimestamp: BigInt
+
+  # === CCTPv2 specific fields ===
+  maxFee: BigInt               # v2 only
+  minFinalityThreshold: BigInt # v2 only  
+  hookData: String             # v2 only
+  finalityThresholdExecuted: BigInt # v2 only (destination side)
 
   # === destination-side ===
   destinationTxHash: String
@@ -62,4 +104,5 @@ type CCTPTransfer @entity {
   destinationChainId: BigInt   # chain ID where message was received
   eventType: String!           # "deposit", "received", or "matched"
   lastUpdated: BigInt!         # timestamp of last update to this record
+  version: String!             # "v1" or "v2"
 }

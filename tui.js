@@ -108,7 +108,7 @@ class CCTPMonitor {
   // Fetch all required data
   async fetchData() {
     const queries = {
-      // Get recent deposit events directly from raw events with enhanced metadata
+      // Get recent deposit events directly from raw events with enhanced metadata (v1)
       recentDeposits: `{
         TokenMessenger_DepositForBurn(
           limit: 15, 
@@ -119,13 +119,35 @@ class CCTPMonitor {
         }
       }`,
       
-      // Get recent received events directly from raw events with enhanced metadata
+      // Get recent deposit events from v2 contracts
+      recentDepositsV2: `{
+        TokenMessenger_DepositForBurnV2(
+          limit: 15, 
+          order_by: {blockTimestamp: desc}
+        ) {
+          id amount depositor destinationDomain
+          chainId blockTimestamp txHash
+        }
+      }`,
+      
+      // Get recent received events directly from raw events with enhanced metadata (v1)
       recentReceived: `{
         MessageTransmitter_MessageReceived(
           limit: 15, 
           order_by: {blockTimestamp: desc}
         ) {
           id nonce sourceDomain caller
+          chainId blockTimestamp txHash
+        }
+      }`,
+      
+      // Get recent received events from v2 contracts
+      recentReceivedV2: `{
+        MessageTransmitter_MessageReceivedV2(
+          limit: 15, 
+          order_by: {blockTimestamp: desc}
+        ) {
+          id nonce sourceDomain caller finalityThresholdExecuted
           chainId blockTimestamp txHash
         }
       }`,
@@ -139,6 +161,7 @@ class CCTPMonitor {
           id sourceDomain destinationDomain nonce amount 
           depositor mintRecipient sourceTxHash destinationTxHash
           depositTimestamp messageReceivedTimestamp latencySeconds
+          version maxFee minFinalityThreshold hookData finalityThresholdExecuted
         }
       }`,
       
@@ -146,7 +169,7 @@ class CCTPMonitor {
       allTransfers: `{
         CCTPTransfer(order_by: {depositTimestamp: desc}) {
           matched latencySeconds sourceDomain destinationDomain
-          depositBlock messageReceivedBlock
+          depositBlock messageReceivedBlock version amount depositTimestamp
         }
       }`,
       
@@ -155,53 +178,93 @@ class CCTPMonitor {
         TokenMessenger_DepositForBurn { id }
       }`,
       
+      allDepositsV2: `{
+        TokenMessenger_DepositForBurnV2 { id }
+      }`,
+      
       allReceived: `{
         MessageTransmitter_MessageReceived { id }
+      }`,
+      
+      allReceivedV2: `{
+        MessageTransmitter_MessageReceivedV2 { id }
       }`
     };
 
     const results = await Promise.all([
       this.graphql(queries.recentDeposits),
+      this.graphql(queries.recentDepositsV2),
       this.graphql(queries.recentReceived),
+      this.graphql(queries.recentReceivedV2),
       this.graphql(queries.matchedTransfers),
       this.graphql(queries.allTransfers),
       this.graphql(queries.allDeposits),
-      this.graphql(queries.allReceived)
+      this.graphql(queries.allDepositsV2),
+      this.graphql(queries.allReceived),
+      this.graphql(queries.allReceivedV2)
     ]);
 
     if (results.some(r => !r)) return false;
 
-    const [recentDepositsData, recentReceivedData, matchedData, allTransfersData, depositsData, receivedData] = results;
+    const [recentDepositsData, recentDepositsV2Data, recentReceivedData, recentReceivedV2Data, matchedData, allTransfersData, depositsData, depositsV2Data, receivedData, receivedV2Data] = results;
 
-    // Process data
+    // Process data - combine v1 and v2 events
     this.data.recentDeposits = recentDepositsData.TokenMessenger_DepositForBurn;
+    this.data.recentDepositsV2 = recentDepositsV2Data.TokenMessenger_DepositForBurnV2;
     this.data.recentReceived = recentReceivedData.MessageTransmitter_MessageReceived;
+    this.data.recentReceivedV2 = recentReceivedV2Data.MessageTransmitter_MessageReceivedV2;
     this.data.matchedTransfers = matchedData.CCTPTransfer;
     
-    // Create combined raw events feed from recent deposits and receives
+    // Create combined raw events feed from recent deposits and receives (both v1 and v2)
     this.data.rawEvents = this.createRawEventsFeed(
       this.data.recentDeposits, 
-      this.data.recentReceived
+      this.data.recentDepositsV2,
+      this.data.recentReceived,
+      this.data.recentReceivedV2
     );
     
-    // Calculate metrics
+    // Calculate metrics separately for v1 and v2
     const allTransfers = allTransfersData.CCTPTransfer;
     const matchedTransfers = allTransfers.filter(t => t.matched);
+    const v1Transfers = matchedTransfers.filter(t => t.version === 'v1');
+    const v2Transfers = matchedTransfers.filter(t => t.version === 'v2');
     
     this.data.metrics = {
-      totalEvents: depositsData.TokenMessenger_DepositForBurn.length + receivedData.MessageTransmitter_MessageReceived.length,
-      totalDeposits: depositsData.TokenMessenger_DepositForBurn.length,
-      totalReceived: receivedData.MessageTransmitter_MessageReceived.length,
-      matchedCount: this.data.matchedTransfers.length, // Total matched transfers from dedicated query
-      avgLatency: this.calculateAverageLatency(this.data.matchedTransfers), // Use the matched transfers data
-      binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers), // Amount-binned latency metrics
-      dailyVolume: this.calculateDailyVolume(this.data.matchedTransfers), // Daily volume metrics
+      totalEvents: depositsData.TokenMessenger_DepositForBurn.length + depositsV2Data.TokenMessenger_DepositForBurnV2.length + receivedData.MessageTransmitter_MessageReceived.length + receivedV2Data.MessageTransmitter_MessageReceivedV2.length,
+      
+      // V1 metrics
+      v1: {
+        totalDeposits: depositsData.TokenMessenger_DepositForBurn.length,
+        totalReceived: receivedData.MessageTransmitter_MessageReceived.length,
+        matchedCount: v1Transfers.length,
+        avgLatency: this.calculateAverageLatency(v1Transfers),
+        binnedLatency: this.calculateBinnedLatency(v1Transfers),
+        dailyVolume: this.calculateDailyVolume(v1Transfers)
+      },
+      
+      // V2 metrics
+      v2: {
+        totalDeposits: depositsV2Data.TokenMessenger_DepositForBurnV2.length,
+        totalReceived: receivedV2Data.MessageTransmitter_MessageReceivedV2.length,
+        matchedCount: v2Transfers.length,
+        avgLatency: this.calculateAverageLatency(v2Transfers),
+        binnedLatency: this.calculateBinnedLatency(v2Transfers),
+        dailyVolume: this.calculateDailyVolume(v2Transfers)
+      },
+      
+      // Combined metrics
+      matchedCount: this.data.matchedTransfers.length,
+      avgLatency: this.calculateAverageLatency(this.data.matchedTransfers),
+      binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers),
+      dailyVolume: this.calculateDailyVolume(this.data.matchedTransfers),
       latestBlocks: {
         ethereum: this.getLatestBlock(allTransfers, 0),
         optimism: this.getLatestBlock(allTransfers, 2), 
         arbitrum: this.getLatestBlock(allTransfers, 3),
         base: this.getLatestBlock(allTransfers, 6),
-        unichain: this.getLatestBlock(allTransfers, 10)
+        unichain: this.getLatestBlock(allTransfers, 10),
+        linea: this.getLatestBlock(allTransfers, 11),
+        worldchain: this.getLatestBlock(allTransfers, 14)
       }
     };
 
@@ -234,12 +297,14 @@ class CCTPMonitor {
 
     // Calculate cumulative volume
     const totalVolume = recentTransfers.reduce((sum, transfer) => {
+      if (!transfer.amount) return sum;
       return sum + (parseInt(transfer.amount) / 1e6); // Convert to USDC
     }, 0);
 
     // Calculate per-chain volume
     const chainVolume = {};
     recentTransfers.forEach(transfer => {
+      if (!transfer.amount) return;
       const sourceDomain = parseInt(transfer.sourceDomain);
       const chainName = DOMAINS[sourceDomain] || `Chain${sourceDomain}`;
       
@@ -260,11 +325,10 @@ class CCTPMonitor {
   calculateBinnedLatency(matchedTransfers) {
     const bins = {
       micro: { min: 0, max: 10, latencies: [], label: '0-10' },
-      small: { min: 11, max: 100, latencies: [], label: '11-100' },
-      medium: { min: 101, max: 1000, latencies: [], label: '101-1k' },
-      large1: { min: 1001, max: 10000, latencies: [], label: '1k-10k' },
-      large2: { min: 10001, max: 100000, latencies: [], label: '10k-100k' },
-      whale: { min: 100001, max: Infinity, latencies: [], label: '100k+' }
+      small: { min: 10.01, max: 100, latencies: [], label: '>10-100' },
+      medium: { min: 100.01, max: 10000, latencies: [], label: '>100-10k' },
+      large: { min: 10000.01, max: 1000000, latencies: [], label: '>10k-1M' },
+      whale: { min: 1000000.01, max: Infinity, latencies: [], label: '>1M' }
     };
 
     // Categorize transfers by amount
@@ -282,10 +346,8 @@ class CCTPMonitor {
         bins.small.latencies.push(latencySeconds);
       } else if (amountUSDC >= bins.medium.min && amountUSDC <= bins.medium.max) {
         bins.medium.latencies.push(latencySeconds);
-      } else if (amountUSDC >= bins.large1.min && amountUSDC <= bins.large1.max) {
-        bins.large1.latencies.push(latencySeconds);
-      } else if (amountUSDC >= bins.large2.min && amountUSDC <= bins.large2.max) {
-        bins.large2.latencies.push(latencySeconds);
+      } else if (amountUSDC >= bins.large.min && amountUSDC <= bins.large.max) {
+        bins.large.latencies.push(latencySeconds);
       } else if (amountUSDC >= bins.whale.min) {
         bins.whale.latencies.push(latencySeconds);
       }
@@ -358,11 +420,13 @@ class CCTPMonitor {
     if (!hash || hash.length < 10) return hash;
     
     const explorerUrls = {
-      0: 'https://etherscan.io/tx/',           // Ethereum
+      0: 'https://etherscan.io/tx/',            // Ethereum
       2: 'https://optimistic.etherscan.io/tx/', // OP Mainnet
-      3: 'https://arbiscan.io/tx/',            // Arbitrum
-      6: 'https://basescan.org/tx/',           // Base
-      10: 'https://uniscan.xyz/tx/'                   // Unichain
+      3: 'https://arbiscan.io/tx/',             // Arbitrum
+      6: 'https://basescan.org/tx/',            // Base
+      10: 'https://uniscan.xyz/tx/',             // Unichain
+      11: 'https://lineascan.build/tx/',        // Linea
+      14: 'https://worldscan.org/tx/'           // World Chain
     };
     
     const baseUrl = explorerUrls[domain] || `https://etherscan.io/tx/`; // fallback to etherscan
@@ -395,7 +459,7 @@ class CCTPMonitor {
   }
 
   // Create raw events feed from recent deposits and received events
-  createRawEventsFeed(deposits, received) {
+  createRawEventsFeed(deposits, depositsV2, received, receivedV2) {
     const events = [];
     
     // Process deposit events
@@ -406,6 +470,7 @@ class CCTPMonitor {
       
       events.push({
         type: 'deposit',
+        version: 'v1',
         sourceDomain,
         destinationDomain: parseInt(deposit.destinationDomain),
         sourceChain: sourceDomain !== null ? DOMAINS[sourceDomain] : `Chain${chainId}`,
@@ -419,7 +484,29 @@ class CCTPMonitor {
       });
     });
     
-    // Process message received events  
+    // Process v2 deposit events
+    depositsV2.forEach(deposit => {
+      // Map chain ID to domain for source
+      const chainId = parseInt(deposit.chainId);
+      const sourceDomain = this.getChainIdToDomain(chainId);
+      
+      events.push({
+        type: 'deposit',
+        version: 'v2',
+        sourceDomain,
+        destinationDomain: parseInt(deposit.destinationDomain),
+        sourceChain: sourceDomain !== null ? DOMAINS[sourceDomain] : `Chain${chainId}`,
+        destinationChain: DOMAINS[deposit.destinationDomain] || deposit.destinationDomain,
+        amount: deposit.amount,
+        hasAmount: true, // deposits always have amount
+        nonce: null, // v2 doesn't have nonce in deposit events
+        timestamp: deposit.blockTimestamp,
+        txHash: deposit.txHash,
+        direction: 'from'
+      });
+    });
+    
+    // Process v1 message received events  
     received.forEach(msg => {
       // Map chain ID to domain for destination
       const chainId = parseInt(msg.chainId);
@@ -427,6 +514,7 @@ class CCTPMonitor {
       
       events.push({
         type: 'received',
+        version: 'v1',
         sourceDomain: parseInt(msg.sourceDomain),
         destinationDomain,
         sourceChain: DOMAINS[msg.sourceDomain] || msg.sourceDomain,
@@ -434,6 +522,28 @@ class CCTPMonitor {
         amount: null, // received events don't have amount
         hasAmount: false,
         nonce: msg.nonce,
+        timestamp: msg.blockTimestamp,
+        txHash: msg.txHash,
+        direction: 'to'
+      });
+    });
+    
+    // Process v2 message received events  
+    receivedV2.forEach(msg => {
+      // Map chain ID to domain for destination
+      const chainId = parseInt(msg.chainId);
+      const destinationDomain = this.getChainIdToDomain(chainId);
+      
+      events.push({
+        type: 'received',
+        version: 'v2',
+        sourceDomain: parseInt(msg.sourceDomain),
+        destinationDomain,
+        sourceChain: DOMAINS[msg.sourceDomain] || msg.sourceDomain,
+        destinationChain: destinationDomain !== null ? DOMAINS[destinationDomain] : `Chain${chainId}`,
+        amount: null, // received events don't have amount
+        hasAmount: false,
+        nonce: msg.nonce, // v2 uses bytes32 nonce
         timestamp: msg.blockTimestamp,
         txHash: msg.txHash,
         direction: 'to'
@@ -449,8 +559,10 @@ class CCTPMonitor {
       const typeDiff = a.type.localeCompare(b.type);
       if (typeDiff !== 0) return typeDiff;
       
-      // If type is also equal, sort by nonce for consistent ordering
-      return parseInt(a.nonce) - parseInt(b.nonce);
+      // If type is also equal, sort by nonce for consistent ordering (handle null nonces)
+      const nonceA = a.nonce ? parseInt(a.nonce) || 0 : 0;
+      const nonceB = b.nonce ? parseInt(b.nonce) || 0 : 0;
+      return nonceA - nonceB;
     }).slice(0, 12); // Show top 12 most recent events
   }
 
@@ -521,39 +633,61 @@ class CCTPMonitor {
     return output;
   }
 
+  // Format binned latency data for display
+  formatBinnedLatency(binnedData, version) {
+    const versionColor = version === 'v1' ? COLORS.yellow : COLORS.magenta;
+    const bins = ['micro', 'small', 'medium', 'large', 'whale'];
+    
+    const binnedItems = bins.map(binKey => {
+      const bin = binnedData[binKey];
+      if (!bin || bin.count === 0) return null;
+      return `${bin.label}: ${this.formatDuration(bin.avg)} (${bin.count})`;
+    }).filter(item => item !== null);
+    
+    if (binnedItems.length === 0) return '';
+    
+    return `${COLORS.bright}${versionColor}${version.toUpperCase()} Latency by Amount:${COLORS.reset} ${binnedItems.join(` ${COLORS.gray}│${COLORS.reset} `)}`;
+  }
+
   // Render metrics section
   renderMetrics() {
     const { metrics } = this.data;
-    const binned = metrics.binnedLatency;
+    const binnedV1 = metrics.v1.binnedLatency;
+    const binnedV2 = metrics.v2.binnedLatency;
     
     const content = [
-      `${COLORS.green}Events:${COLORS.reset} ${metrics.totalEvents} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}Total Events:${COLORS.reset} ${metrics.totalEvents} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.green}Matched:${COLORS.reset} ${metrics.matchedCount} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.green}Global Avg:${COLORS.reset} ${this.formatDuration(metrics.avgLatency)}`,
+      `${COLORS.green}Combined Avg:${COLORS.reset} ${this.formatDuration(metrics.avgLatency)}`,
+      
+      `${COLORS.bright}${COLORS.yellow}CCTPv1:${COLORS.reset} ` +
+      `${COLORS.green}Events:${COLORS.reset} ${metrics.v1.totalDeposits + metrics.v1.totalReceived} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}Matched:${COLORS.reset} ${metrics.v1.matchedCount} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}Avg:${COLORS.reset} ${this.formatDuration(metrics.v1.avgLatency)}`,
+      
+      `${COLORS.bright}${COLORS.magenta}CCTPv2:${COLORS.reset} ` +
+      `${COLORS.green}Events:${COLORS.reset} ${metrics.v2.totalDeposits + metrics.v2.totalReceived} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}Matched:${COLORS.reset} ${metrics.v2.matchedCount} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}Avg:${COLORS.reset} ${this.formatDuration(metrics.v2.avgLatency)}`,
       
       `${COLORS.yellow}Latest Blocks:${COLORS.reset} ETH ${metrics.latestBlocks.ethereum.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `OP ${metrics.latestBlocks.optimism.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ARB ${metrics.latestBlocks.arbitrum.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.blue}Base ${metrics.latestBlocks.base.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.magenta}Unichain ${metrics.latestBlocks.unichain.toLocaleString()}${COLORS.reset}`,
+      `${COLORS.magenta}Unichain ${metrics.latestBlocks.unichain.toLocaleString()}`,
 
-      `${COLORS.bright}${COLORS.blue}Daily Volume:${COLORS.reset} ${this.formatVolume(metrics.dailyVolume.total)} ${COLORS.gray}(${metrics.dailyVolume.count} transfers)${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
-      `${['ETHEREUM', 'BASE', 'ARBITRUM', 'UNICHAIN'].filter(chain => metrics.dailyVolume.chains[chain]).map(chain => 
-        `${chain}: ${this.formatVolume(metrics.dailyVolume.chains[chain])}`
-      ).join(` ${COLORS.gray}│${COLORS.reset} `)}`,
+      `${COLORS.yellow}More Blocks:${COLORS.reset} ${COLORS.cyan}Linea ${metrics.latestBlocks.linea.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}World Chain ${metrics.latestBlocks.worldchain.toLocaleString()}${COLORS.reset}`,
 
-      `${COLORS.cyan}Latency by Amount:${COLORS.reset} ` +
-      `${COLORS.dim}${binned.micro.label}:${COLORS.reset} ${binned.micro.count > 0 ? this.formatDuration(binned.micro.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.dim}${binned.small.label}:${COLORS.reset} ${binned.small.count > 0 ? this.formatDuration(binned.small.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.dim}${binned.medium.label}:${COLORS.reset} ${binned.medium.count > 0 ? this.formatDuration(binned.medium.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.dim}${binned.large1.label}:${COLORS.reset} ${binned.large1.count > 0 ? this.formatDuration(binned.large1.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.dim}${binned.large2.label}:${COLORS.reset} ${binned.large2.count > 0 ? this.formatDuration(binned.large2.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.bright}${COLORS.magenta}${binned.whale.label}:${COLORS.reset} ${binned.whale.count > 0 ? this.formatDuration(binned.whale.avg) : '?'}`,
+      `${COLORS.bright}${COLORS.blue}Daily Volume v1:${COLORS.reset} ${this.formatVolume(metrics.v1.dailyVolume.total)} ${COLORS.gray}(${metrics.v1.dailyVolume.count} transfers)${COLORS.reset}`,
+      
+      `${COLORS.bright}${COLORS.blue}Daily Volume v2:${COLORS.reset} ${this.formatVolume(metrics.v2.dailyVolume.total)} ${COLORS.gray}(${metrics.v2.dailyVolume.count} transfers)${COLORS.reset}`,
 
-      `${COLORS.gray}Samples (${binned.micro.label}│${binned.small.label}│${binned.medium.label}│${binned.large1.label}│${binned.large2.label}│${binned.whale.label}): ` +
-      `${binned.micro.count} │ ${binned.small.count} │ ${binned.medium.count} │ ${binned.large1.count} │ ${binned.large2.count} │ ${binned.whale.count}${COLORS.reset}`
-    ].join('\n');
+      this.formatBinnedLatency(binnedV1, 'v1'),
+      this.formatBinnedLatency(binnedV2, 'v2')
 
-    return this.drawBox(0, 8, 'METRICS', content);
+    ].filter(line => line !== '').join('\n');
+
+    return this.drawBox(0, 16, 'METRICS (CCTPv1 & v2)', content);
   }
 
   // Render raw activity feed
@@ -579,13 +713,15 @@ class CCTPMonitor {
       const sourceColor = getChainColor(event.sourceDomain);
       const destColor = getChainColor(event.destinationDomain);
       
+      const versionLabel = event.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
+      
       let line = '';
       if (event.type === 'deposit') {
         // Deposit: money leaving source chain
-        line = `${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset} ${COLORS.gray}${txUrl}${COLORS.reset}`;
+        line = `${versionLabel} ${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset}`;
       } else {
         // Received: money arriving at destination chain  
-        line = `${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset} ${COLORS.gray}${txUrl}${COLORS.reset}`;
+        line = `${versionLabel} ${sourceColor}${event.sourceChain}${COLORS.reset}→${destColor}${event.destinationChain}${COLORS.reset}: ${COLORS.bright}${amount}${COLORS.reset} ${COLORS.dim}${time}${COLORS.reset}`;
       }
       
       return line;
@@ -606,13 +742,14 @@ class CCTPMonitor {
       const depositor = this.formatAddress(transfer.depositor);
       const recipient = this.formatAddress(this.extractRecipient(transfer.mintRecipient));
       const latency = this.formatDuration(parseInt(transfer.latencySeconds));
+      const versionLabel = transfer.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
       const srcTxShort = this.formatTxHashShort(transfer.sourceTxHash);
       const dstTxShort = this.formatTxHashShort(transfer.destinationTxHash);
       const srcTxUrl = this.formatTxHash(transfer.sourceTxHash, parseInt(transfer.sourceDomain));
       const dstTxUrl = this.formatTxHash(transfer.destinationTxHash, parseInt(transfer.destinationDomain));
 
       // Main transfer line
-      content += `${COLORS.cyan}${srcDomain}${COLORS.reset}→${COLORS.yellow}${dstDomain}${COLORS.reset}: `;
+      content += `${versionLabel} ${COLORS.cyan}${srcDomain}${COLORS.reset}→${COLORS.yellow}${dstDomain}${COLORS.reset}: `;
       content += `${COLORS.bright}${amount}${COLORS.reset} `;
       content += `${COLORS.green}${depositor}${COLORS.reset}→${COLORS.green}${recipient}${COLORS.reset} `;
       content += `${COLORS.magenta}~${latency}${COLORS.reset}\n`;
