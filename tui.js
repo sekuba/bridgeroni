@@ -195,6 +195,7 @@ class CCTPMonitor {
       matchedCount: this.data.matchedTransfers.length, // Total matched transfers from dedicated query
       avgLatency: this.calculateAverageLatency(this.data.matchedTransfers), // Use the matched transfers data
       binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers), // Amount-binned latency metrics
+      dailyVolume: this.calculateDailyVolume(this.data.matchedTransfers), // Daily volume metrics
       latestBlocks: {
         ethereum: this.getLatestBlock(allTransfers, 0),
         optimism: this.getLatestBlock(allTransfers, 2), 
@@ -217,6 +218,42 @@ class CCTPMonitor {
     
     const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
     return Math.round(avg);
+  }
+
+  // Calculate daily volume for matched transactions (24h rolling period)
+  calculateDailyVolume(matchedTransfers) {
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const twentyFourHoursAgoTimestamp = Math.floor(twentyFourHoursAgo.getTime() / 1000);
+
+    // Filter transfers from last 24 hours
+    const recentTransfers = matchedTransfers.filter(transfer => {
+      const transferTimestamp = parseInt(transfer.depositTimestamp);
+      return transferTimestamp >= twentyFourHoursAgoTimestamp;
+    });
+
+    // Calculate cumulative volume
+    const totalVolume = recentTransfers.reduce((sum, transfer) => {
+      return sum + (parseInt(transfer.amount) / 1e6); // Convert to USDC
+    }, 0);
+
+    // Calculate per-chain volume
+    const chainVolume = {};
+    recentTransfers.forEach(transfer => {
+      const sourceDomain = parseInt(transfer.sourceDomain);
+      const chainName = DOMAINS[sourceDomain] || `Chain${sourceDomain}`;
+      
+      if (!chainVolume[chainName]) {
+        chainVolume[chainName] = 0;
+      }
+      chainVolume[chainName] += parseInt(transfer.amount) / 1e6; // Convert to USDC
+    });
+
+    return {
+      total: totalVolume,
+      chains: chainVolume,
+      count: recentTransfers.length
+    };
   }
 
   // Calculate latency metrics binned by transfer amount (USDC)
@@ -300,6 +337,14 @@ class CCTPMonitor {
     if (!amount || !hasAmount) return '?';
     const num = parseInt(amount) / 1e6;
     return num >= 1000 ? `$${(num/1000).toFixed(1)}k` : `$${num.toFixed(2)}`;
+  }
+
+  // Format volume amount (already in USDC)
+  formatVolume(amount) {
+    if (!amount || amount === 0) return '$0';
+    if (amount >= 1000000) return `$${(amount/1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `$${(amount/1000).toFixed(1)}K`;
+    return `$${amount.toFixed(0)}`;
   }
 
   // Format address for display
@@ -491,6 +536,11 @@ class CCTPMonitor {
       `${COLORS.blue}Base ${metrics.latestBlocks.base.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.magenta}Unichain ${metrics.latestBlocks.unichain.toLocaleString()}${COLORS.reset}`,
 
+      `${COLORS.bright}${COLORS.blue}Daily Volume:${COLORS.reset} ${this.formatVolume(metrics.dailyVolume.total)} ${COLORS.gray}(${metrics.dailyVolume.count} transfers)${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
+      `${['ETHEREUM', 'BASE', 'ARBITRUM', 'UNICHAIN'].filter(chain => metrics.dailyVolume.chains[chain]).map(chain => 
+        `${chain}: ${this.formatVolume(metrics.dailyVolume.chains[chain])}`
+      ).join(` ${COLORS.gray}│${COLORS.reset} `)}`,
+
       `${COLORS.cyan}Latency by Amount:${COLORS.reset} ` +
       `${COLORS.dim}${binned.micro.label}:${COLORS.reset} ${binned.micro.count > 0 ? this.formatDuration(binned.micro.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.dim}${binned.small.label}:${COLORS.reset} ${binned.small.count > 0 ? this.formatDuration(binned.small.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
@@ -503,7 +553,7 @@ class CCTPMonitor {
       `${binned.micro.count} │ ${binned.small.count} │ ${binned.medium.count} │ ${binned.large1.count} │ ${binned.large2.count} │ ${binned.whale.count}${COLORS.reset}`
     ].join('\n');
 
-    return this.drawBox(0, 6, 'METRICS', content);
+    return this.drawBox(0, 8, 'METRICS', content);
   }
 
   // Render raw activity feed
