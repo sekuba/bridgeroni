@@ -1,23 +1,29 @@
 #!/usr/bin/env node
 
 /**
- * CCTP Bridge Monitor - Solarpunk TUI
+ * CCTP Bridge Monitor - Terminal UI
  * 
- * A suckless terminal interface for monitoring CCTP bridge transactions
- * between Ethereum and Base. Uses only Node.js built-ins for maximum
- * maintainability and cypherpunk minimalism.
+ * Real-time monitoring dashboard for CCTP v1 and v2 bridge transactions
+ * across all supported chains. Built with Node.js built-ins for simplicity.
+ * 
+ * Features:
+ * - Comprehensive v1/v2 metrics with separate volume tracking
+ * - Binned latency analysis by transaction amount
+ * - Real-time raw event feed
+ * - Matched bridge transfer display with accurate latency
+ * - Support for all CCTP chains including Linea and World Chain
  * 
  * Architecture:
- * - GraphQL queries fetch data from Hasura API
- * - Terminal rendering using ANSI escape codes
- * - Real-time updates every 5 seconds
- * - Three main sections: Metrics, Raw Activity, Matched Bridges
+ * - GraphQL queries to Hasura/Envio indexer
+ * - ANSI terminal rendering
+ * - 1-second refresh rate
+ * - Deterministic v2 matching via messageBody decoding
  */
 
 const { stdout } = process;
 const { performance } = require('perf_hooks');
 
-// ANSI colors for solarpunk aesthetic (greens, cyans, earth tones)
+// Terminal color codes
 const COLORS = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -31,7 +37,7 @@ const COLORS = {
   gray: '\x1b[90m',
 };
 
-// Domain mappings for all CCTP-supported chains
+// CCTP domain to chain name mapping
 const DOMAINS = {
   0: 'ETHEREUM',
   1: 'AVALANCHE', 
@@ -50,8 +56,19 @@ const DOMAINS = {
   14: 'WORLDCHAIN',
 };
 
-// GraphQL endpoint
-const GRAPHQL_URL = 'http://localhost:8080/v1/graphql';
+// Configuration
+const CONFIG = {
+  GRAPHQL_URL: 'http://localhost:8080/v1/graphql',
+  REFRESH_INTERVAL: 1000, // 1 second
+  TRANSFER_AMOUNT_BINS: {
+    micro: { min: 0, max: 10, label: '0-10' },
+    small: { min: 10.01, max: 100, label: '>10-100' },
+    medium: { min: 100.01, max: 10000, label: '>100-10k' },
+    large: { min: 10000.01, max: 100000, label: '>10k-100k' },
+    xlarge: { min: 100000.01, max: 1000000, label: '>100k-1M' },
+    whale: { min: 1000000.01, max: Infinity, label: '>1M' }
+  }
+};
 
 class CCTPMonitor {
   constructor() {
@@ -83,7 +100,7 @@ class CCTPMonitor {
   // Make GraphQL requests using built-in fetch (Node 18+)
   async graphql(query) {
     try {
-      const response = await fetch(GRAPHQL_URL, {
+      const response = await fetch(CONFIG.GRAPHQL_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -323,14 +340,11 @@ class CCTPMonitor {
 
   // Calculate latency metrics binned by transfer amount (USDC)
   calculateBinnedLatency(matchedTransfers) {
-    const bins = {
-      micro: { min: 0, max: 10, latencies: [], label: '0-10' },
-      small: { min: 10.01, max: 100, latencies: [], label: '>10-100' },
-      medium: { min: 100.01, max: 10000, latencies: [], label: '>100-10k' },
-      large: { min: 10000.01, max: 100000, latencies: [], label: '>10k-100k' },
-      xlarge: { min: 100000.01, max: 1000000, latencies: [], label: '>100k-1M' },
-      whale: { min: 1000000.01, max: Infinity, latencies: [], label: '>1M' }
-    };
+    // Initialize bins with latencies array
+    const bins = {};
+    Object.keys(CONFIG.TRANSFER_AMOUNT_BINS).forEach(key => {
+      bins[key] = { ...CONFIG.TRANSFER_AMOUNT_BINS[key], latencies: [] };
+    });
 
     // Categorize transfers by amount
     matchedTransfers.forEach(transfer => {
@@ -445,8 +459,12 @@ class CCTPMonitor {
   // Format duration in human readable form
   formatDuration(seconds) {
     if (!seconds || seconds <= 0) return '?';
-    const mins = Math.floor(seconds / 60);
     
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    
+    const mins = Math.floor(seconds / 60);
     if (mins >= 60) {
       const hours = Math.floor(mins / 60);
       return `${hours}h`;
@@ -779,7 +797,7 @@ class CCTPMonitor {
     stdout.write(this.renderMatchedBridges());
     
     // Footer
-    stdout.write(`\n${COLORS.gray}Press Ctrl+C to exit • Refreshing every 1s${COLORS.reset}\n`);
+    stdout.write(`\n${COLORS.gray}Press Ctrl+C to exit • Refreshing every ${CONFIG.REFRESH_INTERVAL/1000}s${COLORS.reset}\n`);
   }
 
   // Start the monitor
@@ -789,7 +807,7 @@ class CCTPMonitor {
     // Initial data fetch
     const success = await this.fetchData();
     if (!success) {
-      console.error(`${COLORS.red}Failed to fetch initial data. Is the indexer running?${COLORS.reset}`);
+      console.error(`${COLORS.red}Failed to fetch initial data. Is the indexer running at ${CONFIG.GRAPHQL_URL}?${COLORS.reset}`);
       process.exit(1);
     }
 
@@ -805,7 +823,7 @@ class CCTPMonitor {
     // Handle graceful shutdown
     process.on('SIGINT', () => {
       this.clearScreen();
-      console.log(`${COLORS.green}🌱 Bridge monitoring stopped. Keep scaling Ethereum! ${COLORS.reset}`);
+      console.log(`${COLORS.green}🌱 Bridge monitoring stopped${COLORS.reset}`);
       process.exit(0);
     });
   }

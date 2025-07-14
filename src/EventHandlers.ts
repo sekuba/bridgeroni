@@ -1,3 +1,20 @@
+/**
+ * CCTP Bridge Monitor - Event Handlers
+ * 
+ * Processes CCTP v1 and v2 events to create matched cross-chain transfers.
+ * 
+ * Key Features:
+ * - v1: Uses nonce-based matching (nonce available in both events)
+ * - v2: Uses deterministic nonce computation (nonce only in MessageReceived)
+ * - Decodes v2 messageBody to extract transfer details
+ * - Maintains separate v1/v2 versioning for metrics
+ * 
+ * IMPORTANT: v1 and v2 events are NOT interchangeable!
+ * - Events from different versions cannot be matched together
+ * - Some chains (Linea, World Chain) only support v2
+ * - Metrics should be calculated separately per version
+ */
+
 import {
   MessageTransmitter,
   TokenMessenger,
@@ -10,15 +27,31 @@ import {
   MessageTransmitter_MessageReceivedV2,
 } from "generated";
 
-/* ---------- helpers ---------- */
+/* ---------- Configuration ---------- */
 
-/*
- * IMPORTANT: CCTPv1 and CCTPv2 are NOT interchangeable!
- * - v1 and v2 events cannot be matched together
- * - Metrics like volume and latency should be calculated separately per version
- * - Raw events and matched transfers can be displayed together in feeds
- * - Some chains (Linea, World Chain) only support v2
- */
+// CCTP domain mappings for supported chains
+const DOMAIN_BY_CHAIN_ID: Record<number, bigint> = {
+  1: 0n,        // Ethereum
+  43114: 1n,    // Avalanche
+  10: 2n,       // OP
+  42161: 3n,    // Arbitrum
+  1151111081099710: 4n,  // Noble
+  // 5: Solana (not EVM)
+  8453: 6n,     // Base
+  137: 7n,      // Polygon
+  // 8: Sui (not EVM)
+  // 9: Aptos (not EVM)  
+  130: 10n,     // Unichain
+  59144: 11n,   // Linea
+  // 12: Codex (placeholder)
+  // 13: Sonic (placeholder)
+  480: 14n,     // World Chain
+};
+
+// Helper to create consistent transfer IDs
+const idFor = (domain: bigint, nonce: bigint | string) => `${domain}_${nonce}` as const;
+
+/* ---------- CCTP v2 Helper Functions ---------- */
 
 /*
  * Decode CCTP v2 message body according to the format:
@@ -146,28 +179,11 @@ function computeV2DeterministicNonce(
   }
 }
 
-const DOMAIN_BY_CHAIN_ID: Record<number, bigint> = {
-  1: 0n,        // Ethereum
-  43114: 1n,    // Avalanche
-  10: 2n,       // OP
-  42161: 3n,    // Arbitrum
-  1151111081099710: 4n,  // Noble
-  // 5: Solana (not EVM)
-  8453: 6n,     // Base
-  137: 7n,      // Polygon
-  // 8: Sui (not EVM)
-  // 9: Aptos (not EVM)  
-  130: 10n,    // Unichain
-  59144: 11n,   // Linea
-  // 12: Codex (placeholder)
-  // 13: Sonic (placeholder)
-  480: 14n,     // World Chain
-};
 
-const idFor = (domain: bigint, nonce: bigint | string) => `${domain}_${nonce}` as const;
+/* ---------- CCTP v1 Event Handlers ---------- */
 
-/* ---------- SOURCE side ---------- */
-
+// v1 Source: TokenMessenger DepositForBurn
+// Has nonce available for direct matching
 TokenMessenger.DepositForBurn.handler(async ({ event, context }) => {
   const srcDomain = DOMAIN_BY_CHAIN_ID[event.chainId];
   if (srcDomain === undefined) return;                // ignore chains we didn’t map
@@ -232,8 +248,8 @@ TokenMessenger.DepositForBurn.handler(async ({ event, context }) => {
   } as TokenMessenger_DepositForBurn);
 });
 
-/* ---------- DESTINATION side ---------- */
-
+// v1 Destination: MessageTransmitter MessageReceived
+// Uses nonce from event for matching
 MessageTransmitter.MessageReceived.handler(async ({ event, context }) => {
   const id = idFor(event.params.sourceDomain, event.params.nonce);
   const prev = await context.CCTPTransfer.get(id);
@@ -295,8 +311,10 @@ MessageTransmitter.MessageReceived.handler(async ({ event, context }) => {
   } as MessageTransmitter_MessageReceived);
 });
 
-/* ---------- CCTPv2 SOURCE side ---------- */
+/* ---------- CCTP v2 Event Handlers ---------- */
 
+// v2 Source: TokenMessengerV2 DepositForBurn
+// No nonce available - compute deterministic nonce for matching
 TokenMessengerV2.DepositForBurn.handler(async ({ event, context }) => {
   const srcDomain = DOMAIN_BY_CHAIN_ID[event.chainId];
   if (srcDomain === undefined) return;                // ignore chains we didn't map
@@ -374,8 +392,8 @@ TokenMessengerV2.DepositForBurn.handler(async ({ event, context }) => {
   } as TokenMessenger_DepositForBurnV2);
 });
 
-/* ---------- CCTPv2 DESTINATION side ---------- */
-
+// v2 Destination: MessageTransmitterV2 MessageReceived
+// Decode messageBody and compute same deterministic nonce
 MessageTransmitterV2.MessageReceived.handler(async ({ event, context }) => {
   const destDomain = DOMAIN_BY_CHAIN_ID[event.chainId];
   if (destDomain === undefined) return;
