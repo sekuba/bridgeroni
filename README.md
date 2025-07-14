@@ -1,3 +1,5 @@
+*note/triggerWarn: this is a bridge monitor poc with an envio backend. it is heavily vibecoded by claude. it follows the standard envio hyperindex readme:*
+
 ## Envio Indexer
 
 *Please refer to the [documentation website](https://docs.envio.dev) for a thorough guide on all [Envio](https://envio.dev) indexer features*
