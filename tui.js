@@ -173,7 +173,7 @@ class CCTPMonitor {
       matchedTransfers: `{
         CCTPTransfer(
           where: {matched: {_eq: true}}, 
-          order_by: {messageReceivedTimestamp: desc}
+          order_by: [{messageReceivedTimestamp: desc}, {amount: desc}, {id: asc}]
         ) {
           id sourceDomain destinationDomain nonce amount 
           depositor mintRecipient sourceTxHash destinationTxHash
