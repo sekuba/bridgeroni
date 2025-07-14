@@ -63,6 +63,23 @@ class CCTPMonitor {
     this.lastUpdate = 0;
   }
 
+  // Map chain ID to CCTP domain
+  getChainIdToDomain(chainId) {
+    const mapping = {
+      1: 0,        // Ethereum
+      10: 2,       // OP Mainnet  
+      42161: 3,    // Arbitrum
+      8453: 6,     // Base
+      130: 10,    // Unichain
+      // Additional chains can be added here
+      43114: 1,    // Avalanche (not in config yet)
+      137: 7,      // Polygon (not in config yet)
+      59144: 11,   // Linea (not in config yet)
+      480: 14      // World Chain (not in config yet)
+    };
+    return mapping[chainId] !== undefined ? mapping[chainId] : null;
+  }
+
   // Make GraphQL requests using built-in fetch (Node 18+)
   async graphql(query) {
     try {
@@ -178,8 +195,13 @@ class CCTPMonitor {
       matchedCount: this.data.matchedTransfers.length, // Total matched transfers from dedicated query
       avgLatency: this.calculateAverageLatency(this.data.matchedTransfers), // Use the matched transfers data
       binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers), // Amount-binned latency metrics
-      latestEthBlock: this.getLatestBlock(allTransfers, 0),
-      latestBaseBlock: this.getLatestBlock(allTransfers, 6)
+      latestBlocks: {
+        ethereum: this.getLatestBlock(allTransfers, 0),
+        optimism: this.getLatestBlock(allTransfers, 2), 
+        arbitrum: this.getLatestBlock(allTransfers, 3),
+        base: this.getLatestBlock(allTransfers, 6),
+        unichain: this.getLatestBlock(allTransfers, 10)
+      }
     };
 
     this.lastUpdate = Date.now();
@@ -289,7 +311,16 @@ class CCTPMonitor {
   // Format transaction hash with explorer URL
   formatTxHash(hash, domain) {
     if (!hash || hash.length < 10) return hash;
-    const baseUrl = domain === 0 ? 'https://etherscan.io/tx/' : 'https://basescan.org/tx/';
+    
+    const explorerUrls = {
+      0: 'https://etherscan.io/tx/',           // Ethereum
+      2: 'https://optimistic.etherscan.io/tx/', // OP Mainnet
+      3: 'https://arbiscan.io/tx/',            // Arbitrum
+      6: 'https://basescan.org/tx/',           // Base
+      10: 'https://uniscan.xyz/tx/'                   // Unichain
+    };
+    
+    const baseUrl = explorerUrls[domain] || `https://etherscan.io/tx/`; // fallback to etherscan
     return `${baseUrl}${hash}`;
   }
 
@@ -326,7 +357,7 @@ class CCTPMonitor {
     deposits.forEach(deposit => {
       // Map chain ID to domain for source
       const chainId = parseInt(deposit.chainId);
-      const sourceDomain = chainId === 1 ? 0 : chainId === 8453 ? 6 : null;
+      const sourceDomain = this.getChainIdToDomain(chainId);
       
       events.push({
         type: 'deposit',
@@ -347,7 +378,7 @@ class CCTPMonitor {
     received.forEach(msg => {
       // Map chain ID to domain for destination
       const chainId = parseInt(msg.chainId);
-      const destinationDomain = chainId === 1 ? 0 : chainId === 8453 ? 6 : null;
+      const destinationDomain = this.getChainIdToDomain(chainId);
       
       events.push({
         type: 'received',
@@ -364,9 +395,17 @@ class CCTPMonitor {
       });
     });
     
-    // Sort by timestamp (most recent first)
+    // Sort by timestamp (most recent first), then by type, then by nonce for stable ordering
     return events.sort((a, b) => {
-      return parseInt(b.timestamp) - parseInt(a.timestamp);
+      const timestampDiff = parseInt(b.timestamp) - parseInt(a.timestamp);
+      if (timestampDiff !== 0) return timestampDiff;
+      
+      // If timestamps are equal, sort by type (deposits before received)
+      const typeDiff = a.type.localeCompare(b.type);
+      if (typeDiff !== 0) return typeDiff;
+      
+      // If type is also equal, sort by nonce for consistent ordering
+      return parseInt(a.nonce) - parseInt(b.nonce);
     }).slice(0, 12); // Show top 12 most recent events
   }
 
@@ -447,23 +486,24 @@ class CCTPMonitor {
       `${COLORS.green}Matched:${COLORS.reset} ${metrics.matchedCount} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.green}Global Avg:${COLORS.reset} ${this.formatDuration(metrics.avgLatency)}`,
       
-      `${COLORS.yellow}ETH Block:${COLORS.reset} ${metrics.latestEthBlock.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.blue}Base Block:${COLORS.reset} ${metrics.latestBaseBlock.toLocaleString()}`,
+      `${COLORS.yellow}Latest Blocks:${COLORS.reset} ETH ${metrics.latestBlocks.ethereum.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `OP ${metrics.latestBlocks.optimism.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ARB ${metrics.latestBlocks.arbitrum.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.blue}Base ${metrics.latestBlocks.base.toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.magenta}Unichain ${metrics.latestBlocks.unichain.toLocaleString()}${COLORS.reset}`,
 
-      `${COLORS.cyan}Latency by Amount (showing whale priority):${COLORS.reset}`,
-      
+      `${COLORS.cyan}Latency by Amount:${COLORS.reset} ` +
       `${COLORS.dim}${binned.micro.label}:${COLORS.reset} ${binned.micro.count > 0 ? this.formatDuration(binned.micro.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.dim}${binned.small.label}:${COLORS.reset} ${binned.small.count > 0 ? this.formatDuration(binned.small.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.dim}${binned.medium.label}:${COLORS.reset} ${binned.medium.count > 0 ? this.formatDuration(binned.medium.avg) : '?'}`,
-      
+      `${COLORS.dim}${binned.medium.label}:${COLORS.reset} ${binned.medium.count > 0 ? this.formatDuration(binned.medium.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.dim}${binned.large1.label}:${COLORS.reset} ${binned.large1.count > 0 ? this.formatDuration(binned.large1.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.dim}${binned.large2.label}:${COLORS.reset} ${binned.large2.count > 0 ? this.formatDuration(binned.large2.avg) : '?'} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.bright}${COLORS.magenta}${binned.whale.label}:${COLORS.reset} ${binned.whale.count > 0 ? this.formatDuration(binned.whale.avg) : '?'}`,
 
-      `${COLORS.gray}Samples: ${binned.micro.count} │ ${binned.small.count} │ ${binned.medium.count} │ ${binned.large1.count} │ ${binned.large2.count} │ ${binned.whale.count}${COLORS.reset}`
+      `${COLORS.gray}Samples (${binned.micro.label}│${binned.small.label}│${binned.medium.label}│${binned.large1.label}│${binned.large2.label}│${binned.whale.label}): ` +
+      `${binned.micro.count} │ ${binned.small.count} │ ${binned.medium.count} │ ${binned.large1.count} │ ${binned.large2.count} │ ${binned.whale.count}${COLORS.reset}`
     ].join('\n');
 
-    return this.drawBox(0, 8, 'METRICS', content);
+    return this.drawBox(0, 6, 'METRICS', content);
   }
 
   // Render raw activity feed
@@ -476,9 +516,14 @@ class CCTPMonitor {
       
       // Color coding for chains
       const getChainColor = (domain) => {
-        if (domain === 0) return COLORS.yellow;  // Ethereum
-        if (domain === 6) return COLORS.blue;    // Base
-        return COLORS.cyan;                      // Other chains
+        switch(domain) {
+          case 0: return COLORS.yellow;   // Ethereum
+          case 2: return COLORS.green;    // OP Mainnet
+          case 3: return COLORS.cyan;     // Arbitrum  
+          case 6: return COLORS.blue;     // Base
+          case 10: return COLORS.magenta; // Unichain
+          default: return COLORS.white;   // Other chains
+        }
       };
       
       const sourceColor = getChainColor(event.sourceDomain);

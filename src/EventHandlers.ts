@@ -19,7 +19,7 @@ const DOMAIN_BY_CHAIN_ID: Record<number, bigint> = {
   137: 7n,      // Polygon
   // 8: Sui (not EVM)
   // 9: Aptos (not EVM)  
-  1301: 10n,    // Unichain
+  130: 10n,    // Unichain
   59144: 11n,   // Linea
   // 12: Codex (placeholder)
   // 13: Sonic (placeholder)
