@@ -327,7 +327,8 @@ class CCTPMonitor {
       micro: { min: 0, max: 10, latencies: [], label: '0-10' },
       small: { min: 10.01, max: 100, latencies: [], label: '>10-100' },
       medium: { min: 100.01, max: 10000, latencies: [], label: '>100-10k' },
-      large: { min: 10000.01, max: 1000000, latencies: [], label: '>10k-1M' },
+      large: { min: 10000.01, max: 100000, latencies: [], label: '>10k-100k' },
+      xlarge: { min: 100000.01, max: 1000000, latencies: [], label: '>100k-1M' },
       whale: { min: 1000000.01, max: Infinity, latencies: [], label: '>1M' }
     };
 
@@ -348,6 +349,8 @@ class CCTPMonitor {
         bins.medium.latencies.push(latencySeconds);
       } else if (amountUSDC >= bins.large.min && amountUSDC <= bins.large.max) {
         bins.large.latencies.push(latencySeconds);
+      } else if (amountUSDC >= bins.xlarge.min && amountUSDC <= bins.xlarge.max) {
+        bins.xlarge.latencies.push(latencySeconds);
       } else if (amountUSDC >= bins.whale.min) {
         bins.whale.latencies.push(latencySeconds);
       }
@@ -636,7 +639,7 @@ class CCTPMonitor {
   // Format binned latency data for display
   formatBinnedLatency(binnedData, version) {
     const versionColor = version === 'v1' ? COLORS.yellow : COLORS.magenta;
-    const bins = ['micro', 'small', 'medium', 'large', 'whale'];
+    const bins = ['micro', 'small', 'medium', 'large', 'xlarge', 'whale'];
     
     const binnedItems = bins.map(binKey => {
       const bin = binnedData[binKey];
@@ -687,7 +690,7 @@ class CCTPMonitor {
 
     ].filter(line => line !== '').join('\n');
 
-    return this.drawBox(0, 16, 'METRICS (CCTPv1 & v2)', content);
+    return this.drawBox(0, 12, 'METRICS (CCTPv1 & v2)', content);
   }
 
   // Render raw activity feed
