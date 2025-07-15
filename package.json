@@ -9,7 +9,9 @@
     "codegen": "envio codegen",
     "dev": "envio dev",
     "start": "envio start",
-    "test": "pnpm mocha"
+    "test": "pnpm mocha",
+    "tui": "tsx tui.ts",
+    "tui:watch": "tsx watch tui.ts"
   },
   "devDependencies": {
     "@types/chai": "^4.3.11",
@@ -18,7 +20,8 @@
     "ts-mocha": "^10.0.0",
     "typescript": "5.2.2",
     "chai": "4.3.10",
-    "mocha": "10.2.0"
+    "mocha": "10.2.0",
+    "tsx": "^4.19.2"
   },
   "dependencies": {
     "envio": "2.25.0"
