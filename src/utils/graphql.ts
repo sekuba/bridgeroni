@@ -17,7 +17,7 @@ export const QUERIES = {
       order_by: {blockTimestamp: desc}
     ) {
       id nonce amount depositor destinationDomain
-      chainId blockTimestamp txHash
+      chainId blockNumber blockTimestamp txHash
     }
   }`,
   
@@ -28,7 +28,7 @@ export const QUERIES = {
       order_by: {blockTimestamp: desc}
     ) {
       id amount depositor destinationDomain
-      chainId blockTimestamp txHash
+      chainId blockNumber blockTimestamp txHash
     }
   }`,
   
@@ -39,7 +39,7 @@ export const QUERIES = {
       order_by: {blockTimestamp: desc}
     ) {
       id nonce sourceDomain caller
-      chainId blockTimestamp txHash
+      chainId blockNumber blockTimestamp txHash
     }
   }`,
   
@@ -50,7 +50,7 @@ export const QUERIES = {
       order_by: {blockTimestamp: desc}
     ) {
       id nonce sourceDomain caller finalityThresholdExecuted
-      chainId blockTimestamp txHash
+      chainId blockNumber blockTimestamp txHash
     }
   }`,
   

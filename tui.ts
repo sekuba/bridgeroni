@@ -206,7 +206,7 @@ class CCTPMonitor {
       avgLatency: this.calculateAverageLatency(this.data.matchedTransfers),
       binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers),
       dailyVolume: this.calculateDailyVolume(this.data.matchedTransfers),
-      latestBlocks: this.calculateLatestBlocks(allTransfers)
+      latestBlocks: this.calculateLatestBlocks()
     };
   }
 
@@ -309,33 +309,31 @@ class CCTPMonitor {
   }
 
   /**
-   * Calculate latest blocks for each chain
+   * Calculate latest blocks for each chain from raw events only
    */
-  private calculateLatestBlocks(transfers: any[]): Record<string, number> {
+  private calculateLatestBlocks(): Record<string, number> {
     const latestBlocks: Record<string, number> = {};
     
-    // Initialize with known domains
+    // Initialize with known chains
     Object.entries(DOMAIN_TO_CHAIN_NAME).forEach(([domain, chainName]) => {
       latestBlocks[chainName.toLowerCase()] = 0;
     });
 
-    transfers.forEach(transfer => {
-      const sourceDomain = Number(transfer.sourceDomain);
-      const destDomain = Number(transfer.destinationDomain);
+    // Process raw events for actual chain-specific block numbers
+    [
+      ...this.data.recentDeposits,
+      ...this.data.recentDepositsV2,
+      ...this.data.recentReceived,
+      ...this.data.recentReceivedV2
+    ].forEach(event => {
+      const chainId = Number(event.chainId);
+      const chainName = getChainNameFromChainId(chainId).toLowerCase();
+      const blockNumber = Number(event.blockNumber);
       
-      if (transfer.depositBlock) {
-        const sourceChain = getChainNameFromDomain(sourceDomain).toLowerCase();
-        latestBlocks[sourceChain] = Math.max(
-          latestBlocks[sourceChain] || 0,
-          Number(transfer.depositBlock)
-        );
-      }
-      
-      if (transfer.messageReceivedBlock) {
-        const destChain = getChainNameFromDomain(destDomain).toLowerCase();
-        latestBlocks[destChain] = Math.max(
-          latestBlocks[destChain] || 0,
-          Number(transfer.messageReceivedBlock)
+      if (blockNumber > 0) {
+        latestBlocks[chainName] = Math.max(
+          latestBlocks[chainName] || 0,
+          blockNumber
         );
       }
     });
@@ -528,6 +526,10 @@ class CCTPMonitor {
       `${COLORS.yellow}Latest Blocks:${COLORS.reset} ETH ${(metrics.latestBlocks.ethereum || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `OP ${(metrics.latestBlocks.op || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.blue}Base ${(metrics.latestBlocks.base || 0).toLocaleString()}`,
+
+      `${COLORS.yellow}More Blocks:${COLORS.reset} ${COLORS.magenta}Unichain ${(metrics.latestBlocks.unichain || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.cyan}Linea ${(metrics.latestBlocks.linea || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `${COLORS.green}World Chain ${(metrics.latestBlocks.worldchain || 0).toLocaleString()}`,
 
       `${COLORS.bright}${COLORS.blue}Daily Volume v1:${COLORS.reset} ${formatVolume(metrics.v1.dailyVolume.total)} ${COLORS.gray}(${metrics.v1.dailyVolume.count} transfers)${COLORS.reset}`,
       
