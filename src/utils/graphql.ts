@@ -58,12 +58,13 @@ export const QUERIES = {
   matchedTransfers: `{
     CCTPTransfer(
       where: {matched: {_eq: true}}, 
-      order_by: [{messageReceivedTimestamp: desc}, {amount: desc}, {id: asc}]
+      order_by: [{lastUpdated: desc}, {messageReceivedTimestamp: desc}, {destinationDomain: asc}, {sourceDomain: asc}, {id: asc}]
     ) {
       id sourceDomain destinationDomain nonce amount 
       depositor mintRecipient sourceTxHash destinationTxHash
       depositTimestamp messageReceivedTimestamp latencySeconds
       version maxFee minFinalityThreshold hookData finalityThresholdExecuted
+      lastUpdated
     }
   }`,
   

@@ -583,7 +583,7 @@ class CCTPMonitor {
     const transfers = this.data.matchedTransfers.slice(0, TUI_CONFIG.MAX_MATCHED_TRANSFERS);
     let content = '';
 
-    transfers.forEach(transfer => {
+    transfers.forEach((transfer, index) => {
       const srcDomain = getChainNameFromDomain(Number(transfer.sourceDomain));
       const dstDomain = getChainNameFromDomain(Number(transfer.destinationDomain));
       const amount = formatUSDCAmount(transfer.amount);
@@ -593,8 +593,14 @@ class CCTPMonitor {
       const versionLabel = transfer.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
       const srcTxUrl = formatTxHashWithUrl(transfer.sourceTxHash, Number(transfer.sourceDomain));
       const dstTxUrl = formatTxHashWithUrl(transfer.destinationTxHash, Number(transfer.destinationDomain));
+      
+      // Highlight recently updated transfers (within last 2 minutes)
+      const lastUpdated = Number(transfer.lastUpdated || 0);
+      const twoMinutesAgo = Date.now() / 1000 - 120;
+      const isRecent = lastUpdated > twoMinutesAgo;
+      const newIndicator = isRecent ? `${COLORS.green}●${COLORS.reset} ` : '';
 
-      content += `${versionLabel} ${COLORS.cyan}${srcDomain}${COLORS.reset}→${COLORS.yellow}${dstDomain}${COLORS.reset}: `;
+      content += `${newIndicator}${versionLabel} ${COLORS.cyan}${srcDomain}${COLORS.reset}→${COLORS.yellow}${dstDomain}${COLORS.reset}: `;
       content += `${COLORS.bright}${amount}${COLORS.reset} `;
       content += `${COLORS.green}${depositor}${COLORS.reset}→${COLORS.green}${recipient}${COLORS.reset} `;
       content += `${COLORS.magenta}~${latency}${COLORS.reset}\n`;
