@@ -20,7 +20,7 @@
  * - Deterministic v2 matching via messageBody decoding
  */
 
-import { stdout } from 'process';
+import { stdout, stdin } from 'process';
 
 import { 
   COLORS, 
@@ -117,6 +117,17 @@ interface Transfer {
   lastUpdated?: string;
 }
 
+interface UIState {
+  mode: 'dashboard' | 'list' | 'search';
+  listFilter: {
+    type: 'from' | 'to';
+    chain: string;
+  };
+  searchQuery: string;
+  selectedIndex: number;
+  maxDisplayItems: number;
+}
+
 class CCTPMonitor {
   private data: {
     metrics: Metrics;
@@ -128,6 +139,8 @@ class CCTPMonitor {
     recentReceivedV2: any[];
   };
   private lastUpdate: number = 0;
+  private uiState: UIState;
+  private refreshInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.data = {
@@ -138,6 +151,16 @@ class CCTPMonitor {
       recentDepositsV2: [],
       recentReceived: [],
       recentReceivedV2: []
+    };
+    this.uiState = {
+      mode: 'dashboard',
+      listFilter: {
+        type: 'from',
+        chain: 'ethereum'
+      },
+      searchQuery: '',
+      selectedIndex: 0,
+      maxDisplayItems: 15
     };
   }
 
@@ -483,6 +506,132 @@ class CCTPMonitor {
   }
 
   /**
+   * Keyboard input handling
+   */
+  private setupKeyboardInput(): void {
+    if (stdin.isTTY) {
+      stdin.setRawMode(true);
+      stdin.setEncoding('utf8');
+    }
+    stdin.on('data', (key: string) => {
+      const keyCode = key.charCodeAt(0);
+
+      // Handle Ctrl+C to exit
+      if (keyCode === 3) {
+        this.clearScreen();
+        console.log(`${COLORS.green}🌱 Bridge monitoring stopped${COLORS.reset}`);
+        process.exit(0);
+      }
+
+      // Handle different keys based on current mode
+      if (this.uiState.mode === 'dashboard') {
+        this.handleDashboardKeys(key);
+      } else if (this.uiState.mode === 'list') {
+        this.handleListKeys(key);
+      } else if (this.uiState.mode === 'search') {
+        this.handleSearchKeys(key);
+      }
+
+      this.render();
+    });
+  }
+
+  private handleDashboardKeys(key: string): void {
+    switch (key) {
+      case 'l':
+        this.uiState.mode = 'list';
+        break;
+      case 's':
+        this.uiState.mode = 'search';
+        this.uiState.searchQuery = '';
+        break;
+    }
+  }
+
+  private handleListKeys(key: string): void {
+    const filteredTransfers = this.getFilteredTransfers();
+    const maxItems = Math.min(filteredTransfers.length, this.uiState.maxDisplayItems);
+    
+    switch (key) {
+      case 'q':
+      case '\u001b': // ESC
+        this.uiState.mode = 'dashboard';
+        break;
+      case 'f':
+        this.uiState.listFilter.type = 'from';
+        this.uiState.selectedIndex = 0;
+        break;
+      case 't':
+        this.uiState.listFilter.type = 'to';
+        this.uiState.selectedIndex = 0;
+        break;
+      case 'j':
+      case '\u001b[B': // Down arrow
+        this.uiState.selectedIndex = Math.min(
+          this.uiState.selectedIndex + 1,
+          maxItems - 1
+        );
+        break;
+      case 'k':
+      case '\u001b[A': // Up arrow
+        this.uiState.selectedIndex = Math.max(this.uiState.selectedIndex - 1, 0);
+        break;
+      case '1':
+        this.uiState.listFilter.chain = 'ethereum';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '2':
+        this.uiState.listFilter.chain = 'op';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '3':
+        this.uiState.listFilter.chain = 'arbitrum';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '4':
+        this.uiState.listFilter.chain = 'base';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '5':
+        this.uiState.listFilter.chain = 'unichain';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '6':
+        this.uiState.listFilter.chain = 'linea';
+        this.uiState.selectedIndex = 0;
+        break;
+      case '7':
+        this.uiState.listFilter.chain = 'worldchain';
+        this.uiState.selectedIndex = 0;
+        break;
+    }
+  }
+
+  private handleSearchKeys(key: string): void {
+    const keyCode = key.charCodeAt(0);
+
+    switch (key) {
+      case 'q':
+      case '\u001b': // ESC
+        this.uiState.mode = 'dashboard';
+        break;
+      case '\r': // Enter
+        // Search functionality will be implemented in the render method
+        break;
+      case '\u0008': // Backspace
+      case '\u007f': // Delete
+        this.uiState.searchQuery = this.uiState.searchQuery.slice(0, -1);
+        break;
+      default:
+        // Add regular characters to search query
+        if (keyCode >= 32 && keyCode <= 126) {
+          this.uiState.searchQuery += key;
+        }
+        break;
+    }
+  }
+
+  /**
    * Terminal utilities
    */
   private clearScreen(): void {
@@ -532,6 +681,37 @@ class CCTPMonitor {
     output += `${COLORS.cyan}└${'─'.repeat(width - 2)}┘${COLORS.reset}\n`;
     
     return output;
+  }
+
+  /**
+   * Filtering and search methods
+   */
+  private getFilteredTransfers(): Transfer[] {
+    const { listFilter } = this.uiState;
+    
+    return this.data.matchedTransfers.filter(transfer => {
+      const sourceDomain = Number(transfer.sourceDomain);
+      const destDomain = Number(transfer.destinationDomain);
+      const sourceChain = getChainNameFromDomain(sourceDomain);
+      const destChain = getChainNameFromDomain(destDomain);
+      
+      if (listFilter.type === 'from') {
+        return sourceChain === listFilter.chain;
+      } else {
+        return destChain === listFilter.chain;
+      }
+    });
+  }
+
+  private searchTransfers(query: string): Transfer[] {
+    if (!query.trim()) return [];
+    
+    const searchTerm = query.toLowerCase();
+    
+    return this.data.matchedTransfers.filter(transfer => {
+      return transfer.sourceTxHash.toLowerCase().includes(searchTerm) ||
+             transfer.destinationTxHash.toLowerCase().includes(searchTerm);
+    });
   }
 
   /**
@@ -646,6 +826,93 @@ class CCTPMonitor {
     return this.drawBox(0, Math.min(22, transfers.length * 3 + 2), 'MATCHED BRIDGES', content);
   }
 
+  private renderListView(): string {
+    const { listFilter, selectedIndex } = this.uiState;
+    const filteredTransfers = this.getFilteredTransfers();
+    const displayTransfers = filteredTransfers.slice(0, this.uiState.maxDisplayItems);
+    
+    let content = '';
+    
+    // Header with current filter
+    const chainColor = getChainColorByName(listFilter.chain);
+    content += `${COLORS.bright}Filter: ${listFilter.type.toUpperCase()} ${chainColor}${listFilter.chain}${COLORS.reset}\n`;
+    content += `${COLORS.gray}Total: ${filteredTransfers.length} transactions${COLORS.reset}\n\n`;
+    
+    // Transaction list
+    displayTransfers.forEach((transfer, index) => {
+      const srcDomain = getChainNameFromDomain(Number(transfer.sourceDomain));
+      const dstDomain = getChainNameFromDomain(Number(transfer.destinationDomain));
+      const amount = formatUSDCAmount(BigInt(transfer.amount));
+      const depositor = formatAddress(transfer.depositor);
+      const recipient = formatAddress(extractRecipientAddress(transfer.mintRecipient));
+      const latency = formatDuration(Number(transfer.latencySeconds));
+      const versionLabel = transfer.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
+      const srcTxUrl = formatTxHashWithUrl(transfer.sourceTxHash, Number(transfer.sourceDomain));
+      const dstTxUrl = formatTxHashWithUrl(transfer.destinationTxHash, Number(transfer.destinationDomain));
+      
+      // Highlight selected item
+      const isSelected = index === selectedIndex;
+      const selectionIndicator = isSelected ? `${COLORS.bright}${COLORS.green}▶${COLORS.reset} ` : '  ';
+      
+      content += `${selectionIndicator}${versionLabel} ${getChainColorByName(srcDomain)}${srcDomain}${COLORS.reset}→${getChainColorByName(dstDomain)}${dstDomain}${COLORS.reset}: `;
+      content += `${COLORS.bright}${amount}${COLORS.reset} `;
+      content += `${COLORS.green}${depositor}${COLORS.reset}→${COLORS.green}${recipient}${COLORS.reset} `;
+      content += `${COLORS.magenta}~${latency}${COLORS.reset}\n`;
+      
+      if (isSelected) {
+        content += `    ${COLORS.gray}src: ${srcTxUrl}${COLORS.reset}\n`;
+        content += `    ${COLORS.gray}dst: ${dstTxUrl}${COLORS.reset}\n`;
+      }
+    });
+    
+    // Instructions
+    content += `\n${COLORS.dim}Keys: [f]rom/[t]o filter, [1-7] chains, [j/k] navigate, [q/ESC] back${COLORS.reset}`;
+    
+    return this.drawBox(0, Math.min(25, displayTransfers.length * 2 + 8), 'TRANSACTION LIST', content);
+  }
+
+  private renderSearchView(): string {
+    const { searchQuery } = this.uiState;
+    const searchResults = this.searchTransfers(searchQuery);
+    
+    let content = '';
+    
+    // Search input
+    content += `${COLORS.bright}Search: ${COLORS.reset}${searchQuery}${COLORS.bright}_${COLORS.reset}\n`;
+    content += `${COLORS.gray}Enter transaction hash (source or destination)${COLORS.reset}\n\n`;
+    
+    // Search results
+    if (searchQuery.trim()) {
+      content += `${COLORS.bright}Results: ${searchResults.length} matches${COLORS.reset}\n\n`;
+      
+      const displayResults = searchResults.slice(0, this.uiState.maxDisplayItems);
+      displayResults.forEach((transfer) => {
+        const srcDomain = getChainNameFromDomain(Number(transfer.sourceDomain));
+        const dstDomain = getChainNameFromDomain(Number(transfer.destinationDomain));
+        const amount = formatUSDCAmount(BigInt(transfer.amount));
+        const depositor = formatAddress(transfer.depositor);
+        const recipient = formatAddress(extractRecipientAddress(transfer.mintRecipient));
+        const latency = formatDuration(Number(transfer.latencySeconds));
+        const versionLabel = transfer.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
+        const srcTxUrl = formatTxHashWithUrl(transfer.sourceTxHash, Number(transfer.sourceDomain));
+        const dstTxUrl = formatTxHashWithUrl(transfer.destinationTxHash, Number(transfer.destinationDomain));
+        
+        content += `${versionLabel} ${getChainColorByName(srcDomain)}${srcDomain}${COLORS.reset}→${getChainColorByName(dstDomain)}${dstDomain}${COLORS.reset}: `;
+        content += `${COLORS.bright}${amount}${COLORS.reset} `;
+        content += `${COLORS.green}${depositor}${COLORS.reset}→${COLORS.green}${recipient}${COLORS.reset} `;
+        content += `${COLORS.magenta}~${latency}${COLORS.reset}\n`;
+        
+        content += `  ${COLORS.gray}src: ${srcTxUrl}${COLORS.reset}\n`;
+        content += `  ${COLORS.gray}dst: ${dstTxUrl}${COLORS.reset}\n`;
+      });
+    }
+    
+    // Instructions
+    content += `\n${COLORS.dim}Type to search, [Enter] to search, [q/ESC] to return${COLORS.reset}`;
+    
+    return this.drawBox(0, Math.min(25, searchResults.length * 3 + 8), 'TRANSACTION SEARCH', content);
+  }
+
   /**
    * Main render function
    */
@@ -656,13 +923,23 @@ class CCTPMonitor {
     stdout.write(`${COLORS.bright}${COLORS.green}🌱 CCTP Bridge Monitor${COLORS.reset}\n`);
     stdout.write(`${COLORS.gray}Last update: ${new Date(this.lastUpdate).toLocaleTimeString()}${COLORS.reset}\n\n`);
     
-    // Render sections
-    stdout.write(this.renderMetrics());
-    stdout.write(this.renderRawActivity());
-    stdout.write(this.renderMatchedBridges());
-    
-    // Footer
-    stdout.write(`${COLORS.gray}Press Ctrl+C to exit • Refreshing every ${TUI_CONFIG.REFRESH_INTERVAL/1000}s${COLORS.reset}`);
+    // Render based on current mode
+    switch (this.uiState.mode) {
+      case 'dashboard':
+        stdout.write(this.renderMetrics());
+        stdout.write(this.renderRawActivity());
+        stdout.write(this.renderMatchedBridges());
+        stdout.write(`${COLORS.gray}Press [l] for list view, [s] for search, Ctrl+C to exit${COLORS.reset}`);
+        break;
+      
+      case 'list':
+        stdout.write(this.renderListView());
+        break;
+      
+      case 'search':
+        stdout.write(this.renderSearchView());
+        break;
+    }
   }
 
   /**
@@ -678,17 +955,23 @@ class CCTPMonitor {
       process.exit(1);
     }
 
+    // Set up keyboard input
+    this.setupKeyboardInput();
+
     // Initial render
     this.render();
 
     // Set up refresh interval
-    setInterval(async () => {
+    this.refreshInterval = setInterval(async () => {
       await this.fetchData();
       this.render();
     }, TUI_CONFIG.REFRESH_INTERVAL);
 
     // Handle graceful shutdown
     process.on('SIGINT', () => {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+      }
       this.clearScreen();
       console.log(`${COLORS.green}🌱 Bridge monitoring stopped${COLORS.reset}`);
       process.exit(0);
