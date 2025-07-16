@@ -100,16 +100,16 @@ export const COLORS = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
   dim: '\x1b[2m',
+  red: '\x1b[31m',
+  lightRed: '\x1b[91m',
   green: '\x1b[32m',
-  cyan: '\x1b[36m',
+  purple: '\x1b[95m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
-  purple: '\x1b[95m',
-  white: '\x1b[37m',
+  cyan: '\x1b[36m',
   gray: '\x1b[90m',
-  red: '\x1b[31m',
-  lightRed: '\x1b[91m',
+  white: '\x1b[37m',
 } as const;
 
 // CCTP Protocol constants
