@@ -1,3 +1,5 @@
+also checkout the [tui readme](README-TUI.md) describing how the tui works, it is kind of a novel but cute too.
+
 *note/triggerWarn: this is a bridge monitor poc with an envio backend. it is heavily vibecoded by claude. it follows the standard envio hyperindex readme:*
 
 ## Envio Indexer
