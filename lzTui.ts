@@ -3,21 +3,22 @@
 /**
  * LayerZero Bridge Monitor - Terminal UI
  * 
- * Optimized real-time monitoring dashboard for LayerZero v2 packet transactions.
- * Features efficient data processing, caching, and modular rendering.
+ * Real-time monitoring dashboard for LayerZero v2 packet transactions
+ * across all supported chains with high-performance data processing.
  * 
- * Performance Optimizations:
- * - Incremental data updates with change detection
- * - Cached formatting operations with memoization
- * - Efficient memory management and garbage collection
- * - Modular rendering components for better performance
- * - Optimized string operations and ANSI rendering
+ * Features:
+ * - Real-time packet monitoring with latency analysis
+ * - Raw packet event feed (PacketSent/PacketDelivered)
+ * - Matched packet display with cross-chain routing
+ * - Interactive list/filter views by EID
+ * - Full database transaction hash search
+ * - Efficient caching and incremental updates
  * 
  * Architecture:
  * - GraphQL indexer integration with smart caching
  * - Event-driven state management
  * - Modular UI components with selective rendering
- * - Performance monitoring and metrics
+ * - Optimized data fetching and processing
  */
 
 import { stdout, stdin } from 'process';
@@ -47,8 +48,8 @@ import { fetchAllLayerZeroData, layerZeroGraphQL } from './src/utils/layerzeroGr
 import { fetchAllLayerZeroData as fetchAllLayerZeroDataLegacy } from './src/utils/layerzeroGraphql';
 import { decodePacket } from './src/utils/layerzeroDecoder';
 
-// Performance constants
-const PERFORMANCE_CONFIG = {
+// UI Configuration
+const UI_CONFIG = {
   RECENT_PACKET_THRESHOLD_SECONDS: 120,
   RAW_ACTIVITY_DISPLAY_COUNT: 6,
   CACHE_TTL_MS: 5000,
@@ -120,12 +121,6 @@ interface UIState {
   maxDisplayItems: number;
 }
 
-interface PerformanceMetrics {
-  fetchTime: number;
-  renderTime: number;
-  totalMemoryUsage: number;
-  cacheHitRate: number;
-}
 
 class LayerZeroMonitor {
   private data: {
@@ -138,7 +133,6 @@ class LayerZeroMonitor {
   private lastUpdate: number = 0;
   private uiState: UIState;
   private refreshInterval: NodeJS.Timeout | null = null;
-  private performanceMetrics: PerformanceMetrics;
   private dataChecksum: string = '';
   private lastRenderTime: number = 0;
   private renderComponents: Map<string, string> = new Map();
@@ -161,13 +155,6 @@ class LayerZeroMonitor {
       selectedIndex: 0,
       maxDisplayItems: 15
     };
-    this.performanceMetrics = {
-      fetchTime: 0,
-      renderTime: 0,
-      totalMemoryUsage: 0,
-      cacheHitRate: 0
-    };
-    
     // Initialize cache cleanup
     this.scheduleCacheCleanup();
   }
@@ -186,7 +173,7 @@ class LayerZeroMonitor {
   private scheduleCacheCleanup(): void {
     setInterval(() => {
       this.cleanupCache();
-    }, PERFORMANCE_CONFIG.CACHE_TTL_MS);
+    }, UI_CONFIG.CACHE_TTL_MS);
   }
 
   /**
@@ -200,7 +187,7 @@ class LayerZeroMonitor {
 
   private cleanupCache(): void {
     const now = Date.now();
-    if (now - lastCacheCleanup > PERFORMANCE_CONFIG.CACHE_TTL_MS) {
+    if (now - lastCacheCleanup > UI_CONFIG.CACHE_TTL_MS) {
       formatCache.clear();
       chainLookupCache.clear();
       lastCacheCleanup = now;
@@ -211,8 +198,6 @@ class LayerZeroMonitor {
    * Optimized data fetching with change detection and caching
    */
   async fetchData(): Promise<boolean> {
-    const fetchStart = Date.now();
-    
     try {
       // Try optimized fetch first
       let results = await fetchAllLayerZeroData();
@@ -220,7 +205,6 @@ class LayerZeroMonitor {
       
       // Fall back to legacy if optimized fails
       if (!results) {
-        console.log('Optimized fetch failed, falling back to legacy...');
         results = await fetchAllLayerZeroDataLegacy();
         useOptimized = false;
       }
@@ -233,7 +217,6 @@ class LayerZeroMonitor {
       // Skip processing if data hasn't changed (but allow updates every 10 seconds)
       const timeSinceLastUpdate = Date.now() - this.lastUpdate;
       if (newChecksum === this.dataChecksum && timeSinceLastUpdate < 10000) {
-        this.performanceMetrics.fetchTime = Date.now() - fetchStart;
         return true;
       }
 
@@ -268,11 +251,9 @@ class LayerZeroMonitor {
       }
 
       this.lastUpdate = Date.now();
-      this.performanceMetrics.fetchTime = Date.now() - fetchStart;
       return true;
     } catch (error) {
       console.error('Error fetching LayerZero data:', error);
-      this.performanceMetrics.fetchTime = Date.now() - fetchStart;
       return false;
     }
   }
@@ -578,8 +559,8 @@ class LayerZeroMonitor {
     
     // Process in batches to avoid blocking
     const processBatch = (packets: any[], createEventFn: (packet: any) => RawPacketEvent) => {
-      for (let i = 0; i < packets.length; i += PERFORMANCE_CONFIG.BATCH_SIZE) {
-        const batch = packets.slice(i, i + PERFORMANCE_CONFIG.BATCH_SIZE);
+      for (let i = 0; i < packets.length; i += UI_CONFIG.BATCH_SIZE) {
+        const batch = packets.slice(i, i + UI_CONFIG.BATCH_SIZE);
         for (const packet of batch) {
           events.push(createEventFn(packet));
         }
@@ -607,8 +588,8 @@ class LayerZeroMonitor {
     const limitedEvents = events.slice(0, TUI_CONFIG.MAX_RAW_EVENTS);
     
     // Memory cleanup
-    if (events.length > PERFORMANCE_CONFIG.MAX_RETAINED_EVENTS) {
-      events.length = PERFORMANCE_CONFIG.MAX_RETAINED_EVENTS;
+    if (events.length > UI_CONFIG.MAX_RETAINED_EVENTS) {
+      events.length = UI_CONFIG.MAX_RETAINED_EVENTS;
     }
     
     return limitedEvents;
@@ -975,7 +956,6 @@ class LayerZeroMonitor {
   private renderMetrics(): string {
     const { metrics } = this.data;
     
-    // Build content with performance metrics
     const lines = [
       `${COLORS.green}Total Events:${COLORS.reset} ${metrics.totalEvents} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.green}Sent:${COLORS.reset} ${metrics.totalSent} ${COLORS.gray}│${COLORS.reset} ` +
@@ -986,19 +966,14 @@ class LayerZeroMonitor {
       
       `${COLORS.yellow}Latest Blocks:${COLORS.reset} ${getChainColorByEid(30101)}ETH ${(metrics.latestBlocks.ethereum || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
       `${getChainColorByEid(30184)}Base ${(metrics.latestBlocks.base || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
-      `${getChainColorByEid(30110)}ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()}${COLORS.reset}`,
-      
-      // Add performance metrics
-      `${COLORS.blue}Performance:${COLORS.reset} ${COLORS.gray}Fetch: ${this.performanceMetrics.fetchTime}ms │ ` +
-      `Render: ${this.performanceMetrics.renderTime}ms │ ` +
-      `Memory: ${Math.round(this.performanceMetrics.totalMemoryUsage / 1024 / 1024)}MB${COLORS.reset}`
+      `${getChainColorByEid(30110)}ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()}${COLORS.reset}`
     ];
 
-    return this.drawBox(0, 8, 'LayerZero v2 METRICS', lines.join('\n'));
+    return this.drawBox(0, 6, 'LayerZero v2 METRICS', lines.join('\n'));
   }
 
   private renderRawActivity(): string {
-    const events = this.data.rawEvents.slice(0, PERFORMANCE_CONFIG.RAW_ACTIVITY_DISPLAY_COUNT);
+    const events = this.data.rawEvents.slice(0, UI_CONFIG.RAW_ACTIVITY_DISPLAY_COUNT);
     
     // Pre-allocate array for better performance
     const contentLines: string[] = [];
@@ -1018,7 +993,7 @@ class LayerZeroMonitor {
     const packets = this.data.matchedPackets.slice(0, TUI_CONFIG.MAX_MATCHED_TRANSFERS);
     const contentLines: string[] = [];
     const currentTime = Date.now() / 1000;
-    const recentThreshold = currentTime - PERFORMANCE_CONFIG.RECENT_PACKET_THRESHOLD_SECONDS;
+    const recentThreshold = currentTime - UI_CONFIG.RECENT_PACKET_THRESHOLD_SECONDS;
 
     for (const packet of packets) {
       const details = formatPacketDetails(packet);
@@ -1138,11 +1113,9 @@ class LayerZeroMonitor {
     const now = Date.now();
     
     // Throttle rendering to improve performance
-    if (now - this.lastRenderTime < PERFORMANCE_CONFIG.RENDER_THROTTLE_MS) {
+    if (now - this.lastRenderTime < UI_CONFIG.RENDER_THROTTLE_MS) {
       return;
     }
-    
-    const renderStart = Date.now();
     
     this.clearScreen();
     
@@ -1175,7 +1148,6 @@ class LayerZeroMonitor {
     }
     
     this.lastRenderTime = now;
-    this.performanceMetrics.renderTime = Date.now() - renderStart;
   }
 
   private renderCachedMetrics(): string {
@@ -1209,10 +1181,10 @@ class LayerZeroMonitor {
   }
 
   /**
-   * Start the optimized monitor with performance tracking
+   * Start the LayerZero bridge monitor
    */
   async start(): Promise<void> {
-    console.log(`${COLORS.green}🌐 Starting LayerZero v2 Bridge Monitor (Optimized)...${COLORS.reset}`);
+    console.log(`${COLORS.green}🌐 Starting LayerZero v2 Bridge Monitor...${COLORS.reset}`);
     
     // Initial data fetch
     const success = await this.fetchData();
@@ -1231,7 +1203,6 @@ class LayerZeroMonitor {
     this.refreshInterval = setInterval(async () => {
       await this.fetchData();
       this.render();
-      this.updatePerformanceMetrics();
       
       // Clean up caches periodically
       if (Date.now() % 10000 < 1000) { // Every ~10 seconds
@@ -1251,11 +1222,6 @@ class LayerZeroMonitor {
     });
   }
 
-  private updatePerformanceMetrics(): void {
-    const memUsage = process.memoryUsage();
-    this.performanceMetrics.totalMemoryUsage = memUsage.heapUsed;
-    this.performanceMetrics.cacheHitRate = formatCache.size / Math.max(1, formatCache.size + chainLookupCache.size);
-  }
 
   private shutdown(): void {
     if (this.refreshInterval) {
@@ -1273,21 +1239,16 @@ class LayerZeroMonitor {
   }
 }
 
-// Performance and compatibility checks
+// Compatibility checks
 if (typeof fetch === 'undefined') {
   console.error('This script requires Node.js 18+ with built-in fetch support.');
   console.error('Please upgrade your Node.js version.');
   process.exit(1);
 }
 
-// Memory usage monitoring
-const initialMemory = process.memoryUsage();
-console.log(`${COLORS.gray}Initial memory usage: ${Math.round(initialMemory.heapUsed / 1024 / 1024)}MB${COLORS.reset}`);
-
-// Start the optimized monitor
+// Start the LayerZero monitor
 const monitor = new LayerZeroMonitor();
 monitor.start().catch(error => {
   console.error(`${COLORS.red}Fatal error: ${error.message}${COLORS.reset}`);
-  console.error(`${COLORS.red}Stack trace: ${error.stack}${COLORS.reset}`);
   process.exit(1);
 });

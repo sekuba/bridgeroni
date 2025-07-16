@@ -75,10 +75,9 @@ class LayerZeroGraphQLOptimized {
       return [...results1, ...results2, totalCounts];
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Request aborted for new fetch');
         return null;
       }
-      console.error('Optimized fetch error:', error);
+      console.error('Error fetching LayerZero data:', error);
       return null;
     }
   }
