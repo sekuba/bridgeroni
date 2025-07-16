@@ -98,6 +98,8 @@ export function formatTxHashWithUrl(hash: string | null | undefined, chainId: nu
     1: 'https://etherscan.io/tx/',       // Ethereum
     8453: 'https://basescan.org/tx/',    // Base
     42161: 'https://arbiscan.io/tx/',    // Arbitrum
+    10: 'https://optimistic.etherscan.io/tx/', // OP mainnet
+    56: 'https://bscscan.com/tx/',       // BSC
   };
   
   const baseUrl = explorerUrls[chainId] || 'https://etherscan.io/tx/';

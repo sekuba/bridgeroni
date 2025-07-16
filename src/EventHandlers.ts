@@ -34,7 +34,8 @@ import {
 import { 
   createTransferId,
   getDomainFromChainId,
-  LAYERZERO_EID_BY_CHAIN_ID
+  LAYERZERO_EID_BY_CHAIN_ID,
+  LAYERZERO_EID_TO_CHAIN_ID
 } from "./constants";
 
 import {
@@ -82,6 +83,10 @@ function createLayerZeroPacket(params: {
   const deliveredTs = isDelivered ? params.timestamp : params.prev?.deliveredTimestamp;
   const latencySeconds = matched && sentTs && deliveredTs ? deliveredTs - sentTs : undefined;
   
+  // Derive chain IDs from EIDs for proper URL generation
+  const srcChainId = params.srcEid ? LAYERZERO_EID_TO_CHAIN_ID[Number(params.srcEid)] : undefined;
+  const dstChainId = params.dstEid ? LAYERZERO_EID_TO_CHAIN_ID[Number(params.dstEid)] : undefined;
+  
   return {
     id: params.id,
     srcEid: params.srcEid,
@@ -110,8 +115,8 @@ function createLayerZeroPacket(params: {
     
     // Computed fields for TUI efficiency
     hasPayload: !!(params.payload || params.prev?.payload),
-    sourceChainId: isSent ? BigInt(params.chainId) : params.prev?.sourceChainId,
-    destinationChainId: isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId,
+    sourceChainId: srcChainId ? BigInt(srcChainId) : (isSent ? BigInt(params.chainId) : params.prev?.sourceChainId),
+    destinationChainId: dstChainId ? BigInt(dstChainId) : (isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId),
     eventType: matched ? "matched" : params.eventType,
     lastUpdated: params.timestamp,
   };
@@ -393,6 +398,25 @@ MessageTransmitterV2.MessageReceived.handler(async ({ event, context }) => {
 });
 
 /* ---------- LayerZero v2 Event Handlers ---------- */
+/*
+ * LayerZero v2 event handling supports unordered event processing:
+ * 
+ * Scenario 1: PacketSent processed first, then PacketDelivered
+ * - PacketSent creates new packet record with source data
+ * - PacketDelivered updates existing packet with destination data → MATCHED
+ * 
+ * Scenario 2: PacketDelivered processed first, then PacketSent  
+ * - PacketDelivered creates new packet record with destination data
+ * - PacketSent updates existing packet with source data → MATCHED
+ * 
+ * Scenario 3: Only PacketSent processed (no delivery yet)
+ * - PacketSent creates packet record with source data only → UNMATCHED
+ * 
+ * Scenario 4: Only PacketDelivered processed (no sent event indexed)
+ * - PacketDelivered creates packet record with destination data only → UNMATCHED
+ * 
+ * All scenarios use the same GUID for matching: keccak256(nonce, srcEid, sender, dstEid, receiver)
+ */
 
 // LayerZero v2 Source: EndpointV2 PacketSent
 // Decode packet header to extract routing information
@@ -417,7 +441,8 @@ EndpointV2.PacketSent.handler(async ({ event, context }) => {
     header.receiver
   );
   
-  const prev = await context.LayerZeroPacket.get(guid);
+  // Check if we already have a packet (possibly from a delivered event that was processed first)
+  const existingPacket = await context.LayerZeroPacket.get(guid);
   
   const packet = createLayerZeroPacket({
     id: guid,
@@ -430,7 +455,7 @@ EndpointV2.PacketSent.handler(async ({ event, context }) => {
     timestamp,
     txHash: event.transaction.hash,
     eventType: 'sent',
-    prev,
+    prev: existingPacket,
     encodedPayload: event.params.encodedPayload,
     options: event.params.options,
     sendLibrary: event.params.sendLibrary,
@@ -479,14 +504,12 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
     event.params.receiver
   );
   
-  const prev = await context.LayerZeroPacket.get(guid);
+  // Check if we already have a packet (possibly from a sent event that was processed first)
+  const existingPacket = await context.LayerZeroPacket.get(guid);
   
-  // Only process if we have a matching sent packet for this exact routing
-  if (!prev) {
-    console.warn(`No matching sent packet found for GUID ${guid} (srcEid: ${origin.srcEid}, dstEid: ${destEid})`);
-    return;
-  }
-  
+  // Create or update the packet record
+  // If no existing packet, create a new one (sent event will be processed later)
+  // If existing packet exists, update it with delivered information
   const packet = createLayerZeroPacket({
     id: guid,
     srcEid: BigInt(origin.srcEid),
@@ -498,7 +521,7 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
     timestamp,
     txHash: event.transaction.hash,
     eventType: 'delivered',
-    prev,
+    prev: existingPacket,
   });
   
   context.LayerZeroPacket.set(packet);

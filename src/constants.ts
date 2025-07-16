@@ -24,6 +24,16 @@ export const LAYERZERO_EID_TO_CHAIN_NAME: Record<number, string> = {
   30184: 'base',
   30110: 'arbitrum',
   30111: 'op', // OP mainnet (not currently indexed)
+  30102: 'bsc', // BSC (not currently indexed)
+};
+
+// LayerZero EID to chain ID mapping (reverse of LAYERZERO_EID_BY_CHAIN_ID)
+export const LAYERZERO_EID_TO_CHAIN_ID: Record<number, number> = {
+  30101: 1,     // Ethereum
+  30184: 8453,  // Base
+  30110: 42161, // Arbitrum
+  30111: 10,    // OP mainnet
+  30102: 56,    // BSC
 };
 
 // CCTP domain mappings for supported chains
