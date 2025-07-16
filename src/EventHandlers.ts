@@ -442,15 +442,16 @@ EndpointV2.PacketSent.handler(async ({ event, context }) => {
 });
 
 // LayerZero v2 Destination: EndpointV2 PacketDelivered
-// Uses Origin struct to match with sent packet
+// Uses Origin tuple to match with sent packet
 EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
   const timestamp = BigInt(event.block.timestamp);
   
-  // Extract origin information from the event
+  // Extract origin information from the tuple (uint32,bytes32,uint64)
+  // event.params.origin is [srcEid, sender, nonce]
   const origin = {
-    srcEid: Number(event.params.origin.srcEid),
-    sender: event.params.origin.sender,
-    nonce: event.params.origin.nonce,
+    srcEid: Number(event.params.origin[0]),  // uint32 srcEid
+    sender: event.params.origin[1],          // bytes32 sender
+    nonce: event.params.origin[2],           // uint64 nonce
   };
   
   // Create the same packet ID that was used on the source side
@@ -476,9 +477,9 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
   // Enhanced raw event log
   context.EndpointV2_PacketDelivered.set({
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    originSrcEid: event.params.origin.srcEid,
-    originSender: event.params.origin.sender,
-    originNonce: event.params.origin.nonce,
+    originSrcEid: event.params.origin[0],    // uint32 srcEid
+    originSender: event.params.origin[1],    // bytes32 sender
+    originNonce: event.params.origin[2],     // uint64 nonce
     receiver: event.params.receiver,
     chainId: BigInt(event.chainId),
     blockNumber: BigInt(event.block.number),

@@ -29,8 +29,8 @@ contracts:
 - name: EndpointV2
   handler: src/EventHandlers.ts
   events:
+    - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
     - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
-    - event: PacketDelivered(Origin origin, address receiver)
 
 networks:
 # Standard CCTP v1 + v2 chains + LayerZero v2
