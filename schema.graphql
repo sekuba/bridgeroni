@@ -69,12 +69,13 @@ type TokenMessenger_DepositForBurnV2 {
 type CCTPTransfer @entity {
   id: ID!
 
-  # === identifying ===
+  # === Core identifiers ===
   sourceDomain: BigInt!
   destinationDomain: BigInt
   nonce: String!  # Support both BigInt (v1) and bytes32 (v2) as string
+  version: String!             # "v1" or "v2"
 
-  # === source-side ===
+  # === Source-side data ===
   amount: BigInt
   burnToken: String
   depositor: String
@@ -83,26 +84,25 @@ type CCTPTransfer @entity {
   depositBlock: BigInt
   depositTimestamp: BigInt
 
-  # === CCTPv2 specific fields ===
+  # === CCTP v2 specific fields ===
   maxFee: BigInt               # v2 only
   minFinalityThreshold: BigInt # v2 only  
   hookData: String             # v2 only
   finalityThresholdExecuted: BigInt # v2 only (destination side)
 
-  # === destination-side ===
+  # === Destination-side data ===
   destinationTxHash: String
   messageReceivedBlock: BigInt
   messageReceivedTimestamp: BigInt
 
-  # === derived ===
+  # === Derived fields ===
   latencySeconds: BigInt
   matched: Boolean!
   
-  # === computed fields for TUI efficiency ===
+  # === Computed fields for TUI efficiency ===
   hasAmount: Boolean!           # true if amount is not null (for display logic)
   sourceChainId: BigInt        # chain ID where deposit occurred
   destinationChainId: BigInt   # chain ID where message was received
   eventType: String!           # "deposit", "received", or "matched"
   lastUpdated: BigInt!         # timestamp of last update to this record
-  version: String!             # "v1" or "v2"
 }
