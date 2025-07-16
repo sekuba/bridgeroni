@@ -605,13 +605,18 @@ class LayerZeroMonitor {
       const srcTxUrl = formatTxHashWithUrl(packet.sourceTxHash, srcChainId);
       const dstTxUrl = formatTxHashWithUrl(packet.destinationTxHash, dstChainId);
       
+      // Format delivery timestamp
+      const deliveryTime = packet.deliveredTimestamp ? 
+        formatTimestamp(packet.deliveredTimestamp) : 
+        formatTimestamp(packet.lastUpdated || '0');
+      
       // Highlight recently updated packets
       const lastUpdated = Number(packet.lastUpdated || 0);
       const twoMinutesAgo = Date.now() / MILLISECONDS_PER_SECOND - RECENT_PACKET_THRESHOLD_SECONDS;
       const isRecent = lastUpdated > twoMinutesAgo;
       const newIndicator = isRecent ? `${COLORS.green}●${COLORS.reset} ` : '';
 
-      content += `${newIndicator}${details}\n`;
+      content += `${newIndicator}${details} ${COLORS.dim}${deliveryTime}${COLORS.reset}\n`;
       content += `  ${COLORS.gray}src: ${srcTxUrl}${COLORS.reset}\n`;
       content += `  ${COLORS.gray}dst: ${dstTxUrl}${COLORS.reset}\n`;
     });
@@ -641,11 +646,16 @@ class LayerZeroMonitor {
       const srcTxUrl = formatTxHashWithUrl(packet.sourceTxHash, srcChainId);
       const dstTxUrl = formatTxHashWithUrl(packet.destinationTxHash, dstChainId);
       
+      // Format delivery timestamp
+      const deliveryTime = packet.deliveredTimestamp ? 
+        formatTimestamp(packet.deliveredTimestamp) : 
+        formatTimestamp(packet.lastUpdated || '0');
+      
       // Highlight selected item
       const isSelected = index === selectedIndex;
       const selectionIndicator = isSelected ? `${COLORS.bright}${COLORS.green}▶${COLORS.reset} ` : '  ';
       
-      content += `${selectionIndicator}${details}\n`;
+      content += `${selectionIndicator}${details} ${COLORS.dim}${deliveryTime}${COLORS.reset}\n`;
       
       if (isSelected) {
         content += `    ${COLORS.gray}src: ${srcTxUrl}${COLORS.reset}\n`;
@@ -681,7 +691,12 @@ class LayerZeroMonitor {
         const srcTxUrl = formatTxHashWithUrl(packet.sourceTxHash, srcChainId);
         const dstTxUrl = formatTxHashWithUrl(packet.destinationTxHash, dstChainId);
         
-        content += `${details}\n`;
+        // Format delivery timestamp
+        const deliveryTime = packet.deliveredTimestamp ? 
+          formatTimestamp(packet.deliveredTimestamp) : 
+          formatTimestamp(packet.lastUpdated || '0');
+        
+        content += `${details} ${COLORS.dim}${deliveryTime}${COLORS.reset}\n`;
         content += `  ${COLORS.gray}src: ${srcTxUrl}${COLORS.reset}\n`;
         content += `  ${COLORS.gray}dst: ${dstTxUrl}${COLORS.reset}\n`;
       });
