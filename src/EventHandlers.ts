@@ -1,18 +1,18 @@
 /**
- * CCTP Bridge Monitor - Event Handlers
+ * Cross-Chain Bridge Monitor - Event Handlers
  * 
- * Processes CCTP v1 and v2 events to create matched cross-chain transfers.
+ * Processes CCTP v1/v2 and LayerZero v2 events to create matched cross-chain transfers.
  * 
  * Key Features:
- * - v1: Uses nonce-based matching (nonce available in both events)
- * - v2: Uses deterministic nonce computation (nonce only in MessageReceived)
- * - Decodes v2 messageBody to extract transfer details
- * - Maintains separate v1/v2 versioning for metrics
+ * - CCTP v1: Uses nonce-based matching (nonce available in both events)
+ * - CCTP v2: Uses deterministic nonce computation (nonce only in MessageReceived)
+ * - LayerZero v2: Uses packet header decoding for source/destination matching
+ * - Maintains separate protocol versioning for metrics
  * 
- * IMPORTANT: v1 and v2 events are NOT interchangeable!
- * - Events from different versions cannot be matched together
- * - Some chains (Linea, World Chain) only support v2
- * - Metrics should be calculated separately per version
+ * IMPORTANT: Different protocols use different matching strategies!
+ * - CCTP events use domain-based matching
+ * - LayerZero events use EID-based matching
+ * - Metrics should be calculated separately per protocol
  */
 
 import {
@@ -20,11 +20,15 @@ import {
   TokenMessenger,
   TokenMessengerV2,
   MessageTransmitterV2,
+  EndpointV2,
   CCTPTransfer,
+  LayerZeroPacket,
   TokenMessenger_DepositForBurn,
   TokenMessenger_DepositForBurnV2,
   MessageTransmitter_MessageReceived,
   MessageTransmitter_MessageReceivedV2,
+  EndpointV2_PacketSent,
+  EndpointV2_PacketDelivered,
 } from "generated";
 
 import { 
@@ -37,7 +41,79 @@ import {
   computeV2DeterministicNonce
 } from "./utils/messageDecoder";
 
+import {
+  decodePacket,
+  createPacketId,
+  createPacketIdFromOrigin
+} from "./utils/layerzeroDecoder";
+
 /* ---------- Helper Functions ---------- */
+
+/**
+ * Create and update a LayerZeroPacket entity
+ */
+function createLayerZeroPacket(params: {
+  id: string;
+  srcEid: bigint;
+  dstEid: bigint | undefined;
+  nonce: bigint;
+  sender: string;
+  receiver: string;
+  chainId: number;
+  timestamp: bigint;
+  txHash: string;
+  eventType: 'sent' | 'delivered';
+  prev?: LayerZeroPacket;
+  // Sent-specific fields
+  encodedPayload?: string;
+  options?: string;
+  sendLibrary?: string;
+  payload?: string;
+}): LayerZeroPacket {
+  const isSent = params.eventType === 'sent';
+  const isDelivered = params.eventType === 'delivered';
+  const matched = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
+                  !!(isSent && params.prev?.destinationTxHash) ||
+                  !!(isDelivered && params.prev?.sourceTxHash);
+  
+  const sentTs = isSent ? params.timestamp : params.prev?.sentTimestamp;
+  const deliveredTs = isDelivered ? params.timestamp : params.prev?.deliveredTimestamp;
+  const latencySeconds = matched && sentTs && deliveredTs ? deliveredTs - sentTs : undefined;
+  
+  return {
+    id: params.id,
+    srcEid: params.srcEid,
+    dstEid: params.dstEid,
+    nonce: params.nonce,
+    sender: params.sender,
+    receiver: params.receiver,
+    
+    // Source-side data
+    encodedPayload: params.encodedPayload || params.prev?.encodedPayload,
+    options: params.options || params.prev?.options,
+    sendLibrary: params.sendLibrary || params.prev?.sendLibrary,
+    payload: params.payload || params.prev?.payload,
+    sourceTxHash: isSent ? params.txHash : params.prev?.sourceTxHash,
+    sentBlock: isSent ? params.timestamp : params.prev?.sentBlock,
+    sentTimestamp: sentTs,
+    
+    // Destination-side data
+    destinationTxHash: isDelivered ? params.txHash : params.prev?.destinationTxHash,
+    deliveredBlock: isDelivered ? params.timestamp : params.prev?.deliveredBlock,
+    deliveredTimestamp: deliveredTs,
+    
+    // Derived fields
+    matched,
+    latencySeconds,
+    
+    // Computed fields for TUI efficiency
+    hasPayload: !!(params.payload || params.prev?.payload),
+    sourceChainId: isSent ? BigInt(params.chainId) : params.prev?.sourceChainId,
+    destinationChainId: isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId,
+    eventType: matched ? "matched" : params.eventType,
+    lastUpdated: params.timestamp,
+  };
+}
 
 /**
  * Create and update a CCTPTransfer entity
@@ -312,4 +388,101 @@ MessageTransmitterV2.MessageReceived.handler(async ({ event, context }) => {
     blockTimestamp: timestamp,
     txHash: event.transaction.hash,
   } as MessageTransmitter_MessageReceivedV2);
+});
+
+/* ---------- LayerZero v2 Event Handlers ---------- */
+
+// LayerZero v2 Source: EndpointV2 PacketSent
+// Decode packet header to extract routing information
+EndpointV2.PacketSent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Decode the packet header to extract routing information
+  const decodedPacket = decodePacket(event.params.encodedPayload);
+  if (!decodedPacket) {
+    console.error('Failed to decode LayerZero packet header');
+    return;
+  }
+  
+  const { header, payload } = decodedPacket;
+  
+  // Create packet ID for matching
+  const packetId = createPacketId(header.srcEid, header.sender, header.nonce);
+  const prev = await context.LayerZeroPacket.get(packetId);
+  
+  const packet = createLayerZeroPacket({
+    id: packetId,
+    srcEid: BigInt(header.srcEid),
+    dstEid: BigInt(header.dstEid),
+    nonce: header.nonce,
+    sender: header.sender,
+    receiver: header.receiver,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'sent',
+    prev,
+    encodedPayload: event.params.encodedPayload,
+    options: event.params.options,
+    sendLibrary: event.params.sendLibrary,
+    payload,
+  });
+  
+  context.LayerZeroPacket.set(packet);
+  
+  // Enhanced raw event log
+  context.EndpointV2_PacketSent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as EndpointV2_PacketSent);
+});
+
+// LayerZero v2 Destination: EndpointV2 PacketDelivered
+// Uses Origin struct to match with sent packet
+EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Extract origin information from the event
+  const origin = {
+    srcEid: Number(event.params.origin.srcEid),
+    sender: event.params.origin.sender,
+    nonce: event.params.origin.nonce,
+  };
+  
+  // Create the same packet ID that was used on the source side
+  const packetId = createPacketIdFromOrigin(origin);
+  const prev = await context.LayerZeroPacket.get(packetId);
+  
+  const packet = createLayerZeroPacket({
+    id: packetId,
+    srcEid: BigInt(origin.srcEid),
+    dstEid: undefined, // Will be filled from prev if available
+    nonce: origin.nonce,
+    sender: origin.sender,
+    receiver: event.params.receiver,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'delivered',
+    prev,
+  });
+  
+  context.LayerZeroPacket.set(packet);
+  
+  // Enhanced raw event log
+  context.EndpointV2_PacketDelivered.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    originSrcEid: event.params.origin.srcEid,
+    originSender: event.params.origin.sender,
+    originNonce: event.params.origin.nonce,
+    receiver: event.params.receiver,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as EndpointV2_PacketDelivered);
 });

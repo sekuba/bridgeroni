@@ -1,10 +1,29 @@
 /**
- * CCTP Bridge Monitor - Constants and Configuration
+ * Cross-Chain Bridge Monitor - Constants and Configuration
  * 
  * Centralized configuration for domain mappings, network parameters,
  * and application settings. This file ensures consistency across
- * the indexer and TUI components.
+ * the indexer and TUI components for both CCTP and LayerZero protocols.
  */
+
+// LayerZero EID mappings for supported chains
+export const LAYERZERO_EID_BY_CHAIN_ID: Record<number, number> = {
+  1: 30101,     // Ethereum -> EID 30101
+  8453: 30184,  // Base -> EID 30184
+  42161: 30110, // Arbitrum -> EID 30110
+};
+
+// Chain ID to LayerZero EID mapping (reverse lookup)
+export const CHAIN_ID_TO_LAYERZERO_EID = Object.fromEntries(
+  Object.entries(LAYERZERO_EID_BY_CHAIN_ID).map(([chainId, eid]) => [parseInt(chainId), eid])
+);
+
+// LayerZero EID to chain name mapping
+export const LAYERZERO_EID_TO_CHAIN_NAME: Record<number, string> = {
+  30101: 'ethereum',
+  30184: 'base',
+  30110: 'arbitrum',
+};
 
 // CCTP domain mappings for supported chains
 export const DOMAIN_BY_CHAIN_ID: Record<number, bigint> = {
@@ -154,3 +173,15 @@ export const supportsV1 = (chainId: number): boolean =>
 // Helper function to check if chain supports v2
 export const supportsV2 = (chainId: number): boolean => 
   Object.keys(DOMAIN_BY_CHAIN_ID).map(Number).includes(chainId);
+
+// Helper function to get LayerZero EID from chain ID
+export const getLayerZeroEidFromChainId = (chainId: number): number | undefined => 
+  LAYERZERO_EID_BY_CHAIN_ID[chainId];
+
+// Helper function to get chain name from LayerZero EID
+export const getChainNameFromLayerZeroEid = (eid: number): string => 
+  LAYERZERO_EID_TO_CHAIN_NAME[eid] || `EID${eid}`;
+
+// Helper function to check if chain supports LayerZero v2
+export const supportsLayerZeroV2 = (chainId: number): boolean => 
+  Object.keys(LAYERZERO_EID_BY_CHAIN_ID).map(Number).includes(chainId);
