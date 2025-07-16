@@ -316,7 +316,7 @@ class CCTPMonitor {
     
     // Initialize with known chains
     Object.entries(DOMAIN_TO_CHAIN_NAME).forEach(([domain, chainName]) => {
-      latestBlocks[chainName.toLowerCase()] = 0;
+      latestBlocks[chainName] = 0;
     });
 
     // Process raw events for actual chain-specific block numbers
@@ -327,10 +327,10 @@ class CCTPMonitor {
       ...this.data.recentReceivedV2
     ].forEach(event => {
       const chainId = Number(event.chainId);
-      const chainName = getChainNameFromChainId(chainId).toLowerCase();
+      const chainName = getChainNameFromChainId(chainId);
       const blockNumber = Number(event.blockNumber);
       
-      if (blockNumber > 0) {
+      if (blockNumber > 0 && chainName) {
         latestBlocks[chainName] = Math.max(
           latestBlocks[chainName] || 0,
           blockNumber
@@ -527,13 +527,13 @@ class CCTPMonitor {
       `OP ${(metrics.latestBlocks.op || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.blue}Base ${(metrics.latestBlocks.base || 0).toLocaleString()}`,
 
-      `${COLORS.yellow}More Blocks:${COLORS.reset} ${COLORS.magenta}Unichain ${(metrics.latestBlocks.unichain || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
+      `               ${COLORS.magenta}Unichain ${(metrics.latestBlocks.unichain || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.cyan}Linea ${(metrics.latestBlocks.linea || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.green}World Chain ${(metrics.latestBlocks.worldchain || 0).toLocaleString()}`,
 
       `${COLORS.bright}${COLORS.blue}Daily Volume v1:${COLORS.reset} ${formatVolume(metrics.v1.dailyVolume.total)} ${COLORS.gray}(${metrics.v1.dailyVolume.count} transfers)${COLORS.reset}`,
       
-      `${COLORS.bright}${COLORS.blue}Daily Volume v2:${COLORS.reset} ${formatVolume(metrics.v2.dailyVolume.total)} ${COLORS.gray}(${metrics.v2.dailyVolume.count} transfers)${COLORS.reset}`,
+      `${COLORS.bright}${COLORS.blue}             v2:${COLORS.reset} ${formatVolume(metrics.v2.dailyVolume.total)} ${COLORS.gray}(${metrics.v2.dailyVolume.count} transfers)${COLORS.reset}`,
 
       this.formatBinnedLatency(metrics.v1.binnedLatency, 'v1'),
       this.formatBinnedLatency(metrics.v2.binnedLatency, 'v2')
