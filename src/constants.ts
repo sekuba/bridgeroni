@@ -79,11 +79,11 @@ export const EXPLORER_URLS: Record<number, string> = {
 // Transfer amount bins for latency analysis (in USDC)
 export const TRANSFER_AMOUNT_BINS = {
   micro: { min: 0, max: 10, label: '0-10' },
-  small: { min: 10.01, max: 100, label: '>10-100' },
-  medium: { min: 100.01, max: 10000, label: '>100-10k' },
-  large: { min: 10000.01, max: 100000, label: '>10k-100k' },
-  xlarge: { min: 100000.01, max: 1000000, label: '>100k-1M' },
-  whale: { min: 1000000.01, max: Infinity, label: '>1M' }
+  small: { min: 10, max: 100, label: '>10-100' },
+  medium: { min: 100, max: 10000, label: '>100-10k' },
+  large: { min: 10000, max: 100000, label: '>10k-100k' },
+  xlarge: { min: 100000, max: 1000000, label: '>100k-1M' },
+  whale: { min: 1000000, max: Infinity, label: '>1M' }
 } as const;
 
 // TUI Configuration

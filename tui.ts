@@ -283,7 +283,7 @@ class CCTPMonitor {
   private calculateAverageLatency(transfers: Transfer[]): number {
     const latencies = transfers
       .map(t => Number(t.latencySeconds))
-      .filter(l => l > 0);
+      .filter(l => l > 0 && !isNaN(l));
     
     if (latencies.length === 0) return 0;
     
@@ -301,11 +301,12 @@ class CCTPMonitor {
 
     const recentTransfers = transfers.filter(transfer => {
       const transferTimestamp = Number(transfer.depositTimestamp);
-      return transferTimestamp >= cutoffTimestamp;
+      return !isNaN(transferTimestamp) && transferTimestamp >= cutoffTimestamp;
     });
 
     const totalVolume = recentTransfers.reduce((sum, transfer) => {
-      return sum + convertUSDCToNumber(transfer.amount);
+      const amount = convertUSDCToNumber(transfer.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
 
     const chainVolume: Record<string, number> = {};
@@ -313,11 +314,14 @@ class CCTPMonitor {
       if (!transfer.amount) return;
       const sourceDomain = Number(transfer.sourceDomain);
       const chainName = getChainNameFromDomain(sourceDomain);
+      const amount = convertUSDCToNumber(transfer.amount);
+      
+      if (isNaN(amount)) return;
       
       if (!chainVolume[chainName]) {
         chainVolume[chainName] = 0;
       }
-      chainVolume[chainName] += convertUSDCToNumber(transfer.amount);
+      chainVolume[chainName] += amount;
     });
 
     return {
@@ -343,11 +347,13 @@ class CCTPMonitor {
       const amountUSDC = convertUSDCToNumber(transfer.amount);
       const latencySeconds = Number(transfer.latencySeconds);
       
-      if (latencySeconds <= 0) return;
+      if (latencySeconds <= 0 || isNaN(latencySeconds) || isNaN(amountUSDC)) return;
 
-      // Categorize by amount bins
+      // Categorize by amount bins (use > for non-zero min to avoid overlaps)
       Object.entries(TRANSFER_AMOUNT_BINS).forEach(([binKey, config]) => {
-        if (amountUSDC >= config.min && amountUSDC <= config.max) {
+        if (config.min === 0 ? 
+            (amountUSDC >= config.min && amountUSDC <= config.max) : 
+            (amountUSDC > config.min && amountUSDC <= config.max)) {
           bins[binKey].latencies.push(latencySeconds);
         }
       });

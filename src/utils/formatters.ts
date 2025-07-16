@@ -55,6 +55,8 @@ export function formatDuration(seconds: number | bigint | null | undefined): str
   if (!seconds || Number(seconds) <= 0) return '?';
   
   const sec = Number(seconds);
+  if (isNaN(sec) || sec <= 0) return '?';
+  
   if (sec < 60) return `${sec}s`;
   
   const mins = Math.floor(sec / 60);
@@ -124,5 +126,6 @@ export function getChainColorByName(chainName: string): string {
  */
 export function convertUSDCToNumber(amount: bigint | string | null | undefined): number {
   if (!amount) return 0;
-  return Number(amount) / Math.pow(10, CCTP_CONSTANTS.USDC_DECIMALS);
+  const converted = Number(amount) / Math.pow(10, CCTP_CONSTANTS.USDC_DECIMALS);
+  return isNaN(converted) ? 0 : converted;
 }
