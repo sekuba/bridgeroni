@@ -14,7 +14,7 @@ export const LAYERZERO_QUERIES = {
   recentPacketsSent: `{
     EndpointV2_PacketSent(
       limit: ${TUI_CONFIG.MAX_RECENT_EVENTS}, 
-      order_by: {blockTimestamp: desc}
+      order_by: [{blockTimestamp: desc}, {txHash: asc}]
     ) {
       id encodedPayload options sendLibrary
       chainId blockNumber blockTimestamp txHash
@@ -25,7 +25,7 @@ export const LAYERZERO_QUERIES = {
   recentPacketsDelivered: `{
     EndpointV2_PacketDelivered(
       limit: ${TUI_CONFIG.MAX_RECENT_EVENTS}, 
-      order_by: {blockTimestamp: desc}
+      order_by: [{blockTimestamp: desc}, {txHash: asc}]
     ) {
       id originSrcEid originSender originNonce receiver
       chainId blockNumber blockTimestamp txHash
@@ -36,7 +36,7 @@ export const LAYERZERO_QUERIES = {
   matchedPackets: `{
     LayerZeroPacket(
       where: {matched: {_eq: true}}, 
-      order_by: [{lastUpdated: desc}, {deliveredTimestamp: desc}, {dstEid: asc}, {srcEid: asc}, {id: asc}]
+      order_by: [{lastUpdated: desc}, {deliveredTimestamp: desc}, {sender: asc}, {receiver: asc}, {id: asc}]
     ) {
       id srcEid dstEid nonce sender receiver
       encodedPayload options sendLibrary payload

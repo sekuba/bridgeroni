@@ -303,7 +303,12 @@ class LayerZeroMonitor {
         const typeDiff = a.type.localeCompare(b.type);
         if (typeDiff !== 0) return typeDiff;
         
-        return 0;
+        // Tertiary sort by sender address for stability
+        const senderDiff = (a.sender || '').localeCompare(b.sender || '');
+        if (senderDiff !== 0) return senderDiff;
+        
+        // Quaternary sort by txHash as final tiebreaker
+        return a.txHash.localeCompare(b.txHash);
       })
       .slice(0, TUI_CONFIG.MAX_RAW_EVENTS);
   }
