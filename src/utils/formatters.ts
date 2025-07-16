@@ -40,14 +40,6 @@ export function formatAddress(addr: string | null | undefined): string {
 }
 
 /**
- * Format transaction hash for display (short version)
- */
-export function formatTxHashShort(hash: string | null | undefined): string {
-  if (!hash || hash.length < 10) return hash || '';
-  return `${hash.slice(0, 6)}..${hash.slice(-4)}`;
-}
-
-/**
  * Format transaction hash with explorer URL
  */
 export function formatTxHashWithUrl(hash: string | null | undefined, domain: number): string {
@@ -112,18 +104,18 @@ export function getChainNameFromChainId(chainId: number): string {
 }
 
 /**
- * Get chain color for display
+ * Get chain color for display by chain name
  */
-export function getChainColor(domain: number): string {
-  switch(domain) {
-    case 0: return COLORS.yellow;   // Ethereum
-    case 2: return COLORS.green;    // OP Mainnet
-    case 3: return COLORS.cyan;     // Arbitrum  
-    case 6: return COLORS.blue;     // Base
-    case 10: return COLORS.magenta; // Unichain
-    case 11: return COLORS.cyan;    // Linea
-    case 14: return COLORS.green;   // World Chain
-    default: return COLORS.white;   // Other chains
+export function getChainColorByName(chainName: string): string {
+  switch(chainName.toLowerCase()) {
+    case 'ethereum': return COLORS.purple;
+    case 'op': return COLORS.red;
+    case 'arbitrum': return COLORS.cyan;
+    case 'base': return COLORS.blue;
+    case 'unichain': return COLORS.lightRed;
+    case 'linea': return COLORS.dim;
+    case 'worldchain': return COLORS.yellow;
+    default: return COLORS.white;
   }
 }
 

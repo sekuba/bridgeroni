@@ -21,7 +21,6 @@
  */
 
 import { stdout } from 'process';
-import { performance } from 'perf_hooks';
 
 import { 
   COLORS, 
@@ -35,14 +34,13 @@ import {
   formatUSDCAmount,
   formatVolume,
   formatAddress,
-  formatTxHashShort,
   formatTxHashWithUrl,
   formatDuration,
   formatTimestamp,
   extractRecipientAddress,
   getChainNameFromDomain,
   getChainNameFromChainId,
-  getChainColor,
+  getChainColorByName,
   convertUSDCToNumber
 } from './src/utils/formatters';
 
@@ -523,13 +521,13 @@ class CCTPMonitor {
       `${COLORS.green}Matched:${COLORS.reset} ${metrics.v2.matchedCount} ${COLORS.gray}│${COLORS.reset} ` +
       `${COLORS.green}Avg:${COLORS.reset} ${formatDuration(metrics.v2.avgLatency)}`,
       
-      `${COLORS.yellow}Latest Blocks:${COLORS.reset} ETH ${(metrics.latestBlocks.ethereum || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `OP ${(metrics.latestBlocks.op || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.blue}Base ${(metrics.latestBlocks.base || 0).toLocaleString()}`,
+      `${COLORS.yellow}Latest Blocks:${COLORS.reset} ${getChainColorByName('ethereum')}ETH ${(metrics.latestBlocks.ethereum || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
+      `${getChainColorByName('op')}OP ${(metrics.latestBlocks.op || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ${getChainColorByName('arbitrum')}ARB ${(metrics.latestBlocks.arbitrum || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
+      `${getChainColorByName('base')}Base ${(metrics.latestBlocks.base || 0).toLocaleString()}${COLORS.reset}`,
 
-      `               ${COLORS.magenta}Unichain ${(metrics.latestBlocks.unichain || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.cyan}Linea ${(metrics.latestBlocks.linea || 0).toLocaleString()} ${COLORS.gray}│${COLORS.reset} ` +
-      `${COLORS.green}World Chain ${(metrics.latestBlocks.worldchain || 0).toLocaleString()}`,
+      `               ${getChainColorByName('unichain')}Unichain ${(metrics.latestBlocks.unichain || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
+      `${getChainColorByName('linea')}Linea ${(metrics.latestBlocks.linea || 0).toLocaleString()}${COLORS.reset} ${COLORS.gray}│${COLORS.reset} ` +
+      `${getChainColorByName('worldchain')}World Chain ${(metrics.latestBlocks.worldchain || 0).toLocaleString()}${COLORS.reset}`,
 
       `${COLORS.bright}${COLORS.blue}Daily Volume v1:${COLORS.reset} ${formatVolume(metrics.v1.dailyVolume.total)} ${COLORS.gray}(${metrics.v1.dailyVolume.count} transfers)${COLORS.reset}`,
       
@@ -567,8 +565,8 @@ class CCTPMonitor {
       const time = formatTimestamp(event.timestamp);
       const txUrl = formatTxHashWithUrl(event.txHash, event.direction === 'from' ? event.sourceDomain : event.destinationDomain);
       
-      const sourceColor = getChainColor(event.sourceDomain);
-      const destColor = getChainColor(event.destinationDomain);
+      const sourceColor = getChainColorByName(event.sourceChain);
+      const destColor = getChainColorByName(event.destinationChain);
       
       const versionLabel = event.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
       
@@ -602,7 +600,7 @@ class CCTPMonitor {
       const isRecent = lastUpdated > twoMinutesAgo;
       const newIndicator = isRecent ? `${COLORS.green}●${COLORS.reset} ` : '';
 
-      content += `${newIndicator}${versionLabel} ${COLORS.cyan}${srcDomain}${COLORS.reset}→${COLORS.yellow}${dstDomain}${COLORS.reset}: `;
+      content += `${newIndicator}${versionLabel} ${getChainColorByName(srcDomain)}${srcDomain}${COLORS.reset}→${getChainColorByName(dstDomain)}${dstDomain}${COLORS.reset}: `;
       content += `${COLORS.bright}${amount}${COLORS.reset} `;
       content += `${COLORS.green}${depositor}${COLORS.reset}→${COLORS.green}${recipient}${COLORS.reset} `;
       content += `${COLORS.magenta}~${latency}${COLORS.reset}\n`;

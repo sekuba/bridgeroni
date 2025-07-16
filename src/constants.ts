@@ -105,9 +105,11 @@ export const COLORS = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
+  purple: '\x1b[95m',
   white: '\x1b[37m',
   gray: '\x1b[90m',
   red: '\x1b[31m',
+  lightRed: '\x1b[91m',
 } as const;
 
 // CCTP Protocol constants
