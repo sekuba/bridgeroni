@@ -153,11 +153,22 @@ export function formatPacketStatus(matched: boolean, hasPayload: boolean): strin
  * Format detailed packet info for list view
  */
 export function formatPacketDetails(packet: any): string {
-  const direction = formatPacketDirection(Number(packet.srcEid), Number(packet.dstEid || 0));
+  const srcEid = Number(packet.srcEid);
+  let dstEid = Number(packet.dstEid);
+  
+  // If dstEid is null, 0, or NaN, derive it from destinationChainId
+  if (!dstEid || isNaN(dstEid)) {
+    dstEid = CHAIN_ID_TO_LAYERZERO_EID[Number(packet.destinationChainId)] || 0;
+  }
+  
+  const direction = formatPacketDirection(srcEid, dstEid);
   const sender = formatBytes32Address(packet.sender);
   const receiver = formatBytes32Address(packet.receiver);
   const latency = formatDuration(Number(packet.latencySeconds));
-  const status = formatPacketStatus(packet.matched, packet.hasPayload);
+  
+  // Check if packet is actually matched (has both source and destination tx hashes)
+  const isMatched = !!(packet.sourceTxHash && packet.destinationTxHash);
+  const status = formatPacketStatus(isMatched, packet.hasPayload);
   
   return `${status} ${direction}: ${COLORS.green}${sender}${COLORS.reset}→${COLORS.green}${receiver}${COLORS.reset} ${COLORS.magenta}~${latency}${COLORS.reset}`;
 }

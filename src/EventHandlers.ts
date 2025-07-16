@@ -33,7 +33,8 @@ import {
 
 import { 
   createTransferId,
-  getDomainFromChainId
+  getDomainFromChainId,
+  LAYERZERO_EID_BY_CHAIN_ID
 } from "./constants";
 
 import {
@@ -44,7 +45,8 @@ import {
 import {
   decodePacket,
   createPacketId,
-  createPacketIdFromOrigin
+  createPacketIdFromOrigin,
+  createLayerZeroGuid
 } from "./utils/layerzeroDecoder";
 
 /* ---------- Helper Functions ---------- */
@@ -406,12 +408,19 @@ EndpointV2.PacketSent.handler(async ({ event, context }) => {
   
   const { header, payload } = decodedPacket;
   
-  // Create packet ID for matching
-  const packetId = createPacketId(header.srcEid, header.sender, header.nonce);
-  const prev = await context.LayerZeroPacket.get(packetId);
+  // Create LayerZero GUID for proper matching
+  const guid = createLayerZeroGuid(
+    header.nonce,
+    header.srcEid,
+    header.sender,
+    header.dstEid,
+    header.receiver
+  );
+  
+  const prev = await context.LayerZeroPacket.get(guid);
   
   const packet = createLayerZeroPacket({
-    id: packetId,
+    id: guid,
     srcEid: BigInt(header.srcEid),
     dstEid: BigInt(header.dstEid),
     nonce: header.nonce,
@@ -454,14 +463,34 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
     nonce: event.params.origin[2],           // uint64 nonce
   };
   
-  // Create the same packet ID that was used on the source side
-  const packetId = createPacketIdFromOrigin(origin);
-  const prev = await context.LayerZeroPacket.get(packetId);
+  // Get the EID for the current chain (destination)
+  const destEid = LAYERZERO_EID_BY_CHAIN_ID[event.chainId];
+  if (!destEid) {
+    console.error(`No LayerZero EID found for chain ID ${event.chainId}`);
+    return;
+  }
+  
+  // Create the LayerZero GUID using the complete routing information
+  const guid = createLayerZeroGuid(
+    origin.nonce,
+    origin.srcEid,
+    origin.sender,
+    destEid,
+    event.params.receiver
+  );
+  
+  const prev = await context.LayerZeroPacket.get(guid);
+  
+  // Only process if we have a matching sent packet for this exact routing
+  if (!prev) {
+    console.warn(`No matching sent packet found for GUID ${guid} (srcEid: ${origin.srcEid}, dstEid: ${destEid})`);
+    return;
+  }
   
   const packet = createLayerZeroPacket({
-    id: packetId,
+    id: guid,
     srcEid: BigInt(origin.srcEid),
-    dstEid: undefined, // Will be filled from prev if available
+    dstEid: BigInt(destEid),
     nonce: origin.nonce,
     sender: origin.sender,
     receiver: event.params.receiver,

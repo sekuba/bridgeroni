@@ -23,6 +23,7 @@ export const LAYERZERO_EID_TO_CHAIN_NAME: Record<number, string> = {
   30101: 'ethereum',
   30184: 'base',
   30110: 'arbitrum',
+  30111: 'op', // OP mainnet (not currently indexed)
 };
 
 // CCTP domain mappings for supported chains
