@@ -46,6 +46,15 @@ import {
 
 import { fetchAllData } from './src/utils/graphql';
 
+// Constants for calculations
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+const RECENT_TRANSFER_THRESHOLD_SECONDS = 120; // 2 minutes
+const RAW_ACTIVITY_DISPLAY_COUNT = 6;
+
 interface RawEvent {
   type: 'deposit' | 'received';
   version: 'v1' | 'v2';
@@ -93,11 +102,26 @@ interface VolumeMetrics {
   count: number;
 }
 
+interface Transfer {
+  matched?: boolean;
+  version: 'v1' | 'v2';
+  amount: string;
+  latencySeconds: string;
+  depositTimestamp: string;
+  sourceDomain: string;
+  destinationDomain: string;
+  depositor: string;
+  mintRecipient: string;
+  sourceTxHash: string;
+  destinationTxHash: string;
+  lastUpdated?: string;
+}
+
 class CCTPMonitor {
   private data: {
     metrics: Metrics;
     rawEvents: RawEvent[];
-    matchedTransfers: any[];
+    matchedTransfers: Transfer[];
     recentDeposits: any[];
     recentDepositsV2: any[];
     recentReceived: any[];
@@ -121,55 +145,60 @@ class CCTPMonitor {
    * Fetch and process all data
    */
   async fetchData(): Promise<boolean> {
-    const results = await fetchAllData();
-    if (!results) return false;
+    try {
+      const results = await fetchAllData();
+      if (!results) return false;
 
-    const [
-      recentDepositsData,
-      recentDepositsV2Data,
-      recentReceivedData,
-      recentReceivedV2Data,
-      matchedData,
-      allTransfersData,
-      depositsData,
-      depositsV2Data,
-      receivedData,
-      receivedV2Data
-    ] = results;
+      const [
+        recentDepositsData,
+        recentDepositsV2Data,
+        recentReceivedData,
+        recentReceivedV2Data,
+        matchedData,
+        allTransfersData,
+        depositsData,
+        depositsV2Data,
+        receivedData,
+        receivedV2Data
+      ] = results;
 
-    // Process data
-    this.data.recentDeposits = recentDepositsData.TokenMessenger_DepositForBurn;
-    this.data.recentDepositsV2 = recentDepositsV2Data.TokenMessenger_DepositForBurnV2;
-    this.data.recentReceived = recentReceivedData.MessageTransmitter_MessageReceived;
-    this.data.recentReceivedV2 = recentReceivedV2Data.MessageTransmitter_MessageReceivedV2;
-    this.data.matchedTransfers = matchedData.CCTPTransfer;
-    
-    // Create raw events feed
-    this.data.rawEvents = this.createRawEventsFeed(
-      this.data.recentDeposits,
-      this.data.recentDepositsV2,
-      this.data.recentReceived,
-      this.data.recentReceivedV2
-    );
-    
-    // Calculate metrics
-    this.calculateMetrics(
-      allTransfersData.CCTPTransfer,
-      depositsData.TokenMessenger_DepositForBurn,
-      depositsV2Data.TokenMessenger_DepositForBurnV2,
-      receivedData.MessageTransmitter_MessageReceived,
-      receivedV2Data.MessageTransmitter_MessageReceivedV2
-    );
+      // Process data with validation
+      this.data.recentDeposits = recentDepositsData?.TokenMessenger_DepositForBurn || [];
+      this.data.recentDepositsV2 = recentDepositsV2Data?.TokenMessenger_DepositForBurnV2 || [];
+      this.data.recentReceived = recentReceivedData?.MessageTransmitter_MessageReceived || [];
+      this.data.recentReceivedV2 = recentReceivedV2Data?.MessageTransmitter_MessageReceivedV2 || [];
+      this.data.matchedTransfers = matchedData?.CCTPTransfer || [];
+      
+      // Create raw events feed
+      this.data.rawEvents = this.createRawEventsFeed(
+        this.data.recentDeposits,
+        this.data.recentDepositsV2,
+        this.data.recentReceived,
+        this.data.recentReceivedV2
+      );
+      
+      // Calculate metrics
+      this.calculateMetrics(
+        allTransfersData?.CCTPTransfer || [],
+        depositsData?.TokenMessenger_DepositForBurn || [],
+        depositsV2Data?.TokenMessenger_DepositForBurnV2 || [],
+        receivedData?.MessageTransmitter_MessageReceived || [],
+        receivedV2Data?.MessageTransmitter_MessageReceivedV2 || []
+      );
 
-    this.lastUpdate = Date.now();
-    return true;
+      this.lastUpdate = Date.now();
+      return true;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return false;
+    }
   }
 
   /**
    * Calculate all metrics
    */
   private calculateMetrics(
-    allTransfers: any[],
+    allTransfers: Transfer[],
     deposits: any[],
     depositsV2: any[],
     received: any[],
@@ -211,7 +240,7 @@ class CCTPMonitor {
   /**
    * Calculate average latency for transfers
    */
-  private calculateAverageLatency(transfers: any[]): number {
+  private calculateAverageLatency(transfers: Transfer[]): number {
     const latencies = transfers
       .map(t => Number(t.latencySeconds))
       .filter(l => l > 0);
@@ -225,10 +254,10 @@ class CCTPMonitor {
   /**
    * Calculate daily volume (24h rolling)
    */
-  private calculateDailyVolume(transfers: any[]): VolumeMetrics {
+  private calculateDailyVolume(transfers: Transfer[]): VolumeMetrics {
     const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const cutoffTimestamp = Math.floor(twentyFourHoursAgo.getTime() / 1000);
+    const twentyFourHoursAgo = new Date(now.getTime() - MILLISECONDS_PER_DAY);
+    const cutoffTimestamp = Math.floor(twentyFourHoursAgo.getTime() / MILLISECONDS_PER_SECOND);
 
     const recentTransfers = transfers.filter(transfer => {
       const transferTimestamp = Number(transfer.depositTimestamp);
@@ -261,7 +290,7 @@ class CCTPMonitor {
   /**
    * Calculate latency metrics binned by transfer amount
    */
-  private calculateBinnedLatency(transfers: any[]): Record<string, BinnedLatency> {
+  private calculateBinnedLatency(transfers: Transfer[]): Record<string, BinnedLatency> {
     const bins: Record<string, { latencies: number[]; label: string }> = {};
     
     Object.entries(TRANSFER_AMOUNT_BINS).forEach(([key, config]) => {
@@ -313,7 +342,7 @@ class CCTPMonitor {
     const latestBlocks: Record<string, number> = {};
     
     // Initialize with known chains
-    Object.entries(DOMAIN_TO_CHAIN_NAME).forEach(([domain, chainName]) => {
+    Object.entries(DOMAIN_TO_CHAIN_NAME).forEach(([, chainName]) => {
       latestBlocks[chainName] = 0;
     });
 
@@ -352,86 +381,22 @@ class CCTPMonitor {
     
     // Process v1 deposits
     deposits.forEach(deposit => {
-      const chainId = Number(deposit.chainId);
-      const sourceDomain = CHAIN_ID_TO_DOMAIN[chainId];
-      
-      events.push({
-        type: 'deposit',
-        version: 'v1',
-        sourceDomain: sourceDomain !== undefined ? sourceDomain : chainId,
-        destinationDomain: Number(deposit.destinationDomain),
-        sourceChain: getChainNameFromChainId(chainId),
-        destinationChain: getChainNameFromDomain(Number(deposit.destinationDomain)),
-        amount: BigInt(deposit.amount),
-        hasAmount: true,
-        nonce: deposit.nonce,
-        timestamp: deposit.blockTimestamp,
-        txHash: deposit.txHash,
-        direction: 'from'
-      });
+      events.push(this.createDepositEvent(deposit, 'v1'));
     });
     
     // Process v2 deposits
     depositsV2.forEach(deposit => {
-      const chainId = Number(deposit.chainId);
-      const sourceDomain = CHAIN_ID_TO_DOMAIN[chainId];
-      
-      events.push({
-        type: 'deposit',
-        version: 'v2',
-        sourceDomain: sourceDomain !== undefined ? sourceDomain : chainId,
-        destinationDomain: Number(deposit.destinationDomain),
-        sourceChain: getChainNameFromChainId(chainId),
-        destinationChain: getChainNameFromDomain(Number(deposit.destinationDomain)),
-        amount: BigInt(deposit.amount),
-        hasAmount: true,
-        nonce: null,
-        timestamp: deposit.blockTimestamp,
-        txHash: deposit.txHash,
-        direction: 'from'
-      });
+      events.push(this.createDepositEvent(deposit, 'v2'));
     });
     
     // Process v1 received
     received.forEach(msg => {
-      const chainId = Number(msg.chainId);
-      const destDomain = CHAIN_ID_TO_DOMAIN[chainId];
-      
-      events.push({
-        type: 'received',
-        version: 'v1',
-        sourceDomain: Number(msg.sourceDomain),
-        destinationDomain: destDomain !== undefined ? destDomain : chainId,
-        sourceChain: getChainNameFromDomain(Number(msg.sourceDomain)),
-        destinationChain: getChainNameFromChainId(chainId),
-        amount: null,
-        hasAmount: false,
-        nonce: msg.nonce,
-        timestamp: msg.blockTimestamp,
-        txHash: msg.txHash,
-        direction: 'to'
-      });
+      events.push(this.createReceivedEvent(msg, 'v1'));
     });
     
     // Process v2 received
     receivedV2.forEach(msg => {
-      const chainId = Number(msg.chainId);
-      const destDomain = CHAIN_ID_TO_DOMAIN[chainId];
-      
-      events.push({
-        type: 'received',
-        version: 'v2',
-        sourceDomain: Number(msg.sourceDomain),
-        destinationDomain: destDomain !== undefined ? destDomain : chainId,
-        sourceChain: getChainNameFromDomain(Number(msg.sourceDomain)),
-        destinationChain: getChainNameFromChainId(chainId),
-        amount: null,
-        hasAmount: false,
-        nonce: msg.nonce,
-        timestamp: msg.blockTimestamp,
-        txHash: msg.txHash,
-        direction: 'to'
-      });
+      events.push(this.createReceivedEvent(msg, 'v2'));
     });
     
     // Sort and limit events
@@ -446,6 +411,52 @@ class CCTPMonitor {
         return 0;
       })
       .slice(0, TUI_CONFIG.MAX_RAW_EVENTS);
+  }
+
+  /**
+   * Create a deposit event from raw data
+   */
+  private createDepositEvent(deposit: any, version: 'v1' | 'v2'): RawEvent {
+    const chainId = Number(deposit.chainId);
+    const sourceDomain = CHAIN_ID_TO_DOMAIN[chainId];
+    
+    return {
+      type: 'deposit',
+      version,
+      sourceDomain: sourceDomain !== undefined ? sourceDomain : chainId,
+      destinationDomain: Number(deposit.destinationDomain),
+      sourceChain: getChainNameFromChainId(chainId),
+      destinationChain: getChainNameFromDomain(Number(deposit.destinationDomain)),
+      amount: BigInt(deposit.amount),
+      hasAmount: true,
+      nonce: version === 'v1' ? deposit.nonce : null,
+      timestamp: deposit.blockTimestamp,
+      txHash: deposit.txHash,
+      direction: 'from'
+    };
+  }
+
+  /**
+   * Create a received event from raw data
+   */
+  private createReceivedEvent(msg: any, version: 'v1' | 'v2'): RawEvent {
+    const chainId = Number(msg.chainId);
+    const destDomain = CHAIN_ID_TO_DOMAIN[chainId];
+    
+    return {
+      type: 'received',
+      version,
+      sourceDomain: Number(msg.sourceDomain),
+      destinationDomain: destDomain !== undefined ? destDomain : chainId,
+      sourceChain: getChainNameFromDomain(Number(msg.sourceDomain)),
+      destinationChain: getChainNameFromChainId(chainId),
+      amount: null,
+      hasAmount: false,
+      nonce: msg.nonce,
+      timestamp: msg.blockTimestamp,
+      txHash: msg.txHash,
+      direction: 'to'
+    };
   }
 
   /**
@@ -557,7 +568,7 @@ class CCTPMonitor {
   }
 
   private renderRawActivity(): string {
-    const events = this.data.rawEvents.slice(0, 6);
+    const events = this.data.rawEvents.slice(0, RAW_ACTIVITY_DISPLAY_COUNT);
     let content = '';
     
     events.forEach(event => {
@@ -583,10 +594,10 @@ class CCTPMonitor {
     const transfers = this.data.matchedTransfers.slice(0, TUI_CONFIG.MAX_MATCHED_TRANSFERS);
     let content = '';
 
-    transfers.forEach((transfer, index) => {
+    transfers.forEach((transfer) => {
       const srcDomain = getChainNameFromDomain(Number(transfer.sourceDomain));
       const dstDomain = getChainNameFromDomain(Number(transfer.destinationDomain));
-      const amount = formatUSDCAmount(transfer.amount);
+      const amount = formatUSDCAmount(BigInt(transfer.amount));
       const depositor = formatAddress(transfer.depositor);
       const recipient = formatAddress(extractRecipientAddress(transfer.mintRecipient));
       const latency = formatDuration(transfer.latencySeconds);
@@ -596,7 +607,7 @@ class CCTPMonitor {
       
       // Highlight recently updated transfers (within last 2 minutes)
       const lastUpdated = Number(transfer.lastUpdated || 0);
-      const twoMinutesAgo = Date.now() / 1000 - 120;
+      const twoMinutesAgo = Date.now() / MILLISECONDS_PER_SECOND - RECENT_TRANSFER_THRESHOLD_SECONDS;
       const isRecent = lastUpdated > twoMinutesAgo;
       const newIndicator = isRecent ? `${COLORS.green}●${COLORS.reset} ` : '';
 
