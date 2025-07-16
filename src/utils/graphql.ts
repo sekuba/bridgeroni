@@ -91,6 +91,46 @@ export const QUERIES = {
   
   allReceivedV2: `{
     MessageTransmitter_MessageReceivedV2 { id }
+  }`,
+
+  // Get latest block number for each chain from deposits v1
+  latestBlocksDepositsV1: `{
+    TokenMessenger_DepositForBurn(
+      order_by: [{chainId: asc}, {blockNumber: desc}]
+      distinct_on: chainId
+    ) {
+      chainId blockNumber
+    }
+  }`,
+
+  // Get latest block number for each chain from deposits v2
+  latestBlocksDepositsV2: `{
+    TokenMessenger_DepositForBurnV2(
+      order_by: [{chainId: asc}, {blockNumber: desc}]
+      distinct_on: chainId
+    ) {
+      chainId blockNumber
+    }
+  }`,
+
+  // Get latest block number for each chain from received v1
+  latestBlocksReceivedV1: `{
+    MessageTransmitter_MessageReceived(
+      order_by: [{chainId: asc}, {blockNumber: desc}]
+      distinct_on: chainId
+    ) {
+      chainId blockNumber
+    }
+  }`,
+
+  // Get latest block number for each chain from received v2
+  latestBlocksReceivedV2: `{
+    MessageTransmitter_MessageReceivedV2(
+      order_by: [{chainId: asc}, {blockNumber: desc}]
+      distinct_on: chainId
+    ) {
+      chainId blockNumber
+    }
   }`
 };
 
@@ -135,7 +175,11 @@ export async function fetchAllData(): Promise<any[] | null> {
     executeGraphQLQuery(QUERIES.allDeposits),
     executeGraphQLQuery(QUERIES.allDepositsV2),
     executeGraphQLQuery(QUERIES.allReceived),
-    executeGraphQLQuery(QUERIES.allReceivedV2)
+    executeGraphQLQuery(QUERIES.allReceivedV2),
+    executeGraphQLQuery(QUERIES.latestBlocksDepositsV1),
+    executeGraphQLQuery(QUERIES.latestBlocksDepositsV2),
+    executeGraphQLQuery(QUERIES.latestBlocksReceivedV1),
+    executeGraphQLQuery(QUERIES.latestBlocksReceivedV2)
   ]);
 
   if (results.some(r => !r)) return null;

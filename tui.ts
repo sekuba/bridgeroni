@@ -159,7 +159,11 @@ class CCTPMonitor {
         depositsData,
         depositsV2Data,
         receivedData,
-        receivedV2Data
+        receivedV2Data,
+        latestBlocksDepositsV1Data,
+        latestBlocksDepositsV2Data,
+        latestBlocksReceivedV1Data,
+        latestBlocksReceivedV2Data
       ] = results;
 
       // Process data with validation
@@ -183,7 +187,11 @@ class CCTPMonitor {
         depositsData?.TokenMessenger_DepositForBurn || [],
         depositsV2Data?.TokenMessenger_DepositForBurnV2 || [],
         receivedData?.MessageTransmitter_MessageReceived || [],
-        receivedV2Data?.MessageTransmitter_MessageReceivedV2 || []
+        receivedV2Data?.MessageTransmitter_MessageReceivedV2 || [],
+        latestBlocksDepositsV1Data?.TokenMessenger_DepositForBurn || [],
+        latestBlocksDepositsV2Data?.TokenMessenger_DepositForBurnV2 || [],
+        latestBlocksReceivedV1Data?.MessageTransmitter_MessageReceived || [],
+        latestBlocksReceivedV2Data?.MessageTransmitter_MessageReceivedV2 || []
       );
 
       this.lastUpdate = Date.now();
@@ -202,7 +210,11 @@ class CCTPMonitor {
     deposits: any[],
     depositsV2: any[],
     received: any[],
-    receivedV2: any[]
+    receivedV2: any[],
+    latestBlocksDepositsV1: any[],
+    latestBlocksDepositsV2: any[],
+    latestBlocksReceivedV1: any[],
+    latestBlocksReceivedV2: any[]
   ): void {
     const matchedTransfers = allTransfers.filter(t => t.matched);
     const v1Transfers = matchedTransfers.filter(t => t.version === 'v1');
@@ -233,7 +245,12 @@ class CCTPMonitor {
       avgLatency: this.calculateAverageLatency(this.data.matchedTransfers),
       binnedLatency: this.calculateBinnedLatency(this.data.matchedTransfers),
       dailyVolume: this.calculateDailyVolume(this.data.matchedTransfers),
-      latestBlocks: this.calculateLatestBlocks()
+      latestBlocks: this.calculateLatestBlocks(
+        latestBlocksDepositsV1,
+        latestBlocksDepositsV2,
+        latestBlocksReceivedV1,
+        latestBlocksReceivedV2
+      )
     };
   }
 
@@ -336,9 +353,14 @@ class CCTPMonitor {
   }
 
   /**
-   * Calculate latest blocks for each chain from raw events only
+   * Calculate latest blocks for each chain from all events in the database
    */
-  private calculateLatestBlocks(): Record<string, number> {
+  private calculateLatestBlocks(
+    latestBlocksDepositsV1: any[],
+    latestBlocksDepositsV2: any[],
+    latestBlocksReceivedV1: any[],
+    latestBlocksReceivedV2: any[]
+  ): Record<string, number> {
     const latestBlocks: Record<string, number> = {};
     
     // Initialize with known chains
@@ -346,18 +368,19 @@ class CCTPMonitor {
       latestBlocks[chainName] = 0;
     });
 
-    // Process raw events for actual chain-specific block numbers
+    // Process latest blocks from database queries
     [
-      ...this.data.recentDeposits,
-      ...this.data.recentDepositsV2,
-      ...this.data.recentReceived,
-      ...this.data.recentReceivedV2
+      ...latestBlocksDepositsV1,
+      ...latestBlocksDepositsV2,
+      ...latestBlocksReceivedV1,
+      ...latestBlocksReceivedV2
     ].forEach(event => {
       const chainId = Number(event.chainId);
       const chainName = getChainNameFromChainId(chainId);
       const blockNumber = Number(event.blockNumber);
       
       if (blockNumber > 0 && chainName) {
+        // Take the maximum block number for each chain
         latestBlocks[chainName] = Math.max(
           latestBlocks[chainName] || 0,
           blockNumber
@@ -600,7 +623,7 @@ class CCTPMonitor {
       const amount = formatUSDCAmount(BigInt(transfer.amount));
       const depositor = formatAddress(transfer.depositor);
       const recipient = formatAddress(extractRecipientAddress(transfer.mintRecipient));
-      const latency = formatDuration(transfer.latencySeconds);
+      const latency = formatDuration(Number(transfer.latencySeconds));
       const versionLabel = transfer.version === 'v2' ? `${COLORS.magenta}v2${COLORS.reset}` : `${COLORS.yellow}v1${COLORS.reset}`;
       const srcTxUrl = formatTxHashWithUrl(transfer.sourceTxHash, Number(transfer.sourceDomain));
       const dstTxUrl = formatTxHashWithUrl(transfer.destinationTxHash, Number(transfer.destinationDomain));
