@@ -113,7 +113,7 @@ export function getChainColorByName(chainName: string): string {
     case 'arbitrum': return COLORS.cyan;
     case 'base': return COLORS.blue;
     case 'unichain': return COLORS.lightRed;
-    case 'linea': return COLORS.dim;
+    case 'linea': return COLORS.white;
     case 'worldchain': return COLORS.yellow;
     default: return COLORS.white;
   }
