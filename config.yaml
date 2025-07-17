@@ -1,5 +1,5 @@
-# CCTP Bridge Monitor - Envio Indexer Configuration
-# Tracks both CCTP v1 and v2 events for comprehensive cross-chain monitoring
+# Cross-Chain Bridge Monitor - Envio Indexer Configuration
+# Tracks CCTP v1/v2 and LayerZero v2 events for comprehensive cross-chain monitoring
 
 name: cctp-bridge-monitor
 contracts:
@@ -25,8 +25,15 @@ contracts:
   events:
     - event: MessageReceived(address indexed caller, uint32 sourceDomain, bytes32 indexed nonce, bytes32 sender, uint32 indexed finalityThresholdExecuted, bytes messageBody)
 
+# LayerZero v2 Contracts
+- name: EndpointV2
+  handler: src/EventHandlers.ts
+  events:
+    - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
+    - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
+
 networks:
-# Standard CCTP v1 + v2 chains
+# Standard CCTP v1 + v2 chains + LayerZero v2
 - id: 1  # Ethereum
   start_block: 22864921
   contracts:
@@ -38,6 +45,8 @@ networks:
     address: [0x0a992d191DEeC32aFe36203Ad87D7d289a738F81]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: EndpointV2
+    address: [0x1a44076050125825900e736c501f859c50fE728c]
 
 - id: 10  # OP Mainnet
   start_block: 138131801
@@ -62,6 +71,8 @@ networks:
     address: [0xC30362313FBBA5cf9163F0bb16a0e01f01A896ca]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: EndpointV2
+    address: [0x1a44076050125825900e736c501f859c50fE728c]
 
 - id: 8453  # Base
   start_block: 32536517
@@ -74,6 +85,8 @@ networks:
     address: [0xAD09780d193884d503182aD4588450C416D6F9D4]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: EndpointV2
+    address: [0x1a44076050125825900e736c501f859c50fE728c]
 
 - id: 130  # Unichain
   start_block: 21114021

@@ -66,6 +66,70 @@ type TokenMessenger_DepositForBurnV2 {
   txHash: String!
 }
 
+# LayerZero v2 PacketSent event
+type EndpointV2_PacketSent {
+  id: ID!
+  encodedPayload: String!
+  options: String!
+  sendLibrary: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# LayerZero v2 PacketDelivered event  
+type EndpointV2_PacketDelivered {
+  id: ID!
+  originSrcEid: BigInt!
+  originSender: String!
+  originNonce: BigInt!
+  receiver: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# LayerZero packet transfer entity for matching sent/delivered packets
+type LayerZeroPacket @entity {
+  id: ID!
+
+  # === Core identifiers ===
+  srcEid: BigInt!
+  dstEid: BigInt
+  nonce: BigInt!
+  sender: String!
+  receiver: String!
+
+  # === Source-side data ===
+  encodedPayload: String
+  options: String
+  sendLibrary: String
+  sourceTxHash: String
+  sentBlock: BigInt
+  sentTimestamp: BigInt
+
+  # === Destination-side data ===
+  destinationTxHash: String
+  deliveredBlock: BigInt
+  deliveredTimestamp: BigInt
+
+  # === Derived fields ===
+  latencySeconds: BigInt
+  matched: Boolean!
+  payload: String              # Decoded payload (everything after header)
+  
+  # === Computed fields for TUI efficiency ===
+  hasPayload: Boolean!         # true if payload is not null/empty
+  sourceChainId: BigInt        # chain ID where packet was sent
+  destinationChainId: BigInt   # chain ID where packet was delivered
+  eventType: String!           # "sent", "delivered", or "matched"
+  lastUpdated: BigInt!         # timestamp of last update to this record
+}
+
 type CCTPTransfer @entity {
   id: ID!
 

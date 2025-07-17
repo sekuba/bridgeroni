@@ -1,58 +1,73 @@
-# CCTP Bridge Monitor TUI 🌱
+# Bridge Monitor TUI 🌱
 
-A comprehensive terminal interface for monitoring CCTP (Cross-Chain Transfer Protocol) bridge transactions across all supported EVM chains. This tool provides real-time insights into both CCTP v1 and v2 bridge activity with advanced analytics and search capabilities.
+A comprehensive terminal interface for monitoring cross-chain bridge transactions across EVM chains. This tool provides real-time insights into both CCTP (Circle Cross-Chain Transfer Protocol) v1/v2 and LayerZero v2 bridge activity with advanced analytics, search capabilities, and performance monitoring.
+
+## Supported Protocols
+
+- **CCTP v1 & v2**: USDC bridge transfers with deterministic matching
+- **LayerZero v2**: Omnichain packet routing with payload analysis
 
 ## Features
 
 ### Core Functionality
 - **Real-time monitoring** of bridge events with 1-second refresh
-- **Multi-chain support** for all CCTP-enabled chains including Linea and World Chain
-- **Dual protocol support** for both CCTP v1 and v2 with separate metrics
-- **Advanced matching logic** with deterministic nonce computation for v2
+- **Multi-protocol support** for CCTP v1/v2 and LayerZero v2
+- **Multi-chain support** across 7 EVM chains with live block tracking
+- **Advanced matching logic** with protocol-specific deterministic algorithms
 - **Multiple view modes**: Dashboard, List, and Search interfaces
-- **Binned latency analysis** by transaction amount ranges
-- **Live block tracking** for all monitored chains
+- **Performance optimization** with intelligent caching and batch processing
+- **Unordered event processing** with eventual consistency guarantees
 
 ### Interactive Interface
 - **Dashboard mode**: Overview metrics, raw activity feed, and matched transfers
 - **List mode**: Filtered transaction lists with chain-specific navigation
-- **Search mode**: Transaction hash lookup functionality
+- **Search mode**: Transaction hash lookup with database search capabilities
 - **Keyboard navigation**: vim-like controls with arrow key support
 - **Real-time updates**: Green indicators for recently matched transfers
+- **Protocol switching**: Toggle between CCTP and LayerZero monitoring
 
 ### Analytics & Metrics
-- **Comprehensive metrics** separated by CCTP v1/v2 versions
-- **24-hour rolling volume** tracking with per-chain breakdown
-- **Latency binning** by transfer amounts (micro to whale categories)
-- **Match rate analysis** for bridge completion monitoring
-- **Block synchronization** status across all chains
+- **CCTP Analytics**: Volume tracking, latency binning by amount, v1/v2 separation
+- **LayerZero Analytics**: Packet routing analysis, payload tracking, EID-based metrics
+- **Cross-chain timing**: Latency distribution analysis across all supported chains
+- **Match rate monitoring**: Bridge completion rates and failure detection
+- **Block synchronization**: Real-time sync status across all indexed chains
 
 ## Supported Chains
 
-### CCTP v1 + v2 Chains
-- **Ethereum** (Domain 0, Chain ID 1)
-- **OP Mainnet** (Domain 2, Chain ID 10)
-- **Arbitrum** (Domain 3, Chain ID 42161)
-- **Base** (Domain 6, Chain ID 8453)
-- **Unichain** (Domain 10, Chain ID 130)
+### Complete Chain Coverage
+| Chain | Chain ID | CCTP Domain | LayerZero EID | Protocols |
+|-------|----------|-------------|---------------|-----------|
+| **Ethereum** | 1 | 0 | 30101 | CCTP v1/v2, LayerZero v2 |
+| **OP Mainnet** | 10 | 2 | 30111 | CCTP v1/v2, LayerZero v2 |
+| **Arbitrum** | 42161 | 3 | 30110 | CCTP v1/v2, LayerZero v2 |
+| **Base** | 8453 | 6 | 30184 | CCTP v1/v2, LayerZero v2 |
+| **Unichain** | 130 | 10 | - | CCTP v1/v2 |
+| **Linea** | 59144 | 11 | - | CCTP v2 only |
+| **World Chain** | 480 | 14 | - | CCTP v2 only |
 
-### CCTP v2 Only Chains
-- **Linea** (Domain 11, Chain ID 59144)
-- **World Chain** (Domain 14, Chain ID 480)
+### Protocol-Specific Features
+- **CCTP**: Domain-based routing with USDC-specific analytics
+- **LayerZero**: EID-based routing with generic packet analysis
+- **Multi-chain**: Parallel indexing with reorg protection
 
 ## Usage
 
 ### Starting the TUI
 ```bash
-# install dependencies
+# Install dependencies
 pnpm install
 
-# Make sure the indexer is running first
+# Start the indexer (required for both TUIs)
 pnpm dev
 
-# Start the TUI (requires Node.js 18+)
+# Start CCTP Bridge Monitor (requires Node.js 18+)
 pnpm tui
+# or
+node tui.ts
 
+# Start LayerZero Bridge Monitor 
+node lzTui.ts
 ```
 
 ### Navigation Controls
@@ -81,12 +96,13 @@ pnpm tui
 ## Architecture
 
 ### Backend Infrastructure
-- **Envio Hyperindex**: High-performance blockchain indexer
-- **GraphQL API**: Real-time data access with efficient querying
-- **PostgreSQL**: Event storage and historical data
-- **Multi-chain synchronization**: Parallel indexing across all chains
+- **Envio Hyperindex**: High-performance blockchain indexer with hypersync
+- **GraphQL API**: Real-time data access with intelligent caching
+- **PostgreSQL**: Event storage with optimized indexing
+- **Multi-chain synchronization**: Parallel indexing with unordered processing
+- **Performance optimizations**: Query batching, connection pooling, incremental updates
 
-### CCTP Protocol Understanding
+### Protocol Understanding
 
 #### CCTP v1 (Legacy)
 - **Nonce-based matching**: Direct nonce correlation between deposit and receive events
@@ -99,88 +115,150 @@ pnpm tui
 - **Enhanced features**: Finality thresholds, hook data, dynamic fees
 - **Broader adoption**: All chains support v2, some are v2-only
 
+#### LayerZero v2
+- **Packet header decoding**: 81-byte header with routing information
+- **GUID-based matching**: Deterministic packet matching via keccak256
+- **Omnichain routing**: EID-based cross-chain packet delivery
+- **Payload analysis**: Generic message payload processing
+
 ### Data Flow Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Blockchain    │───▶│  Envio Indexer   │───▶│   GraphQL API   │
-│     Events      │    │   (HyperSync)    │    │   (Hasura)      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                                         │
-                                                         ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   TUI Display   │◀───│  Event Matching  │◀───│ Data Processing │
-│   (Terminal)    │    │    & Analysis    │    │   & Metrics     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+                    Multi-Chain Event Processing
+┌─────────────────┬─────────────────┬─────────────────┐
+│   Ethereum      │   Arbitrum      │   Base/OP/etc   │
+│   Events        │   Events        │   Events        │
+└─────────────────┴─────────────────┴─────────────────┘
+                           │
+                           ▼
+           ┌─────────────────────────────────────┐
+           │        Envio Hyperindex             │
+           │    (Unordered Multichain Mode)     │
+           └─────────────────────────────────────┘
+                           │
+                           ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │              Event Handlers (TypeScript)               │
+    │  ┌─────────────────┐  ┌─────────────────────────────┐  │
+    │  │ CCTP v1/v2      │  │ LayerZero v2                │  │
+    │  │ • Nonce matching│  │ • Packet header decoding   │  │
+    │  │ • Message decode│  │ • GUID-based matching      │  │
+    │  └─────────────────┘  └─────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │              PostgreSQL Database                        │
+    │  ┌─────────────────┐  ┌─────────────────────────────┐  │
+    │  │ Raw Events      │  │ Aggregated Entities         │  │
+    │  │ • Deposits      │  │ • CCTPTransfer              │  │
+    │  │ • Receipts      │  │ • LayerZeroPacket           │  │
+    │  │ • Packets       │  │ • Computed metrics          │  │
+    │  └─────────────────┘  └─────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │              GraphQL API (Auto-generated)              │
+    │  ┌─────────────────┐  ┌─────────────────────────────┐  │
+    │  │ Real-time       │  │ Optimized Queries           │  │
+    │  │ Subscriptions   │  │ • Caching layer             │  │
+    │  │ • Live updates  │  │ • Batch processing          │  │
+    │  └─────────────────┘  └─────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │                Terminal UIs                             │
+    │  ┌─────────────────┐  ┌─────────────────────────────┐  │
+    │  │ CCTP Monitor    │  │ LayerZero Monitor           │  │
+    │  │ (tui.ts)        │  │ (lzTui.ts)                  │  │
+    │  │ • USDC analytics│  │ • Packet routing analytics  │  │
+    │  │ • Volume tracking│  │ • Payload analysis         │  │
+    │  └─────────────────┘  └─────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────┘
 ```
 
 ### Core Components
 
 #### 1. Event Handlers (`src/EventHandlers.ts`)
-- **TokenMessenger v1/v2**: Processes deposit events
-- **MessageTransmitter v1/v2**: Processes message receipt events
-- **Matching logic**: Links deposits to receipts via nonce correlation
-- **Data enrichment**: Adds metadata for TUI display
+- **Multi-protocol support**: Handles CCTP v1/v2 and LayerZero v2 events
+- **Unordered processing**: Supports out-of-order event delivery
+- **Deterministic matching**: Protocol-specific matching algorithms
+- **Data enrichment**: Adds computed fields and metadata
 
-#### 2. Message Decoder (`src/utils/messageDecoder.ts`)
-- **v2 message parsing**: Decodes complex messageBody structures
-- **Deterministic nonce computation**: Ensures consistent v2 matching
-- **Field extraction**: Parses amounts, recipients, fees, and hook data
+#### 2. Protocol Decoders
+- **CCTP v2 (`src/utils/messageDecoder.ts`)**: Decodes 228-byte message bodies
+- **LayerZero v2 (`src/utils/layerzeroDecoder.ts`)**: Decodes 81-byte packet headers
+- **Deterministic ID generation**: Ensures consistent cross-chain matching
 
-#### 3. GraphQL Interface (`src/utils/graphql.ts`)
-- **Parallel queries**: Fetches all data sources simultaneously
-- **Real-time data**: Recent events, matched transfers, metrics
-- **Efficient filtering**: Optimized queries for TUI performance
+#### 3. GraphQL Interface Layer
+- **CCTP Queries (`src/utils/graphql.ts`)**: Standard parallel queries
+- **LayerZero Queries (`src/utils/layerzeroGraphql.ts`)**: Optimized with caching
+- **Performance optimization**: Query batching, connection pooling, TTL caching
 
-#### 4. TUI Engine (`tui.ts`)
-- **CCTPMonitor class**: Main application controller
-- **Render system**: ANSI-based terminal drawing
-- **Input handling**: Keyboard navigation and mode switching
-- **State management**: UI state and data synchronization
+#### 4. Terminal UI Systems
+- **CCTP Monitor (`tui.ts`)**: USDC-focused bridge monitoring
+- **LayerZero Monitor (`lzTui.ts`)**: Packet routing analytics
+- **Shared UI patterns**: Common keyboard handling and rendering
 
-#### 5. Formatters (`src/utils/formatters.ts`)
-- **Amount formatting**: USDC decimal handling and display
-- **Time formatting**: Human-readable duration and timestamps
-- **Address formatting**: Truncated address display
-- **Chain coloring**: Visual chain identification
+#### 5. Formatting Utilities
+- **Common (`src/utils/formatters.ts`)**: Shared formatting functions
+- **CCTP-specific**: USDC amounts, domain-based routing
+- **LayerZero-specific (`src/utils/layerzeroFormatters.ts`)**: EID-based routing
 
-#### 6. Constants (`src/constants.ts`)
-- **Domain mappings**: Chain ID to CCTP domain correlations
-- **Network configuration**: Explorer URLs and chain metadata
-- **Protocol constants**: USDC decimals, message lengths, etc.
+#### 6. Configuration (`src/constants.ts`)
+- **Multi-protocol mappings**: Chain ID, CCTP domain, LayerZero EID correlations
+- **Explorer integration**: Protocol-specific transaction URLs
+- **Performance tuning**: Cache TTL, batch sizes, refresh intervals
 
-### Matching Algorithm
+### Matching Algorithms
 
-#### v1 Matching (Nonce-based)
+#### CCTP v1 Matching (Nonce-based)
 ```typescript
-// Direct nonce correlation
+// Direct nonce correlation between deposit and receipt
 const transferId = createTransferId(sourceDomain, nonce);
 const existingTransfer = await context.CCTPTransfer.get(transferId);
 ```
 
-#### v2 Matching (Deterministic)
+#### CCTP v2 Matching (Deterministic)
 ```typescript
 // Compute deterministic nonce from message components
 const deterministicNonce = computeV2DeterministicNonce(
-  sourceDomain,
-  destinationDomain,
-  burnToken,
-  mintRecipient,
-  amount,
-  messageSender,
-  maxFee,
-  hookData
+  sourceDomain, destinationDomain, burnToken, mintRecipient,
+  amount, messageSender, maxFee, hookData
 );
 const transferId = createTransferId(sourceDomain, deterministicNonce);
 ```
 
+#### LayerZero v2 Matching (GUID-based)
+```typescript
+// Generate deterministic GUID from packet header
+const guid = createLayerZeroGuid(
+  nonce, srcEid, sender, dstEid, receiver
+);
+const existingPacket = await context.LayerZeroPacket.get(guid);
+```
+
 ### Performance Optimizations
 
-- **1-second refresh**: Real-time updates without overwhelming the system
-- **Parallel queries**: All GraphQL requests executed simultaneously
-- **Efficient rendering**: Minimal terminal redraws with ANSI positioning
-- **Memory management**: Bounded event arrays and automatic cleanup
+#### Multi-Level Caching
+- **Query-level caching**: 5-second TTL for repeated GraphQL queries
+- **Component caching**: Rendered UI components cached until data changes
+- **Format caching**: Expensive formatting operations cached with Map structures
+- **Chain lookup caching**: Repeated chain name/color lookups cached
+
+#### Efficient Data Processing
+- **Batch processing**: Events processed in configurable batches
+- **Incremental updates**: Time-based filtering for reduced data transfer
+- **Connection pooling**: HTTP keep-alive for persistent GraphQL connections
+- **Render throttling**: Prevents excessive re-renders with 50ms throttling
+
+#### Database Optimizations
 - **Indexed queries**: Optimized database queries with proper indexing
+- **Parallel queries**: All GraphQL requests executed simultaneously
+- **Unordered processing**: Parallel chain indexing for maximum throughput
+- **Memory cleanup**: Automatic cache cleanup and bounded arrays
 
 ## Customization
 
@@ -217,29 +295,39 @@ export const TRANSFER_AMOUNT_BINS = {
 
 ## Development
 
+### Adding New Bridge Protocols
+1. **Update config**: Add contract definitions to `config.yaml`
+2. **Schema updates**: Define new entity types in `schema.graphql`
+3. **Event handlers**: Create protocol-specific matching logic in `EventHandlers.ts`
+4. **Decoder functions**: Implement message format parsing in `src/utils/`
+5. **TUI integration**: Add protocol-specific formatters and queries
+
 ### Adding New Chains
-1. **Update constants**: Add chain ID and domain mappings
+1. **Update constants**: Add chain ID and protocol-specific mappings
 2. **Configure indexer**: Add network configuration to `config.yaml`
-3. **Deploy contracts**: Ensure CCTP contracts are deployed
+3. **Deploy contracts**: Ensure protocol contracts are deployed
 4. **Update formatters**: Add chain-specific colors and explorers
 
 ### Extending Analytics
-- **Custom metrics**: Add new calculations to `calculateMetrics()`
-- **Additional queries**: Extend GraphQL queries for new data
-- **Enhanced visualizations**: Create new render methods for data
+- **Custom metrics**: Add new calculations to protocol-specific metrics functions
+- **Additional queries**: Extend GraphQL queries for new data sources
+- **Enhanced visualizations**: Create new render methods for data display
 
 ### Testing
 ```bash
 # Run the indexer
 pnpm dev
 
-# Test TUI in development
+# Test CCTP TUI
 node tui.ts
+
+# Test LayerZero TUI
+node lzTui.ts
 ```
 
 ## Technical Details
 
-### Message Body Structure (v2)
+### CCTP v2 Message Body Structure (228 bytes)
 ```
 ┌─────────────────┬──────────────────┐
 │     Field       │      Size        │
@@ -256,12 +344,34 @@ node tui.ts
 └─────────────────┴──────────────────┘
 ```
 
+### LayerZero v2 Packet Header Structure (81 bytes)
+```
+┌─────────────────┬──────────────────┐
+│     Field       │      Size        │
+├─────────────────┼──────────────────┤
+│ Version         │ 1 byte           │
+│ Nonce           │ 8 bytes          │
+│ Source EID      │ 4 bytes          │
+│ Sender          │ 32 bytes         │
+│ Destination EID │ 4 bytes          │
+│ Receiver        │ 32 bytes         │
+│ Payload         │ Variable         │
+└─────────────────┴──────────────────┘
+```
+
 ### Database Schema
+
+#### CCTP Tables
 - **CCTPTransfer**: Matched transfer records with latency metrics
 - **TokenMessenger_DepositForBurn**: Raw v1 deposit events
 - **TokenMessenger_DepositForBurnV2**: Raw v2 deposit events
 - **MessageTransmitter_MessageReceived**: Raw v1 receipt events
 - **MessageTransmitter_MessageReceivedV2**: Raw v2 receipt events
+
+#### LayerZero Tables
+- **LayerZeroPacket**: Matched packet records with routing information
+- **EndpointV2_PacketSent**: Raw packet sent events
+- **EndpointV2_PacketDelivered**: Raw packet delivered events
 
 ### Error Handling
 - **Graceful degradation**: Continues operation with partial data
