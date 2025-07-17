@@ -25,6 +25,23 @@ contracts:
   events:
     - event: MessageReceived(address indexed caller, uint32 sourceDomain, bytes32 indexed nonce, bytes32 sender, uint32 indexed finalityThresholdExecuted, bytes messageBody)
 
+# LayerZero v1 Contracts
+- name: UltraLightNodeV2
+  handler: src/EventHandlers.ts
+  events:
+    - event: Packet(bytes payload)
+    - event: PacketReceived(uint16 indexed srcChainId, bytes srcAddress, address indexed dstAddress, uint64 nonce, bytes32 payloadHash)
+
+- name: SendUln301
+  handler: src/EventHandlers.ts
+  events:
+    - event: PacketSent(bytes encodedPayload, bytes options, uint256 nativeFee, uint256 lzTokenFee)
+
+- name: ReceiveUln301
+  handler: src/EventHandlers.ts
+  events:
+    - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
+
 # LayerZero v2 Contracts
 - name: EndpointV2
   handler: src/EventHandlers.ts
@@ -45,6 +62,12 @@ networks:
     address: [0x0a992d191DEeC32aFe36203Ad87D7d289a738F81]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: UltraLightNodeV2
+    address: [0x4D73AdB72bC3DD368966edD0f0b2148401A178E2]
+  - name: SendUln301
+    address: [0xD231084BfB234C107D3eE2b22F97F3346fDAF705]
+  - name: ReceiveUln301
+    address: [0x245B6e8FFE9ea5Fc301e32d16F66bD4C2123eEfC]
   - name: EndpointV2
     address: [0x1a44076050125825900e736c501f859c50fE728c]
 
@@ -71,6 +94,12 @@ networks:
     address: [0xC30362313FBBA5cf9163F0bb16a0e01f01A896ca]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: UltraLightNodeV2
+    address: [0x4D73AdB72bC3DD368966edD0f0b2148401A178E2]
+  - name: SendUln301
+    address: [0x5cDc927876031B4Ef910735225c425A7Fc8efed9]
+  - name: ReceiveUln301
+    address: [0xe4DD168822767C4342e54e6241f0b91DE0d3c241]
   - name: EndpointV2
     address: [0x1a44076050125825900e736c501f859c50fE728c]
 
@@ -85,6 +114,12 @@ networks:
     address: [0xAD09780d193884d503182aD4588450C416D6F9D4]
   - name: MessageTransmitterV2
     address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
+  - name: UltraLightNodeV2
+    address: [0x38dE71124f7a447a01D67945a51eDcE9FF491251]
+  - name: SendUln301
+    address: [0x9DB3714048B5499Ec65F807787897D3b3Aa70072]
+  - name: ReceiveUln301
+    address: [0x58D53a2d6a08B72a15137F3381d21b90638bd753]
   - name: EndpointV2
     address: [0x1a44076050125825900e736c501f859c50fE728c]
 

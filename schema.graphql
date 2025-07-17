@@ -66,6 +66,60 @@ type TokenMessenger_DepositForBurnV2 {
   txHash: String!
 }
 
+# LayerZero v1 UltraLightNodeV2 Packet event
+type UltraLightNodeV2_Packet {
+  id: ID!
+  payload: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# LayerZero v1 UltraLightNodeV2 PacketReceived event
+type UltraLightNodeV2_PacketReceived {
+  id: ID!
+  srcChainId: BigInt!
+  srcAddress: String!
+  dstAddress: String!
+  nonce: BigInt!
+  payloadHash: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# LayerZero v1 SendUln301 PacketSent event
+type SendUln301_PacketSent {
+  id: ID!
+  encodedPayload: String!
+  options: String!
+  nativeFee: BigInt!
+  lzTokenFee: BigInt!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# LayerZero v1 ReceiveUln301 PacketDelivered event
+type ReceiveUln301_PacketDelivered {
+  id: ID!
+  originSrcEid: BigInt!
+  originSender: String!
+  originNonce: BigInt!
+  receiver: String!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
 # LayerZero v2 PacketSent event
 type EndpointV2_PacketSent {
   id: ID!
@@ -93,7 +147,49 @@ type EndpointV2_PacketDelivered {
   txHash: String!
 }
 
-# LayerZero packet transfer entity for matching sent/delivered packets
+# LayerZero v1 packet transfer entity for matching sent/delivered packets
+type LayerZeroV1Packet @entity {
+  id: ID!
+
+  # === Core identifiers ===
+  srcChainId: BigInt!           # v1 uses chain IDs instead of EIDs
+  dstChainId: BigInt
+  nonce: BigInt!
+  ua: String!                   # User Application address
+  dstAddress: String!           # Destination address
+  
+  # === Source-side data (UltraLightNodeV2.Packet or SendUln301.PacketSent) ===
+  payload: String               # Raw payload from Packet event
+  encodedPayload: String        # Encoded payload from SendUln301.PacketSent
+  options: String               # Options from SendUln301.PacketSent
+  nativeFee: BigInt             # Native fee from SendUln301.PacketSent
+  lzTokenFee: BigInt            # LZ token fee from SendUln301.PacketSent
+  sourceTxHash: String
+  sentBlock: BigInt
+  sentTimestamp: BigInt
+
+  # === Destination-side data (UltraLightNodeV2.PacketReceived or ReceiveUln301.PacketDelivered) ===
+  payloadHash: String           # Payload hash from PacketReceived
+  srcAddress: String            # Source address from PacketReceived
+  destinationTxHash: String
+  deliveredBlock: BigInt
+  deliveredTimestamp: BigInt
+
+  # === Derived fields ===
+  latencySeconds: BigInt
+  matched: Boolean!
+  version: String!              # "v1" for LayerZero v1
+  protocol: String!             # "UltraLightNodeV2" or "SendUln301"
+  
+  # === Computed fields for TUI efficiency ===
+  hasPayload: Boolean!          # true if payload is not null/empty
+  sourceChainId: BigInt         # chain ID where packet was sent
+  destinationChainId: BigInt    # chain ID where packet was delivered
+  eventType: String!            # "sent", "delivered", or "matched"
+  lastUpdated: BigInt!          # timestamp of last update to this record
+}
+
+# LayerZero v2 packet transfer entity for matching sent/delivered packets
 type LayerZeroPacket @entity {
   id: ID!
 
