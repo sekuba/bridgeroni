@@ -21,14 +21,22 @@ import {
   TokenMessengerV2,
   MessageTransmitterV2,
   EndpointV2,
+  UltraLightNodeV2,
+  SendUln301,
+  ReceiveUln301,
   CCTPTransfer,
   LayerZeroPacket,
+  LayerZeroV1Packet,
   TokenMessenger_DepositForBurn,
   TokenMessenger_DepositForBurnV2,
   MessageTransmitter_MessageReceived,
   MessageTransmitter_MessageReceivedV2,
   EndpointV2_PacketSent,
   EndpointV2_PacketDelivered,
+  UltraLightNodeV2_Packet,
+  UltraLightNodeV2_PacketReceived,
+  SendUln301_PacketSent,
+  ReceiveUln301_PacketDelivered,
 } from "generated";
 
 import { 
@@ -47,6 +55,15 @@ import {
   decodePacket,
   createLayerZeroGuid
 } from "./utils/lz2Decoder";
+
+import {
+  decodeV1Packet,
+  decodeV1SendUln301Packet,
+  createV1PacketId,
+  createV1SendUln301Id,
+  getActualChainId,
+  getLzV1ChainId
+} from "./utils/lz1Decoder";
 
 /* ---------- Helper Functions ---------- */
 
@@ -115,6 +132,82 @@ function createLayerZeroPacket(params: {
     hasPayload: !!(params.payload || params.prev?.payload),
     sourceChainId: srcChainId ? BigInt(srcChainId) : (isSent ? BigInt(params.chainId) : params.prev?.sourceChainId),
     destinationChainId: dstChainId ? BigInt(dstChainId) : (isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId),
+    eventType: matched ? "matched" : params.eventType,
+    lastUpdated: params.timestamp,
+  };
+}
+
+/**
+ * Create and update a LayerZeroV1Packet entity
+ */
+function createLayerZeroV1Packet(params: {
+  id: string;
+  srcChainId: bigint;
+  dstChainId: bigint | undefined;
+  nonce: bigint;
+  ua: string;
+  dstAddress: string;
+  chainId: number;
+  timestamp: bigint;
+  txHash: string;
+  eventType: 'sent' | 'delivered';
+  protocol: 'UltraLightNodeV2' | 'SendUln301';
+  prev?: LayerZeroV1Packet;
+  // Source-specific fields
+  payload?: string;
+  encodedPayload?: string;
+  options?: string;
+  nativeFee?: bigint;
+  lzTokenFee?: bigint;
+  // Destination-specific fields
+  payloadHash?: string;
+  srcAddress?: string;
+}): LayerZeroV1Packet {
+  const isSent = params.eventType === 'sent';
+  const isDelivered = params.eventType === 'delivered';
+  const matched = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
+                  !!(isSent && params.prev?.destinationTxHash) ||
+                  !!(isDelivered && params.prev?.sourceTxHash);
+  
+  const sentTs = isSent ? params.timestamp : params.prev?.sentTimestamp;
+  const deliveredTs = isDelivered ? params.timestamp : params.prev?.deliveredTimestamp;
+  const latencySeconds = matched && sentTs && deliveredTs ? deliveredTs - sentTs : undefined;
+  
+  return {
+    id: params.id,
+    srcChainId: params.srcChainId,
+    dstChainId: params.dstChainId,
+    nonce: params.nonce,
+    ua: params.ua,
+    dstAddress: params.dstAddress,
+    
+    // Source-side data
+    payload: params.payload || params.prev?.payload,
+    encodedPayload: params.encodedPayload || params.prev?.encodedPayload,
+    options: params.options || params.prev?.options,
+    nativeFee: params.nativeFee || params.prev?.nativeFee,
+    lzTokenFee: params.lzTokenFee || params.prev?.lzTokenFee,
+    sourceTxHash: isSent ? params.txHash : params.prev?.sourceTxHash,
+    sentBlock: isSent ? params.timestamp : params.prev?.sentBlock,
+    sentTimestamp: sentTs,
+    
+    // Destination-side data
+    payloadHash: params.payloadHash || params.prev?.payloadHash,
+    srcAddress: params.srcAddress || params.prev?.srcAddress,
+    destinationTxHash: isDelivered ? params.txHash : params.prev?.destinationTxHash,
+    deliveredBlock: isDelivered ? params.timestamp : params.prev?.deliveredBlock,
+    deliveredTimestamp: deliveredTs,
+    
+    // Derived fields
+    matched,
+    latencySeconds,
+    version: 'v1',
+    protocol: params.protocol,
+    
+    // Computed fields for TUI efficiency
+    hasPayload: !!(params.payload || params.prev?.payload),
+    sourceChainId: isSent ? BigInt(params.chainId) : params.prev?.sourceChainId,
+    destinationChainId: isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId,
     eventType: matched ? "matched" : params.eventType,
     lastUpdated: params.timestamp,
   };
@@ -536,4 +629,260 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
     blockTimestamp: timestamp,
     txHash: event.transaction.hash,
   } as EndpointV2_PacketDelivered);
+});
+
+/* ---------- LayerZero v1 Event Handlers ---------- */
+/*
+ * LayerZero v1 has two different event paths:
+ * 
+ * Path 1: UltraLightNodeV2
+ * - Source: UltraLightNodeV2.Packet (bytes payload)
+ * - Destination: UltraLightNodeV2.PacketReceived (uint16 srcChainId, bytes srcAddress, address dstAddress, uint64 nonce, bytes32 payloadHash)
+ * 
+ * Path 2: SendUln301 -> ReceiveUln301
+ * - Source: SendUln301.PacketSent (bytes encodedPayload, bytes options, uint256 nativeFee, uint256 lzTokenFee)
+ * - Destination: ReceiveUln301.PacketDelivered ((uint32,bytes32,uint64) origin, address receiver)
+ * 
+ * Matching Strategy:
+ * - Path 1: Use decoded payload data (nonce, srcChainId, ua, dstChainId, dstAddress) to create deterministic ID
+ * - Path 2: Use the same structure as LayerZero v2 (nonce, srcEid, sender, dstEid, receiver) to create deterministic ID
+ * 
+ * All scenarios support unordered event processing similar to LayerZero v2.
+ */
+
+// LayerZero v1 UltraLightNodeV2 Source: Packet event
+// Decode payload to extract routing information for matching
+UltraLightNodeV2.Packet.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Decode the packet payload to extract routing information
+  const decodedPacket = decodeV1Packet(event.params.payload);
+  if (!decodedPacket) {
+    console.error('Failed to decode LayerZero v1 packet payload');
+    return;
+  }
+  
+  // Get actual chain IDs from LayerZero v1 chain IDs
+  const actualSrcChainId = getActualChainId(decodedPacket.localChainId) || event.chainId;
+  const actualDstChainId = getActualChainId(decodedPacket.dstChainId);
+  
+  // Create matching ID based on decoded packet data
+  const packetId = createV1PacketId(
+    decodedPacket.nonce,
+    decodedPacket.localChainId,
+    decodedPacket.ua,
+    decodedPacket.dstChainId,
+    decodedPacket.dstAddress
+  );
+  
+  // Check if we already have a packet (possibly from a received event that was processed first)
+  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  
+  const packet = createLayerZeroV1Packet({
+    id: packetId,
+    srcChainId: BigInt(actualSrcChainId),
+    dstChainId: actualDstChainId ? BigInt(actualDstChainId) : undefined,
+    nonce: decodedPacket.nonce,
+    ua: decodedPacket.ua,
+    dstAddress: decodedPacket.dstAddress,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'sent',
+    protocol: 'UltraLightNodeV2',
+    prev: existingPacket,
+    payload: decodedPacket.payload,
+  });
+  
+  context.LayerZeroV1Packet.set(packet);
+  
+  // Enhanced raw event log
+  context.UltraLightNodeV2_Packet.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as UltraLightNodeV2_Packet);
+});
+
+// LayerZero v1 UltraLightNodeV2 Destination: PacketReceived event
+// Use event parameters to match with sent packet
+UltraLightNodeV2.PacketReceived.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Get actual chain IDs from LayerZero v1 chain IDs
+  const srcChainId = Number(event.params.srcChainId);
+  const actualSrcChainId = getActualChainId(srcChainId) || srcChainId;
+  const actualDstChainId = event.chainId;
+  
+  // Create matching ID using the same parameters as the source event
+  // Note: srcAddress in v1 is bytes, dstAddress is address
+  const packetId = createV1PacketId(
+    event.params.nonce,
+    srcChainId,
+    event.params.dstAddress, // This is actually the UA (User Application)
+    getLzV1ChainId(actualDstChainId) || actualDstChainId,
+    event.params.dstAddress
+  );
+  
+  // Check if we already have a packet (possibly from a sent event that was processed first)
+  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  
+  const packet = createLayerZeroV1Packet({
+    id: packetId,
+    srcChainId: BigInt(actualSrcChainId),
+    dstChainId: BigInt(actualDstChainId),
+    nonce: event.params.nonce,
+    ua: event.params.dstAddress, // UA is the destination address in this context
+    dstAddress: event.params.dstAddress,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'delivered',
+    protocol: 'UltraLightNodeV2',
+    prev: existingPacket,
+    payloadHash: event.params.payloadHash,
+    srcAddress: event.params.srcAddress,
+  });
+  
+  context.LayerZeroV1Packet.set(packet);
+  
+  // Enhanced raw event log
+  context.UltraLightNodeV2_PacketReceived.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    srcChainId: event.params.srcChainId,
+    srcAddress: event.params.srcAddress,
+    dstAddress: event.params.dstAddress,
+    nonce: event.params.nonce,
+    payloadHash: event.params.payloadHash,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as UltraLightNodeV2_PacketReceived);
+});
+
+// LayerZero v1 SendUln301 Source: PacketSent event
+// Decode encodedPayload to extract routing information for matching
+SendUln301.PacketSent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Decode the encoded payload to extract routing information
+  const decodedPacket = decodeV1SendUln301Packet(event.params.encodedPayload);
+  if (!decodedPacket) {
+    console.error('Failed to decode LayerZero v1 SendUln301 packet payload');
+    return;
+  }
+  
+  const { header, payload } = decodedPacket;
+  
+  // Get actual chain IDs from EIDs
+  const actualSrcChainId = getActualChainId(header.srcEid) || event.chainId;
+  const actualDstChainId = getActualChainId(header.dstEid);
+  
+  // Create matching ID using the same structure as LayerZero v2
+  const packetId = createV1SendUln301Id(
+    header.nonce,
+    header.srcEid,
+    header.sender,
+    header.dstEid,
+    header.receiver
+  );
+  
+  // Check if we already have a packet (possibly from a delivered event that was processed first)
+  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  
+  const packet = createLayerZeroV1Packet({
+    id: packetId,
+    srcChainId: BigInt(actualSrcChainId),
+    dstChainId: actualDstChainId ? BigInt(actualDstChainId) : undefined,
+    nonce: header.nonce,
+    ua: header.sender, // In SendUln301, sender acts as the UA
+    dstAddress: header.receiver,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'sent',
+    protocol: 'SendUln301',
+    prev: existingPacket,
+    encodedPayload: event.params.encodedPayload,
+    options: event.params.options,
+    nativeFee: event.params.nativeFee,
+    lzTokenFee: event.params.lzTokenFee,
+    payload,
+  });
+  
+  context.LayerZeroV1Packet.set(packet);
+  
+  // Enhanced raw event log
+  context.SendUln301_PacketSent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as SendUln301_PacketSent);
+});
+
+// LayerZero v1 ReceiveUln301 Destination: PacketDelivered event
+// Uses the same origin tuple format as LayerZero v2
+ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Extract origin information from the tuple (uint32,bytes32,uint64)
+  // event.params.origin is [srcEid, sender, nonce]
+  const origin = {
+    srcEid: Number(event.params.origin[0]),  // uint32 srcEid
+    sender: event.params.origin[1],          // bytes32 sender
+    nonce: event.params.origin[2],           // uint64 nonce
+  };
+  
+  // Get actual chain IDs from EIDs
+  const actualSrcChainId = getActualChainId(origin.srcEid) || origin.srcEid;
+  const actualDstChainId = event.chainId;
+  
+  // Create matching ID using the same structure as the source event
+  const packetId = createV1SendUln301Id(
+    origin.nonce,
+    origin.srcEid,
+    origin.sender,
+    getLzV1ChainId(actualDstChainId) || actualDstChainId,
+    event.params.receiver
+  );
+  
+  // Check if we already have a packet (possibly from a sent event that was processed first)
+  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  
+  const packet = createLayerZeroV1Packet({
+    id: packetId,
+    srcChainId: BigInt(actualSrcChainId),
+    dstChainId: BigInt(actualDstChainId),
+    nonce: origin.nonce,
+    ua: origin.sender, // In ReceiveUln301, sender acts as the UA
+    dstAddress: event.params.receiver,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'delivered',
+    protocol: 'SendUln301',
+    prev: existingPacket,
+  });
+  
+  context.LayerZeroV1Packet.set(packet);
+  
+  // Enhanced raw event log
+  context.ReceiveUln301_PacketDelivered.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    originSrcEid: event.params.origin[0],    // uint32 srcEid
+    originSender: event.params.origin[1],    // bytes32 sender
+    originNonce: event.params.origin[2],     // uint64 nonce
+    receiver: event.params.receiver,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as ReceiveUln301_PacketDelivered);
 });
