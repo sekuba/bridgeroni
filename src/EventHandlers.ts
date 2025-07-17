@@ -60,7 +60,6 @@ import {
   decodeV1Packet,
   decodeV1SendUln301Packet,
   createV1PacketId,
-  createV1SendUln301Id,
   getActualChainId,
   getLzV1ChainId
 } from "./utils/lz1Decoder";
@@ -783,7 +782,7 @@ SendUln301.PacketSent.handler(async ({ event, context }) => {
   const actualDstChainId = getActualChainId(header.dstEid);
   
   // Create matching ID using the same structure as LayerZero v2
-  const packetId = createV1SendUln301Id(
+  const guid = createLayerZeroGuid(
     header.nonce,
     header.srcEid,
     header.sender,
@@ -792,10 +791,10 @@ SendUln301.PacketSent.handler(async ({ event, context }) => {
   );
   
   // Check if we already have a packet (possibly from a delivered event that was processed first)
-  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  const existingPacket = await context.LayerZeroV1Packet.get(guid);
   
   const packet = createLayerZeroV1Packet({
-    id: packetId,
+    id: guid,
     srcChainId: BigInt(actualSrcChainId),
     dstChainId: actualDstChainId ? BigInt(actualDstChainId) : undefined,
     nonce: header.nonce,
@@ -845,7 +844,7 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
   const actualDstChainId = event.chainId;
   
   // Create matching ID using the same structure as the source event
-  const packetId = createV1SendUln301Id(
+  const guid = createLayerZeroGuid(
     origin.nonce,
     origin.srcEid,
     origin.sender,
@@ -854,10 +853,10 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
   );
   
   // Check if we already have a packet (possibly from a sent event that was processed first)
-  const existingPacket = await context.LayerZeroV1Packet.get(packetId);
+  const existingPacket = await context.LayerZeroV1Packet.get(guid);
   
   const packet = createLayerZeroV1Packet({
-    id: packetId,
+    id: guid,
     srcChainId: BigInt(actualSrcChainId),
     dstChainId: BigInt(actualDstChainId),
     nonce: origin.nonce,

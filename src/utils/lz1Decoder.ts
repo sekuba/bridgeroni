@@ -183,28 +183,6 @@ export function createV1PacketId(nonce: bigint, srcChainId: number, ua: string, 
 }
 
 /**
- * Create LayerZero v1 matching ID for SendUln301 path
- * Based on: keccak256(abi.encodePacked(nonce, srcEid, sender, dstEid, receiver))
- * This ensures deterministic matching between PacketSent and PacketDelivered events
- */
-export function createV1SendUln301Id(nonce: bigint, srcEid: number, sender: string, dstEid: number, receiver: string): string {
-  // Convert to bytes format
-  const nonceBytes = nonce.toString(16).padStart(16, '0');
-  const srcEidBytes = srcEid.toString(16).padStart(8, '0');
-  const senderBytes32 = normalizeAddress(sender).slice(2);
-  const dstEidBytes = dstEid.toString(16).padStart(8, '0');
-  const receiverBytes32 = normalizeAddress(receiver).slice(2);
-  
-  // Concatenate all components (equivalent to abi.encodePacked)
-  const concatenated = nonceBytes + srcEidBytes + senderBytes32 + dstEidBytes + receiverBytes32;
-  
-  // Use sha256 (should be keccak256 for exact match with contracts)
-  const hash = createHash('sha256').update(concatenated, 'hex').digest('hex');
-  
-  return '0x' + hash;
-}
-
-/**
  * Normalize address to bytes32 format (pad to 64 hex chars)
  */
 export function normalizeAddress(address: string): string {
