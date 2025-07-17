@@ -45,8 +45,6 @@ import {
 
 import {
   decodePacket,
-  createPacketId,
-  createPacketIdFromOrigin,
   createLayerZeroGuid
 } from "./utils/layerzeroDecoder";
 

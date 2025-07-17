@@ -45,7 +45,6 @@ import {
 } from './src/utils/layerzeroFormatters';
 
 import { fetchAllLayerZeroData, layerZeroGraphQL } from './src/utils/layerzeroGraphqlOptimized';
-import { fetchAllLayerZeroData as fetchAllLayerZeroDataLegacy } from './src/utils/layerzeroGraphql';
 import { decodePacket } from './src/utils/layerzeroDecoder';
 
 // UI Configuration
@@ -199,57 +198,18 @@ class LayerZeroMonitor {
    */
   async fetchData(): Promise<boolean> {
     try {
-      // Try optimized fetch first
-      let results = await fetchAllLayerZeroData();
-      let useOptimized = true;
-      
-      // Fall back to legacy if optimized fails
-      if (!results) {
-        results = await fetchAllLayerZeroDataLegacy();
-        useOptimized = false;
-      }
-      
+      const results = await fetchAllLayerZeroData();
       if (!results) return false;
 
-      // Calculate data checksum for change detection
+      // Change‑detection checksum
       const newChecksum = this.calculateDataChecksum(results);
-      
-      // Skip processing if data hasn't changed (but allow updates every 10 seconds)
-      const timeSinceLastUpdate = Date.now() - this.lastUpdate;
-      if (newChecksum === this.dataChecksum && timeSinceLastUpdate < 10000) {
+      if (newChecksum === this.dataChecksum && (Date.now() - this.lastUpdate) < 10_000) {
         return true;
       }
-
       this.dataChecksum = newChecksum;
 
-      // Destructure with null safety
-      const [
-        recentPacketsSentData,
-        recentPacketsDeliveredData,
-        matchedPacketsData,
-        allPacketsData,
-        allPacketsSentData,
-        allPacketsDeliveredData,
-        latestBlocksPacketsSentData,
-        latestBlocksPacketsDeliveredData
-      ] = results;
-
-      // Process data efficiently with batch operations
-      if (useOptimized) {
-        this.processDataBatch(results);
-      } else {
-        this.processDataBatch({
-          recentPacketsSentData: recentPacketsSentData?.EndpointV2_PacketSent || [],
-          recentPacketsDeliveredData: recentPacketsDeliveredData?.EndpointV2_PacketDelivered || [],
-          matchedPacketsData: matchedPacketsData?.LayerZeroPacket || [],
-          allPacketsData: allPacketsData?.LayerZeroPacket || [],
-          allPacketsSentData: allPacketsSentData?.EndpointV2_PacketSent || [],
-          allPacketsDeliveredData: allPacketsDeliveredData?.EndpointV2_PacketDelivered || [],
-          latestBlocksPacketsSentData: latestBlocksPacketsSentData?.EndpointV2_PacketSent || [],
-          latestBlocksPacketsDeliveredData: latestBlocksPacketsDeliveredData?.EndpointV2_PacketDelivered || []
-        });
-      }
-
+      // Optimized structure – single happy‑path processor
+      this.processDataBatch(results);
       this.lastUpdate = Date.now();
       return true;
     } catch (error) {
@@ -296,74 +256,20 @@ class LayerZeroMonitor {
     return checksum || '0';
   }
 
-  private processDataBatch(batchData: any): void {
-    // Handle optimized data structure (array of results)
-    if (Array.isArray(batchData) && batchData.length >= 6) {
-      this.data.recentPacketsSent = batchData[0]?.EndpointV2_PacketSent || [];
-      this.data.recentPacketsDelivered = batchData[1]?.EndpointV2_PacketDelivered || [];
-      this.data.matchedPackets = batchData[2]?.LayerZeroPacket || [];
-      
-      // Process metrics from optimized structure
-      const metricsData = batchData[3] || {};
-      const blocksData = batchData[4] || {};
-      const totalCountsData = batchData[5] || {};
-      
-      // Create raw events feed with optimization
-      this.data.rawEvents = this.createOptimizedRawEventsFeed(
-        this.data.recentPacketsSent,
-        this.data.recentPacketsDelivered
-      );
-      
-      // Calculate metrics efficiently with new structure
-      this.calculateOptimizedMetricsFromAggregates(metricsData, blocksData, totalCountsData);
-    } else {
-      // Handle legacy structure (object with named properties)
-      this.processLegacyDataBatch(batchData);
-    }
-  }
-  
-  private processLegacyDataBatch(batchData: any): void {
-    if (Array.isArray(batchData) && batchData.length >= 8) {
-      // Handle legacy array structure
-      this.data.recentPacketsSent = batchData[0]?.EndpointV2_PacketSent || [];
-      this.data.recentPacketsDelivered = batchData[1]?.EndpointV2_PacketDelivered || [];
-      this.data.matchedPackets = batchData[2]?.LayerZeroPacket || [];
-      
-      // Create raw events feed with optimization
-      this.data.rawEvents = this.createOptimizedRawEventsFeed(
-        this.data.recentPacketsSent,
-        this.data.recentPacketsDelivered
-      );
-      
-      // Calculate metrics efficiently
-      this.calculateOptimizedMetrics(
-        batchData[3]?.LayerZeroPacket || [],
-        batchData[4]?.EndpointV2_PacketSent || [],
-        batchData[5]?.EndpointV2_PacketDelivered || [],
-        batchData[6]?.EndpointV2_PacketSent || [],
-        batchData[7]?.EndpointV2_PacketDelivered || []
-      );
-    } else if (batchData && typeof batchData === 'object') {
-      // Handle object structure from processDataBatch call
-      this.data.recentPacketsSent = batchData.recentPacketsSentData || [];
-      this.data.recentPacketsDelivered = batchData.recentPacketsDeliveredData || [];
-      this.data.matchedPackets = batchData.matchedPacketsData || [];
-      
-      // Create raw events feed with optimization
-      this.data.rawEvents = this.createOptimizedRawEventsFeed(
-        this.data.recentPacketsSent,
-        this.data.recentPacketsDelivered
-      );
-      
-      // Calculate metrics efficiently
-      this.calculateOptimizedMetrics(
-        batchData.allPacketsData || [],
-        batchData.allPacketsSentData || [],
-        batchData.allPacketsDeliveredData || [],
-        batchData.latestBlocksPacketsSentData || [],
-        batchData.latestBlocksPacketsDeliveredData || []
-      );
-    }
+private processDataBatch(batchData: any[]): void {
+    // Optimized result order guaranteed
+    const [sent, delivered, matched, metricsData, blocksData, totalCounts] = batchData;
+
+    this.data.recentPacketsSent    = sent?.EndpointV2_PacketSent        ?? [];
+    this.data.recentPacketsDelivered = delivered?.EndpointV2_PacketDelivered ?? [];
+    this.data.matchedPackets       = matched?.LayerZeroPacket           ?? [];
+
+    this.data.rawEvents = this.createOptimizedRawEventsFeed(
+      this.data.recentPacketsSent,
+      this.data.recentPacketsDelivered
+    );
+
+    this.calculateOptimizedMetricsFromAggregates(metricsData, blocksData, totalCounts);
   }
 
   /**
