@@ -42,9 +42,9 @@ import {
   getChainNameFromChainId,
   getChainColorByName,
   convertUSDCToNumber
-} from './src/utils/formatters';
+} from './src/utils/cctpFormatter';
 
-import { fetchAllData } from './src/utils/graphql';
+import { fetchAllData } from './src/utils/cctpGraphql';
 
 // Constants for calculations
 const MILLISECONDS_PER_SECOND = 1000;

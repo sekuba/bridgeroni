@@ -33,7 +33,7 @@ import {
 import { 
   formatDuration,
   formatTimestamp
-} from './src/utils/formatters';
+} from './src/utils/cctpFormatter';
 
 import {
   getChainNameFromEid,
@@ -42,10 +42,10 @@ import {
   getChainColorByEid,
   formatPacketDirection,
   formatPacketDetails
-} from './src/utils/layerzeroFormatters';
+} from './src/utils/lz2Formatter';
 
-import { fetchAllLayerZeroData, layerZeroGraphQL } from './src/utils/layerzeroGraphqlOptimized';
-import { decodePacket } from './src/utils/layerzeroDecoder';
+import { fetchAllLayerZeroData, layerZeroGraphQL } from './src/utils/lz2Graphql';
+import { decodePacket } from './src/utils/lz2Decoder';
 
 // UI Configuration
 const UI_CONFIG = {

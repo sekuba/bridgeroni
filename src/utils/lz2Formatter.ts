@@ -16,7 +16,7 @@ import {
   formatDuration,
   formatTimestamp,
   getChainColorByName
-} from './formatters';
+} from './cctpFormatter';
 
 /**
  * Get chain name from LayerZero EID

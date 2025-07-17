@@ -41,12 +41,12 @@ import {
 import {
   decodeV2MessageBody,
   computeV2DeterministicNonce
-} from "./utils/messageDecoder";
+} from "./utils/cctpDecoder";
 
 import {
   decodePacket,
   createLayerZeroGuid
-} from "./utils/layerzeroDecoder";
+} from "./utils/lz2Decoder";
 
 /* ---------- Helper Functions ---------- */
 
