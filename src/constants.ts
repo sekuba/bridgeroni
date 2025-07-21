@@ -201,6 +201,7 @@ export const supportsLayerZeroV2 = (chainId: number): boolean =>
 export const AGGLAYER_NETWORK_BY_CHAIN_ID: Record<number, bigint> = {
   1: 0n,       // Ethereum -> Agglayer Network 0
   1101: 1n,    // Polygon zkEVM -> Agglayer Network 1
+  747474: 20n,  // Katana -> Agglayer Network 20
 };
 
 // Chain ID to Agglayer network mapping (reverse lookup)
@@ -212,6 +213,7 @@ export const CHAIN_ID_TO_AGGLAYER_NETWORK = Object.fromEntries(
 export const AGGLAYER_NETWORK_TO_CHAIN_NAME: Record<number, string> = {
   0: 'ethereum',
   1: 'polygonzkevm',
+  20: 'katana',
 };
 
 // Agglayer protocol constants
