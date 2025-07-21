@@ -13,7 +13,8 @@
     "tui": "tsx tui.ts",
     "tui:watch": "tsx watch tui.ts",
     "lzTui": "tsx lzTui.ts",
-    "lzTui:watch": "tsx watch lzTui.ts"
+    "lzTui:watch": "tsx watch lzTui.ts",
+    "lz1-feed": "node scripts/lz1-feed.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.11",
@@ -26,7 +27,9 @@
     "tsx": "^4.19.2"
   },
   "dependencies": {
-    "envio": "2.25.0"
+    "envio": "2.25.0",
+    "graphql-request": "^6.1.0",
+    "chalk": "^4.1.2"
   },
   "optionalDependencies": {
     "generated": "./generated"
