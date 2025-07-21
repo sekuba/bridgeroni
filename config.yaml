@@ -86,6 +86,13 @@ networks:
   - name: PolygonZkEVMBridgeV2
     address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
 
+- id: 747474  # Katana
+  start_block: 5880832
+  rpc: https://rpc.katana.network
+  contracts:
+  - name: PolygonZkEVMBridgeV2
+    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
+
 - id: 10  # OP Mainnet
   start_block: 138131801
   contracts:
