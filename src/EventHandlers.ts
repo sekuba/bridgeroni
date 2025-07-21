@@ -68,178 +68,12 @@ import {
   getLzV1ChainId
 } from "./utils/lz1Decoder";
 
-/* ---------- Agglayer Helper Functions ---------- */
+import {
+  decodeTokenMetadata,
+  decodeGlobalIndex,
+} from "./utils/agglayerDecoder";
 
-/**
- * Create transfer ID for Agglayer transfers using deterministic matching data
- * ID is based on: assetOriginNetwork, assetOriginAddress, destinationAddress, amount, depositCount
- * Adding depositCount ensures unique matching even for identical transfers
- */
-function createAgglayerTransferId(
-  assetOriginNetwork: bigint,
-  assetOriginAddress: string,
-  destinationAddress: string,
-  amount: bigint,
-  depositCount: bigint
-): string {
-  return `agglayer_${assetOriginNetwork}_${assetOriginAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}_${depositCount}`;
-}
-
-/**
- * Decode a dynamic string from ABI encoded data
- */
-function decodeAbiString(data: string, offset: number): string | null {
-  try {
-    // Each hex character represents 4 bits, so multiply by 2 to get byte offset
-    const byteOffset = offset * 2;
-    
-    if (data.length < byteOffset + 64) return null;
-    
-    // First 32 bytes at offset contain the string length
-    const lengthHex = data.slice(byteOffset, byteOffset + 64);
-    const length = parseInt(lengthHex, 16);
-    
-    if (length === 0) return "";
-    if (length > 1000) return null; // Sanity check for unreasonable lengths
-    
-    // String data starts after the length field
-    const stringDataStart = byteOffset + 64;
-    const stringDataEnd = stringDataStart + (length * 2); // length * 2 for hex encoding
-    
-    if (data.length < stringDataEnd) return null;
-    
-    const stringHex = data.slice(stringDataStart, stringDataEnd);
-    
-    // Convert hex to string
-    let result = '';
-    for (let i = 0; i < stringHex.length; i += 2) {
-      const byte = parseInt(stringHex.slice(i, i + 2), 16);
-      if (byte === 0) break; // Stop at null terminator
-      result += String.fromCharCode(byte);
-    }
-    
-    return result || null;
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Handle bytes32 string format (left-aligned, null-terminated)
- */
-function decodeBytes32String(hex: string): string | null {
-  try {
-    if (hex.length !== 64) return null;
-    
-    let result = '';
-    for (let i = 0; i < hex.length; i += 2) {
-      const byte = parseInt(hex.slice(i, i + 2), 16);
-      if (byte === 0) break; // Stop at first null byte
-      if (byte < 32 || byte > 126) break; // Stop at non-printable characters
-      result += String.fromCharCode(byte);
-    }
-    
-    return result || null;
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Full metadata decoder that handles the exact smart contract format
- * metadata is abi.encode(string name, string symbol, uint8 decimals)
- * 
- * ABI encoding format:
- * - First 32 bytes: offset to name string (usually 0x60)
- * - Second 32 bytes: offset to symbol string (dynamic, depends on name length)
- * - Third 32 bytes: decimals value (uint8, right-padded)
- * - Then the actual string data with lengths and content
- */
-function decodeMetadata(metadata: string): { name: string; symbol: string; decimals: bigint } | null {
-  try {
-    // Remove 0x prefix if present
-    const cleanMetadata = metadata.startsWith('0x') ? metadata.slice(2) : metadata;
-    
-    // Need at least 96 bytes (3 * 32) for the header
-    if (cleanMetadata.length < 192) return null;
-    
-    // Parse the header (3 x 32 bytes)
-    const nameOffsetHex = cleanMetadata.slice(0, 64);
-    const symbolOffsetHex = cleanMetadata.slice(64, 128);
-    const decimalsHex = cleanMetadata.slice(128, 192);
-    
-    // Extract decimals (should be a small uint8)
-    const decimals = BigInt('0x' + decimalsHex);
-    if (decimals > 255n) {
-      console.warn(`Invalid decimals value: ${decimals}`);
-      return null;
-    }
-    
-    // Parse offsets
-    const nameOffset = parseInt(nameOffsetHex, 16);
-    const symbolOffset = parseInt(symbolOffsetHex, 16);
-    
-    // Decode strings using their offsets
-    const name = decodeAbiString(cleanMetadata, nameOffset) || "Unknown";
-    const symbol = decodeAbiString(cleanMetadata, symbolOffset) || "UNK";
-    
-    // Handle fallback cases mentioned in the smart contract
-    const finalName = name === "NOT_VALID_ENCODING" ? "Unknown" : (name || "NO_NAME");
-    const finalSymbol = symbol === "NOT_VALID_ENCODING" ? "UNK" : (symbol || "NO_SYMBOL");
-    
-    return {
-      name: finalName,
-      symbol: finalSymbol,
-      decimals
-    };
-  } catch (error) {
-    console.error('Failed to decode metadata:', error);
-    
-    // Fallback: Try to extract just decimals for partial functionality
-    try {
-      const cleanMetadata = metadata.startsWith('0x') ? metadata.slice(2) : metadata;
-      if (cleanMetadata.length >= 192) {
-        const decimalsHex = cleanMetadata.slice(128, 192);
-        const decimals = BigInt('0x' + decimalsHex);
-        if (decimals <= 255n) {
-          return {
-            name: "Decode Error",
-            symbol: "ERR",
-            decimals
-          };
-        }
-      }
-    } catch {}
-    
-    return null;
-  }
-}
-
-/**
- * Extract components from globalIndex
- * Global index format: | 191 bits | 1 bit | 32 bits | 32 bits |
- *                      |    0     | flag  | rollup  | local   |
- */
-function decodeGlobalIndex(globalIndex: bigint): {
-  mainnetFlag: boolean;
-  rollupIndex: bigint;
-  localRootIndex: bigint;
-} {
-  // Extract the last 32 bits (localRootIndex)
-  const localRootIndex = globalIndex & ((1n << 32n) - 1n);
-  
-  // Extract rollup index (bits 32-63)
-  const rollupIndex = (globalIndex >> 32n) & ((1n << 32n) - 1n);
-  
-  // Extract mainnet flag (bit 64)
-  const mainnetFlag = ((globalIndex >> 64n) & 1n) === 1n;
-  
-  return {
-    mainnetFlag,
-    rollupIndex,
-    localRootIndex
-  };
-}
+import { createAgglayerTransferId } from "./constants";
 
 /* ---------- Helper Functions ---------- */
 
@@ -434,7 +268,7 @@ function createAgglayerTransfer(params: {
   
   // Decode token information from metadata
   const metadata = params.metadata || params.prev?.metadata;
-  const tokenInfo = metadata ? decodeMetadata(metadata) : null;
+  const tokenInfo = metadata ? decodeTokenMetadata(metadata) : null;
   
   return {
     id: params.id,
@@ -1156,32 +990,46 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
 
 /* ---------- Agglayer Bridge Event Handlers ---------- */
 /*
- * Agglayer bridge event handling supports unordered event processing:
+ * Agglayer bridge handling provides robust cross-chain event matching for the Polygon zkEVM ecosystem.
  * 
- * Scenario 1: BridgeEvent processed first, then ClaimEvent
- * - BridgeEvent creates new transfer record with source data
- * - ClaimEvent updates existing transfer with destination data → MATCHED
+ * Key Features:
+ * - Deterministic matching using (assetOriginNetwork, assetOriginAddress, destinationAddress, amount, depositCount)
+ * - Unordered event processing (bridge/claim events can arrive in any sequence)
+ * - Enhanced validation: matches require both transaction existence AND depositCount == localRootIndex
+ * - Comprehensive metadata decoding for token information (name, symbol, decimals)
+ * - Global index decoding for mainnet flag, rollup index, and local root index analysis
  * 
- * Scenario 2: ClaimEvent processed first, then BridgeEvent  
- * - ClaimEvent creates new transfer record with destination data
- * - BridgeEvent updates existing transfer with source data → MATCHED
+ * Matching Logic:
+ * - Bridge events create transfer records with source-side data
+ * - Claim events update existing transfers with destination-side data
+ * - Strict matching prevents overcounting: requires exact field matches + nonce verification
+ * - Orphaned events are preserved for separate analysis
  * 
- * Scenario 3: Only BridgeEvent processed (no claim yet)
- * - BridgeEvent creates transfer record with source data only → UNMATCHED
- * 
- * Scenario 4: Only ClaimEvent processed (no bridge event indexed)
- * - ClaimEvent creates transfer record with destination data only → UNMATCHED
- * 
- * All scenarios use deterministic ID based on: originNetwork, originAddress, destinationAddress, amount
- * We also investigate if localRootIndex from globalIndex matches depositCount from bridge event
+ * Supported Networks:
+ * - Ethereum (Network 0) ↔ Polygon zkEVM (Network 1)
+ * - Asset bridging (leafType=0) and message bridging (leafType=1)
  */
 
-// Agglayer Source: PolygonZkEVMBridgeV2 BridgeEvent
-// Create or update transfer with bridge data
+/**
+ * Agglayer Bridge Event Handler
+ * 
+ * Processes BridgeEvent from PolygonZkEVMBridgeV2 contract.
+ * This event is emitted when assets/messages are sent from one network to another.
+ * 
+ * Event contains:
+ * - leafType: 0 for asset bridging, 1 for message bridging
+ * - originNetwork/destinationNetwork: Network IDs (0=Ethereum, 1=Polygon zkEVM)
+ * - originAddress: Token contract address on origin network
+ * - destinationAddress: Recipient address on destination network
+ * - amount: Amount being bridged
+ * - metadata: ABI-encoded token info (name, symbol, decimals)
+ * - depositCount: Sequential nonce for this origin network
+ */
 PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
   const timestamp = BigInt(event.block.timestamp);
   
-  // Create deterministic ID based on matching fields (including depositCount for uniqueness)
+  // Create deterministic ID using all matching fields
+  // Including depositCount ensures uniqueness for identical transfers
   const transferId = createAgglayerTransferId(
     event.params.originNetwork,
     event.params.originAddress,
@@ -1190,7 +1038,7 @@ PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
     event.params.depositCount
   );
   
-  // Check if we already have a transfer (possibly from a claim event processed first)
+  // Check for existing transfer (claim event may have been processed first)
   const existingTransfer = await context.AgglayerTransfer.get(transferId);
   
   const transfer = createAgglayerTransfer({
@@ -1223,19 +1071,33 @@ PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
   } as PolygonZkEVMBridgeV2_BridgeEvent);
 });
 
-// Agglayer Destination: PolygonZkEVMBridgeV2 ClaimEvent
-// Create or update transfer with claim data
+/**
+ * Agglayer Claim Event Handler
+ * 
+ * Processes ClaimEvent from PolygonZkEVMBridgeV2 contract.
+ * This event is emitted when assets/messages are claimed on the destination network.
+ * 
+ * Event contains:
+ * - globalIndex: Encoded index containing mainnet flag, rollup index, and local root index
+ * - originNetwork: Network where the asset originated (0=Ethereum, 1=Polygon zkEVM)  
+ * - originAddress: Token contract address on origin network
+ * - destinationAddress: Recipient address on destination network
+ * - amount: Amount being claimed
+ * 
+ * Key insight: localRootIndex from globalIndex equals depositCount from BridgeEvent
+ * This enables deterministic matching between bridge and claim events.
+ */
 PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
   const timestamp = BigInt(event.block.timestamp);
   
-  // Decode globalIndex to extract all components
+  // Decode globalIndex to extract mainnet flag, rollup index, and local root index
   const globalIndexDecoded = decodeGlobalIndex(event.params.globalIndex);
   
-  // For ClaimEvent, we need to find the matching BridgeEvent using the localRootIndex as depositCount
-  // Since ClaimEvent doesn't contain depositCount directly, we use localRootIndex as the depositCount
+  // Use localRootIndex as depositCount for matching with BridgeEvent
+  // This is the key insight that enables robust event matching
   const depositCount = globalIndexDecoded.localRootIndex;
   
-  // Create deterministic ID using the same fields as bridge event (including depositCount)
+  // Create identical ID as BridgeEvent for matching
   const transferId = createAgglayerTransferId(
     event.params.originNetwork,
     event.params.originAddress,
@@ -1244,7 +1106,7 @@ PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
     depositCount
   );
   
-  // Check if we already have a transfer (possibly from a bridge event processed first)
+  // Check for existing transfer (bridge event may have been processed first)
   const existingTransfer = await context.AgglayerTransfer.get(transferId);
   
   const transfer = createAgglayerTransfer({

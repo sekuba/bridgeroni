@@ -196,3 +196,62 @@ export const getChainNameFromLayerZeroEid = (eid: number): string =>
 // Helper function to check if chain supports LayerZero v2
 export const supportsLayerZeroV2 = (chainId: number): boolean => 
   Object.keys(LAYERZERO_EID_BY_CHAIN_ID).map(Number).includes(chainId);
+
+// Agglayer network mappings
+export const AGGLAYER_NETWORK_BY_CHAIN_ID: Record<number, bigint> = {
+  1: 0n,       // Ethereum -> Agglayer Network 0
+  1101: 1n,    // Polygon zkEVM -> Agglayer Network 1
+};
+
+// Chain ID to Agglayer network mapping (reverse lookup)
+export const CHAIN_ID_TO_AGGLAYER_NETWORK = Object.fromEntries(
+  Object.entries(AGGLAYER_NETWORK_BY_CHAIN_ID).map(([chainId, network]) => [parseInt(chainId), Number(network)])
+);
+
+// Agglayer network to chain name mapping
+export const AGGLAYER_NETWORK_TO_CHAIN_NAME: Record<number, string> = {
+  0: 'ethereum',
+  1: 'polygonzkevm',
+};
+
+// Agglayer protocol constants
+export const AGGLAYER_CONSTANTS = {
+  LEAF_TYPE: {
+    ASSET: 0n,
+    MESSAGE: 1n,
+  },
+  GLOBAL_INDEX: {
+    LOCAL_ROOT_INDEX_BITS: 32,
+    ROLLUP_INDEX_BITS: 32,
+    MAINNET_FLAG_BIT: 1,
+    UNUSED_BITS: 191,
+  },
+  METADATA_ENCODING: {
+    MIN_LENGTH: 192, // Minimum hex characters for valid ABI encoding (3 x 32 bytes)
+    MAX_STRING_LENGTH: 1000, // Sanity check for string lengths
+    DECIMALS_MAX: 255, // Maximum valid decimals for tokens
+  },
+} as const;
+
+// Helper function to get Agglayer network from chain ID
+export const getAgglayerNetworkFromChainId = (chainId: number): bigint | undefined =>
+  AGGLAYER_NETWORK_BY_CHAIN_ID[chainId];
+
+// Helper function to get chain name from Agglayer network
+export const getChainNameFromAgglayerNetwork = (network: number): string =>
+  AGGLAYER_NETWORK_TO_CHAIN_NAME[network] || `Network${network}`;
+
+// Helper function to check if chain supports Agglayer
+export const supportsAgglayer = (chainId: number): boolean =>
+  Object.keys(AGGLAYER_NETWORK_BY_CHAIN_ID).map(Number).includes(chainId);
+
+// Helper function to create Agglayer transfer ID
+export const createAgglayerTransferId = (
+  assetOriginNetwork: bigint,
+  assetOriginAddress: string,
+  destinationAddress: string,
+  amount: bigint,
+  depositCount: bigint
+): string => {
+  return `agglayer_${assetOriginNetwork}_${assetOriginAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}_${depositCount}`;
+};
