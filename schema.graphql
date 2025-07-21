@@ -305,23 +305,30 @@ type AgglayerTransfer @entity {
   id: ID!
 
   # === Core identifiers ===
-  originNetwork: BigInt!
-  destinationNetwork: BigInt
-  originAddress: String!
-  destinationAddress: String!
+  assetOriginNetwork: BigInt!     # Network where the asset is native (0=ethereum, 1=polygonzkevm)
+  assetDestinationNetwork: BigInt # Network where asset is being sent
+  assetOriginAddress: String!     # Address of the asset at its origin network
+  destinationAddress: String!     # Recipient address at destination
   amount: BigInt!
 
   # === Source-side data (BridgeEvent) ===
-  leafType: BigInt             # 0 for asset bridging, 1 for message bridging
+  leafType: BigInt!            # 0 for asset bridging, 1 for message bridging
   metadata: String             # abi.encode(tokenName, tokenSymbol, tokenDecimals)
   depositCount: BigInt         # nonce at the origin
   sourceTxHash: String
   bridgeBlock: BigInt
   bridgeTimestamp: BigInt
 
+  # === Decoded token information ===
+  tokenName: String            # Decoded from metadata
+  tokenSymbol: String          # Decoded from metadata
+  tokenDecimals: BigInt        # Decoded from metadata
+
   # === Destination-side data (ClaimEvent) ===
   globalIndex: BigInt          # Global index containing mainnetFlag, rollupIndex, localRootIndex
-  localRootIndex: BigInt       # Extracted from globalIndex
+  mainnetFlag: Boolean         # Extracted from globalIndex
+  rollupIndex: BigInt          # Extracted from globalIndex
+  localRootIndex: BigInt       # Extracted from globalIndex (should match depositCount)
   destinationTxHash: String
   claimBlock: BigInt
   claimTimestamp: BigInt
@@ -329,6 +336,7 @@ type AgglayerTransfer @entity {
   # === Derived fields ===
   latencySeconds: BigInt
   matched: Boolean!
+  depositCountMatches: Boolean # true if localRootIndex == depositCount
 
   # === Computed fields for TUI efficiency ===
   hasAmount: Boolean!          # true if amount is not null

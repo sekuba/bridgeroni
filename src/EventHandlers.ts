@@ -72,26 +72,173 @@ import {
 
 /**
  * Create transfer ID for Agglayer transfers using deterministic matching data
- * ID is based on: originNetwork, originAddress, destinationAddress, amount
+ * ID is based on: assetOriginNetwork, assetOriginAddress, destinationAddress, amount, depositCount
+ * Adding depositCount ensures unique matching even for identical transfers
  */
 function createAgglayerTransferId(
-  originNetwork: bigint,
-  originAddress: string,
+  assetOriginNetwork: bigint,
+  assetOriginAddress: string,
   destinationAddress: string,
-  amount: bigint
+  amount: bigint,
+  depositCount: bigint
 ): string {
-  // Use keccak256-like approach but with string concatenation for simplicity
-  return `agglayer_${originNetwork}_${originAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}`;
+  return `agglayer_${assetOriginNetwork}_${assetOriginAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}_${depositCount}`;
 }
 
 /**
- * Extract localRootIndex from globalIndex
+ * Decode a dynamic string from ABI encoded data
+ */
+function decodeAbiString(data: string, offset: number): string | null {
+  try {
+    // Each hex character represents 4 bits, so multiply by 2 to get byte offset
+    const byteOffset = offset * 2;
+    
+    if (data.length < byteOffset + 64) return null;
+    
+    // First 32 bytes at offset contain the string length
+    const lengthHex = data.slice(byteOffset, byteOffset + 64);
+    const length = parseInt(lengthHex, 16);
+    
+    if (length === 0) return "";
+    if (length > 1000) return null; // Sanity check for unreasonable lengths
+    
+    // String data starts after the length field
+    const stringDataStart = byteOffset + 64;
+    const stringDataEnd = stringDataStart + (length * 2); // length * 2 for hex encoding
+    
+    if (data.length < stringDataEnd) return null;
+    
+    const stringHex = data.slice(stringDataStart, stringDataEnd);
+    
+    // Convert hex to string
+    let result = '';
+    for (let i = 0; i < stringHex.length; i += 2) {
+      const byte = parseInt(stringHex.slice(i, i + 2), 16);
+      if (byte === 0) break; // Stop at null terminator
+      result += String.fromCharCode(byte);
+    }
+    
+    return result || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Handle bytes32 string format (left-aligned, null-terminated)
+ */
+function decodeBytes32String(hex: string): string | null {
+  try {
+    if (hex.length !== 64) return null;
+    
+    let result = '';
+    for (let i = 0; i < hex.length; i += 2) {
+      const byte = parseInt(hex.slice(i, i + 2), 16);
+      if (byte === 0) break; // Stop at first null byte
+      if (byte < 32 || byte > 126) break; // Stop at non-printable characters
+      result += String.fromCharCode(byte);
+    }
+    
+    return result || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Full metadata decoder that handles the exact smart contract format
+ * metadata is abi.encode(string name, string symbol, uint8 decimals)
+ * 
+ * ABI encoding format:
+ * - First 32 bytes: offset to name string (usually 0x60)
+ * - Second 32 bytes: offset to symbol string (dynamic, depends on name length)
+ * - Third 32 bytes: decimals value (uint8, right-padded)
+ * - Then the actual string data with lengths and content
+ */
+function decodeMetadata(metadata: string): { name: string; symbol: string; decimals: bigint } | null {
+  try {
+    // Remove 0x prefix if present
+    const cleanMetadata = metadata.startsWith('0x') ? metadata.slice(2) : metadata;
+    
+    // Need at least 96 bytes (3 * 32) for the header
+    if (cleanMetadata.length < 192) return null;
+    
+    // Parse the header (3 x 32 bytes)
+    const nameOffsetHex = cleanMetadata.slice(0, 64);
+    const symbolOffsetHex = cleanMetadata.slice(64, 128);
+    const decimalsHex = cleanMetadata.slice(128, 192);
+    
+    // Extract decimals (should be a small uint8)
+    const decimals = BigInt('0x' + decimalsHex);
+    if (decimals > 255n) {
+      console.warn(`Invalid decimals value: ${decimals}`);
+      return null;
+    }
+    
+    // Parse offsets
+    const nameOffset = parseInt(nameOffsetHex, 16);
+    const symbolOffset = parseInt(symbolOffsetHex, 16);
+    
+    // Decode strings using their offsets
+    const name = decodeAbiString(cleanMetadata, nameOffset) || "Unknown";
+    const symbol = decodeAbiString(cleanMetadata, symbolOffset) || "UNK";
+    
+    // Handle fallback cases mentioned in the smart contract
+    const finalName = name === "NOT_VALID_ENCODING" ? "Unknown" : (name || "NO_NAME");
+    const finalSymbol = symbol === "NOT_VALID_ENCODING" ? "UNK" : (symbol || "NO_SYMBOL");
+    
+    return {
+      name: finalName,
+      symbol: finalSymbol,
+      decimals
+    };
+  } catch (error) {
+    console.error('Failed to decode metadata:', error);
+    
+    // Fallback: Try to extract just decimals for partial functionality
+    try {
+      const cleanMetadata = metadata.startsWith('0x') ? metadata.slice(2) : metadata;
+      if (cleanMetadata.length >= 192) {
+        const decimalsHex = cleanMetadata.slice(128, 192);
+        const decimals = BigInt('0x' + decimalsHex);
+        if (decimals <= 255n) {
+          return {
+            name: "Decode Error",
+            symbol: "ERR",
+            decimals
+          };
+        }
+      }
+    } catch {}
+    
+    return null;
+  }
+}
+
+/**
+ * Extract components from globalIndex
  * Global index format: | 191 bits | 1 bit | 32 bits | 32 bits |
  *                      |    0     | flag  | rollup  | local   |
  */
-function extractLocalRootIndex(globalIndex: bigint): bigint {
+function decodeGlobalIndex(globalIndex: bigint): {
+  mainnetFlag: boolean;
+  rollupIndex: bigint;
+  localRootIndex: bigint;
+} {
   // Extract the last 32 bits (localRootIndex)
-  return globalIndex & ((1n << 32n) - 1n);
+  const localRootIndex = globalIndex & ((1n << 32n) - 1n);
+  
+  // Extract rollup index (bits 32-63)
+  const rollupIndex = (globalIndex >> 32n) & ((1n << 32n) - 1n);
+  
+  // Extract mainnet flag (bit 64)
+  const mainnetFlag = ((globalIndex >> 64n) & 1n) === 1n;
+  
+  return {
+    mainnetFlag,
+    rollupIndex,
+    localRootIndex
+  };
 }
 
 /* ---------- Helper Functions ---------- */
@@ -247,9 +394,9 @@ function createLayerZeroV1Packet(params: {
  */
 function createAgglayerTransfer(params: {
   id: string;
-  originNetwork: bigint;
-  destinationNetwork: bigint | undefined;
-  originAddress: string;
+  assetOriginNetwork: bigint;
+  assetDestinationNetwork: bigint | undefined;
+  assetOriginAddress: string;
   destinationAddress: string;
   amount: bigint;
   chainId: number;
@@ -263,37 +410,58 @@ function createAgglayerTransfer(params: {
   depositCount?: bigint;
   // Claim-specific fields
   globalIndex?: bigint;
+  mainnetFlag?: boolean;
+  rollupIndex?: bigint;
   localRootIndex?: bigint;
 }): AgglayerTransfer {
   const isBridge = params.eventType === 'bridge';
   const isClaim = params.eventType === 'claim';
-  const matched = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
-                  !!(isBridge && params.prev?.destinationTxHash) ||
-                  !!(isClaim && params.prev?.sourceTxHash);
+  
+  // Enhanced matching logic: check both transaction existence AND depositCount matching
+  const hasSourceAndDest = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
+                          !!(isBridge && params.prev?.destinationTxHash) ||
+                          !!(isClaim && params.prev?.sourceTxHash);
+  
+  // Check if depositCount matches localRootIndex for additional verification
+  const depositCount = params.depositCount || params.prev?.depositCount;
+  const localRootIndex = params.localRootIndex || params.prev?.localRootIndex;
+  const depositCountMatches = !!(depositCount !== undefined && localRootIndex !== undefined && depositCount === localRootIndex);
+  const matched = hasSourceAndDest && depositCountMatches;
   
   const bridgeTs = isBridge ? params.timestamp : params.prev?.bridgeTimestamp;
   const claimTs = isClaim ? params.timestamp : params.prev?.claimTimestamp;
   const latencySeconds = matched && bridgeTs && claimTs ? claimTs - bridgeTs : undefined;
   
+  // Decode token information from metadata
+  const metadata = params.metadata || params.prev?.metadata;
+  const tokenInfo = metadata ? decodeMetadata(metadata) : null;
+  
   return {
     id: params.id,
-    originNetwork: params.originNetwork,
-    destinationNetwork: params.destinationNetwork,
-    originAddress: params.originAddress,
+    assetOriginNetwork: params.assetOriginNetwork,
+    assetDestinationNetwork: params.assetDestinationNetwork,
+    assetOriginAddress: params.assetOriginAddress,
     destinationAddress: params.destinationAddress,
     amount: params.amount,
     
     // Source-side data
-    leafType: params.leafType || params.prev?.leafType,
-    metadata: params.metadata || params.prev?.metadata,
-    depositCount: params.depositCount || params.prev?.depositCount,
+    leafType: params.leafType ?? params.prev?.leafType ?? 0n,
+    metadata: metadata,
+    depositCount: depositCount ?? 0n,
     sourceTxHash: isBridge ? params.txHash : params.prev?.sourceTxHash,
     bridgeBlock: isBridge ? params.timestamp : params.prev?.bridgeBlock,
     bridgeTimestamp: bridgeTs,
     
+    // Decoded token information
+    tokenName: tokenInfo?.name || params.prev?.tokenName,
+    tokenSymbol: tokenInfo?.symbol || params.prev?.tokenSymbol,
+    tokenDecimals: tokenInfo?.decimals || params.prev?.tokenDecimals,
+    
     // Destination-side data
     globalIndex: params.globalIndex || params.prev?.globalIndex,
-    localRootIndex: params.localRootIndex || params.prev?.localRootIndex,
+    mainnetFlag: params.mainnetFlag !== undefined ? params.mainnetFlag : params.prev?.mainnetFlag,
+    rollupIndex: params.rollupIndex || params.prev?.rollupIndex,
+    localRootIndex: localRootIndex,
     destinationTxHash: isClaim ? params.txHash : params.prev?.destinationTxHash,
     claimBlock: isClaim ? params.timestamp : params.prev?.claimBlock,
     claimTimestamp: claimTs,
@@ -301,6 +469,7 @@ function createAgglayerTransfer(params: {
     // Derived fields
     matched,
     latencySeconds,
+    depositCountMatches,
     
     // Computed fields for TUI efficiency
     hasAmount: !!params.amount,
@@ -1012,12 +1181,13 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
 PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
   const timestamp = BigInt(event.block.timestamp);
   
-  // Create deterministic ID based on matching fields
+  // Create deterministic ID based on matching fields (including depositCount for uniqueness)
   const transferId = createAgglayerTransferId(
     event.params.originNetwork,
     event.params.originAddress,
     event.params.destinationAddress,
-    event.params.amount
+    event.params.amount,
+    event.params.depositCount
   );
   
   // Check if we already have a transfer (possibly from a claim event processed first)
@@ -1025,9 +1195,9 @@ PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
   
   const transfer = createAgglayerTransfer({
     id: transferId,
-    originNetwork: event.params.originNetwork,
-    destinationNetwork: event.params.destinationNetwork,
-    originAddress: event.params.originAddress,
+    assetOriginNetwork: event.params.originNetwork,
+    assetDestinationNetwork: event.params.destinationNetwork,
+    assetOriginAddress: event.params.originAddress,
     destinationAddress: event.params.destinationAddress,
     amount: event.params.amount,
     chainId: event.chainId,
@@ -1058,25 +1228,30 @@ PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
 PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
   const timestamp = BigInt(event.block.timestamp);
   
-  // Create deterministic ID using the same fields as bridge event
+  // Decode globalIndex to extract all components
+  const globalIndexDecoded = decodeGlobalIndex(event.params.globalIndex);
+  
+  // For ClaimEvent, we need to find the matching BridgeEvent using the localRootIndex as depositCount
+  // Since ClaimEvent doesn't contain depositCount directly, we use localRootIndex as the depositCount
+  const depositCount = globalIndexDecoded.localRootIndex;
+  
+  // Create deterministic ID using the same fields as bridge event (including depositCount)
   const transferId = createAgglayerTransferId(
     event.params.originNetwork,
     event.params.originAddress,
     event.params.destinationAddress,
-    event.params.amount
+    event.params.amount,
+    depositCount
   );
-  
-  // Extract localRootIndex from globalIndex for potential matching with depositCount
-  const localRootIndex = extractLocalRootIndex(event.params.globalIndex);
   
   // Check if we already have a transfer (possibly from a bridge event processed first)
   const existingTransfer = await context.AgglayerTransfer.get(transferId);
   
   const transfer = createAgglayerTransfer({
     id: transferId,
-    originNetwork: event.params.originNetwork,
-    destinationNetwork: existingTransfer?.destinationNetwork, // May not be in claim event
-    originAddress: event.params.originAddress,
+    assetOriginNetwork: event.params.originNetwork,
+    assetDestinationNetwork: existingTransfer?.assetDestinationNetwork, // May not be in claim event
+    assetOriginAddress: event.params.originAddress,
     destinationAddress: event.params.destinationAddress,
     amount: event.params.amount,
     chainId: event.chainId,
@@ -1085,7 +1260,9 @@ PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
     eventType: 'claim',
     prev: existingTransfer,
     globalIndex: event.params.globalIndex,
-    localRootIndex,
+    mainnetFlag: globalIndexDecoded.mainnetFlag,
+    rollupIndex: globalIndexDecoded.rollupIndex,
+    localRootIndex: globalIndexDecoded.localRootIndex,
   });
   
   context.AgglayerTransfer.set(transfer);
