@@ -24,9 +24,11 @@ import {
   UltraLightNodeV2,
   SendUln301,
   ReceiveUln301,
+  PolygonZkEVMBridgeV2,
   CCTPTransfer,
   LayerZeroPacket,
   LayerZeroV1Packet,
+  AgglayerTransfer,
   TokenMessenger_DepositForBurn,
   TokenMessenger_DepositForBurnV2,
   MessageTransmitter_MessageReceived,
@@ -37,6 +39,8 @@ import {
   UltraLightNodeV2_PacketReceived,
   SendUln301_PacketSent,
   ReceiveUln301_PacketDelivered,
+  PolygonZkEVMBridgeV2_BridgeEvent,
+  PolygonZkEVMBridgeV2_ClaimEvent,
 } from "generated";
 
 import { 
@@ -63,6 +67,32 @@ import {
   getActualChainId,
   getLzV1ChainId
 } from "./utils/lz1Decoder";
+
+/* ---------- Agglayer Helper Functions ---------- */
+
+/**
+ * Create transfer ID for Agglayer transfers using deterministic matching data
+ * ID is based on: originNetwork, originAddress, destinationAddress, amount
+ */
+function createAgglayerTransferId(
+  originNetwork: bigint,
+  originAddress: string,
+  destinationAddress: string,
+  amount: bigint
+): string {
+  // Use keccak256-like approach but with string concatenation for simplicity
+  return `agglayer_${originNetwork}_${originAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}`;
+}
+
+/**
+ * Extract localRootIndex from globalIndex
+ * Global index format: | 191 bits | 1 bit | 32 bits | 32 bits |
+ *                      |    0     | flag  | rollup  | local   |
+ */
+function extractLocalRootIndex(globalIndex: bigint): bigint {
+  // Extract the last 32 bits (localRootIndex)
+  return globalIndex & ((1n << 32n) - 1n);
+}
 
 /* ---------- Helper Functions ---------- */
 
@@ -207,6 +237,75 @@ function createLayerZeroV1Packet(params: {
     hasPayload: !!(params.payload || params.prev?.payload),
     sourceChainId: isSent ? BigInt(params.chainId) : params.prev?.sourceChainId,
     destinationChainId: isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId,
+    eventType: matched ? "matched" : params.eventType,
+    lastUpdated: params.timestamp,
+  };
+}
+
+/**
+ * Create and update an AgglayerTransfer entity
+ */
+function createAgglayerTransfer(params: {
+  id: string;
+  originNetwork: bigint;
+  destinationNetwork: bigint | undefined;
+  originAddress: string;
+  destinationAddress: string;
+  amount: bigint;
+  chainId: number;
+  timestamp: bigint;
+  txHash: string;
+  eventType: 'bridge' | 'claim';
+  prev?: AgglayerTransfer;
+  // Bridge-specific fields
+  leafType?: bigint;
+  metadata?: string;
+  depositCount?: bigint;
+  // Claim-specific fields
+  globalIndex?: bigint;
+  localRootIndex?: bigint;
+}): AgglayerTransfer {
+  const isBridge = params.eventType === 'bridge';
+  const isClaim = params.eventType === 'claim';
+  const matched = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
+                  !!(isBridge && params.prev?.destinationTxHash) ||
+                  !!(isClaim && params.prev?.sourceTxHash);
+  
+  const bridgeTs = isBridge ? params.timestamp : params.prev?.bridgeTimestamp;
+  const claimTs = isClaim ? params.timestamp : params.prev?.claimTimestamp;
+  const latencySeconds = matched && bridgeTs && claimTs ? claimTs - bridgeTs : undefined;
+  
+  return {
+    id: params.id,
+    originNetwork: params.originNetwork,
+    destinationNetwork: params.destinationNetwork,
+    originAddress: params.originAddress,
+    destinationAddress: params.destinationAddress,
+    amount: params.amount,
+    
+    // Source-side data
+    leafType: params.leafType || params.prev?.leafType,
+    metadata: params.metadata || params.prev?.metadata,
+    depositCount: params.depositCount || params.prev?.depositCount,
+    sourceTxHash: isBridge ? params.txHash : params.prev?.sourceTxHash,
+    bridgeBlock: isBridge ? params.timestamp : params.prev?.bridgeBlock,
+    bridgeTimestamp: bridgeTs,
+    
+    // Destination-side data
+    globalIndex: params.globalIndex || params.prev?.globalIndex,
+    localRootIndex: params.localRootIndex || params.prev?.localRootIndex,
+    destinationTxHash: isClaim ? params.txHash : params.prev?.destinationTxHash,
+    claimBlock: isClaim ? params.timestamp : params.prev?.claimBlock,
+    claimTimestamp: claimTs,
+    
+    // Derived fields
+    matched,
+    latencySeconds,
+    
+    // Computed fields for TUI efficiency
+    hasAmount: !!params.amount,
+    sourceChainId: isBridge ? BigInt(params.chainId) : params.prev?.sourceChainId,
+    destinationChainId: isClaim ? BigInt(params.chainId) : params.prev?.destinationChainId,
     eventType: matched ? "matched" : params.eventType,
     lastUpdated: params.timestamp,
   };
@@ -884,4 +983,120 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
     blockTimestamp: timestamp,
     txHash: event.transaction.hash,
   } as ReceiveUln301_PacketDelivered);
+});
+
+/* ---------- Agglayer Bridge Event Handlers ---------- */
+/*
+ * Agglayer bridge event handling supports unordered event processing:
+ * 
+ * Scenario 1: BridgeEvent processed first, then ClaimEvent
+ * - BridgeEvent creates new transfer record with source data
+ * - ClaimEvent updates existing transfer with destination data → MATCHED
+ * 
+ * Scenario 2: ClaimEvent processed first, then BridgeEvent  
+ * - ClaimEvent creates new transfer record with destination data
+ * - BridgeEvent updates existing transfer with source data → MATCHED
+ * 
+ * Scenario 3: Only BridgeEvent processed (no claim yet)
+ * - BridgeEvent creates transfer record with source data only → UNMATCHED
+ * 
+ * Scenario 4: Only ClaimEvent processed (no bridge event indexed)
+ * - ClaimEvent creates transfer record with destination data only → UNMATCHED
+ * 
+ * All scenarios use deterministic ID based on: originNetwork, originAddress, destinationAddress, amount
+ * We also investigate if localRootIndex from globalIndex matches depositCount from bridge event
+ */
+
+// Agglayer Source: PolygonZkEVMBridgeV2 BridgeEvent
+// Create or update transfer with bridge data
+PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Create deterministic ID based on matching fields
+  const transferId = createAgglayerTransferId(
+    event.params.originNetwork,
+    event.params.originAddress,
+    event.params.destinationAddress,
+    event.params.amount
+  );
+  
+  // Check if we already have a transfer (possibly from a claim event processed first)
+  const existingTransfer = await context.AgglayerTransfer.get(transferId);
+  
+  const transfer = createAgglayerTransfer({
+    id: transferId,
+    originNetwork: event.params.originNetwork,
+    destinationNetwork: event.params.destinationNetwork,
+    originAddress: event.params.originAddress,
+    destinationAddress: event.params.destinationAddress,
+    amount: event.params.amount,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'bridge',
+    prev: existingTransfer,
+    leafType: event.params.leafType,
+    metadata: event.params.metadata,
+    depositCount: event.params.depositCount,
+  });
+  
+  context.AgglayerTransfer.set(transfer);
+  
+  // Enhanced raw event log
+  context.PolygonZkEVMBridgeV2_BridgeEvent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as PolygonZkEVMBridgeV2_BridgeEvent);
+});
+
+// Agglayer Destination: PolygonZkEVMBridgeV2 ClaimEvent
+// Create or update transfer with claim data
+PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Create deterministic ID using the same fields as bridge event
+  const transferId = createAgglayerTransferId(
+    event.params.originNetwork,
+    event.params.originAddress,
+    event.params.destinationAddress,
+    event.params.amount
+  );
+  
+  // Extract localRootIndex from globalIndex for potential matching with depositCount
+  const localRootIndex = extractLocalRootIndex(event.params.globalIndex);
+  
+  // Check if we already have a transfer (possibly from a bridge event processed first)
+  const existingTransfer = await context.AgglayerTransfer.get(transferId);
+  
+  const transfer = createAgglayerTransfer({
+    id: transferId,
+    originNetwork: event.params.originNetwork,
+    destinationNetwork: existingTransfer?.destinationNetwork, // May not be in claim event
+    originAddress: event.params.originAddress,
+    destinationAddress: event.params.destinationAddress,
+    amount: event.params.amount,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'claim',
+    prev: existingTransfer,
+    globalIndex: event.params.globalIndex,
+    localRootIndex,
+  });
+  
+  context.AgglayerTransfer.set(transfer);
+  
+  // Enhanced raw event log
+  context.PolygonZkEVMBridgeV2_ClaimEvent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as PolygonZkEVMBridgeV2_ClaimEvent);
 });

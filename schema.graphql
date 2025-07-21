@@ -147,6 +147,39 @@ type EndpointV2_PacketDelivered {
   txHash: String!
 }
 
+# Agglayer Bridge BridgeEvent
+type PolygonZkEVMBridgeV2_BridgeEvent {
+  id: ID!
+  leafType: BigInt!
+  originNetwork: BigInt!
+  originAddress: String!
+  destinationNetwork: BigInt!
+  destinationAddress: String!
+  amount: BigInt!
+  metadata: String!
+  depositCount: BigInt!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
+# Agglayer Bridge ClaimEvent
+type PolygonZkEVMBridgeV2_ClaimEvent {
+  id: ID!
+  globalIndex: BigInt!
+  originNetwork: BigInt!
+  originAddress: String!
+  destinationAddress: String!
+  amount: BigInt!
+  # Enhanced metadata
+  chainId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  txHash: String!
+}
+
 # LayerZero v1 packet transfer entity for matching sent/delivered packets
 type LayerZeroV1Packet @entity {
   id: ID!
@@ -264,5 +297,43 @@ type CCTPTransfer @entity {
   sourceChainId: BigInt        # chain ID where deposit occurred
   destinationChainId: BigInt   # chain ID where message was received
   eventType: String!           # "deposit", "received", or "matched"
+  lastUpdated: BigInt!         # timestamp of last update to this record
+}
+
+# Agglayer bridge transfer entity for matching bridge/claim events
+type AgglayerTransfer @entity {
+  id: ID!
+
+  # === Core identifiers ===
+  originNetwork: BigInt!
+  destinationNetwork: BigInt
+  originAddress: String!
+  destinationAddress: String!
+  amount: BigInt!
+
+  # === Source-side data (BridgeEvent) ===
+  leafType: BigInt             # 0 for asset bridging, 1 for message bridging
+  metadata: String             # abi.encode(tokenName, tokenSymbol, tokenDecimals)
+  depositCount: BigInt         # nonce at the origin
+  sourceTxHash: String
+  bridgeBlock: BigInt
+  bridgeTimestamp: BigInt
+
+  # === Destination-side data (ClaimEvent) ===
+  globalIndex: BigInt          # Global index containing mainnetFlag, rollupIndex, localRootIndex
+  localRootIndex: BigInt       # Extracted from globalIndex
+  destinationTxHash: String
+  claimBlock: BigInt
+  claimTimestamp: BigInt
+
+  # === Derived fields ===
+  latencySeconds: BigInt
+  matched: Boolean!
+
+  # === Computed fields for TUI efficiency ===
+  hasAmount: Boolean!          # true if amount is not null
+  sourceChainId: BigInt        # chain ID where bridge occurred
+  destinationChainId: BigInt   # chain ID where claim occurred
+  eventType: String!           # "bridge", "claim", or "matched"
   lastUpdated: BigInt!         # timestamp of last update to this record
 }
