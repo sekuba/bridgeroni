@@ -49,6 +49,13 @@ contracts:
     - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
     - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
 
+# Agglayer Bridge Contracts
+- name: PolygonZkEVMBridgeV2
+  handler: src/EventHandlers.ts
+  events:
+    - event: BridgeEvent(uint8 leafType, uint32 originNetwork, address originAddress, uint32 destinationNetwork, address destinationAddress, uint256 amount, bytes metadata, uint32 depositCount)
+    - event: ClaimEvent(uint256 globalIndex, uint32 originNetwork, address originAddress, address destinationAddress, uint256 amount)
+
 networks:
 # Standard CCTP v1 + v2 chains + LayerZero v2
 - id: 1  # Ethereum
@@ -70,6 +77,14 @@ networks:
     address: [0x245B6e8FFE9ea5Fc301e32d16F66bD4C2123eEfC]
   - name: EndpointV2
     address: [0x1a44076050125825900e736c501f859c50fE728c]
+  - name: PolygonZkEVMBridgeV2
+    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
+
+- id: 1101  # Polygon zkEVM
+  start_block: 23759633
+  contracts:
+  - name: PolygonZkEVMBridgeV2
+    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
 
 - id: 10  # OP Mainnet
   start_block: 138131801

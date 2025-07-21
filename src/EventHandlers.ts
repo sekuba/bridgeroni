@@ -24,9 +24,11 @@ import {
   UltraLightNodeV2,
   SendUln301,
   ReceiveUln301,
+  PolygonZkEVMBridgeV2,
   CCTPTransfer,
   LayerZeroPacket,
   LayerZeroV1Packet,
+  AgglayerTransfer,
   TokenMessenger_DepositForBurn,
   TokenMessenger_DepositForBurnV2,
   MessageTransmitter_MessageReceived,
@@ -37,6 +39,8 @@ import {
   UltraLightNodeV2_PacketReceived,
   SendUln301_PacketSent,
   ReceiveUln301_PacketDelivered,
+  PolygonZkEVMBridgeV2_BridgeEvent,
+  PolygonZkEVMBridgeV2_ClaimEvent,
 } from "generated";
 
 import { 
@@ -63,6 +67,13 @@ import {
   getActualChainId,
   getLzV1ChainId
 } from "./utils/lz1Decoder";
+
+import {
+  decodeTokenMetadata,
+  decodeGlobalIndex,
+} from "./utils/agglayerDecoder";
+
+import { createAgglayerTransferId } from "./constants";
 
 /* ---------- Helper Functions ---------- */
 
@@ -207,6 +218,97 @@ function createLayerZeroV1Packet(params: {
     hasPayload: !!(params.payload || params.prev?.payload),
     sourceChainId: isSent ? BigInt(params.chainId) : params.prev?.sourceChainId,
     destinationChainId: isDelivered ? BigInt(params.chainId) : params.prev?.destinationChainId,
+    eventType: matched ? "matched" : params.eventType,
+    lastUpdated: params.timestamp,
+  };
+}
+
+/**
+ * Create and update an AgglayerTransfer entity
+ */
+function createAgglayerTransfer(params: {
+  id: string;
+  assetOriginNetwork: bigint;
+  assetDestinationNetwork: bigint | undefined;
+  assetOriginAddress: string;
+  destinationAddress: string;
+  amount: bigint;
+  chainId: number;
+  timestamp: bigint;
+  txHash: string;
+  eventType: 'bridge' | 'claim';
+  prev?: AgglayerTransfer;
+  // Bridge-specific fields
+  leafType?: bigint;
+  metadata?: string;
+  depositCount?: bigint;
+  // Claim-specific fields
+  globalIndex?: bigint;
+  mainnetFlag?: boolean;
+  rollupIndex?: bigint;
+  localRootIndex?: bigint;
+}): AgglayerTransfer {
+  const isBridge = params.eventType === 'bridge';
+  const isClaim = params.eventType === 'claim';
+  
+  // Enhanced matching logic: check both transaction existence AND depositCount matching
+  const hasSourceAndDest = !!(params.prev?.sourceTxHash && params.prev?.destinationTxHash) ||
+                          !!(isBridge && params.prev?.destinationTxHash) ||
+                          !!(isClaim && params.prev?.sourceTxHash);
+  
+  // Check if depositCount matches localRootIndex for additional verification
+  const depositCount = params.depositCount || params.prev?.depositCount;
+  const localRootIndex = params.localRootIndex || params.prev?.localRootIndex;
+  const depositCountMatches = !!(depositCount !== undefined && localRootIndex !== undefined && depositCount === localRootIndex);
+  const matched = hasSourceAndDest && depositCountMatches;
+  
+  const bridgeTs = isBridge ? params.timestamp : params.prev?.bridgeTimestamp;
+  const claimTs = isClaim ? params.timestamp : params.prev?.claimTimestamp;
+  const latencySeconds = matched && bridgeTs && claimTs ? claimTs - bridgeTs : undefined;
+  
+  // Decode token information from metadata
+  const metadata = params.metadata || params.prev?.metadata;
+  const tokenInfo = metadata ? decodeTokenMetadata(metadata) : null;
+  
+  return {
+    id: params.id,
+    assetOriginNetwork: params.assetOriginNetwork,
+    assetDestinationNetwork: params.assetDestinationNetwork,
+    assetOriginAddress: params.assetOriginAddress,
+    destinationAddress: params.destinationAddress,
+    amount: params.amount,
+    
+    // Source-side data
+    leafType: params.leafType ?? params.prev?.leafType ?? 0n,
+    metadata: metadata,
+    depositCount: depositCount ?? 0n,
+    sourceTxHash: isBridge ? params.txHash : params.prev?.sourceTxHash,
+    bridgeBlock: isBridge ? params.timestamp : params.prev?.bridgeBlock,
+    bridgeTimestamp: bridgeTs,
+    
+    // Decoded token information
+    tokenName: tokenInfo?.name || params.prev?.tokenName,
+    tokenSymbol: tokenInfo?.symbol || params.prev?.tokenSymbol,
+    tokenDecimals: tokenInfo?.decimals || params.prev?.tokenDecimals,
+    
+    // Destination-side data
+    globalIndex: params.globalIndex || params.prev?.globalIndex,
+    mainnetFlag: params.mainnetFlag !== undefined ? params.mainnetFlag : params.prev?.mainnetFlag,
+    rollupIndex: params.rollupIndex || params.prev?.rollupIndex,
+    localRootIndex: localRootIndex,
+    destinationTxHash: isClaim ? params.txHash : params.prev?.destinationTxHash,
+    claimBlock: isClaim ? params.timestamp : params.prev?.claimBlock,
+    claimTimestamp: claimTs,
+    
+    // Derived fields
+    matched,
+    latencySeconds,
+    depositCountMatches,
+    
+    // Computed fields for TUI efficiency
+    hasAmount: !!params.amount,
+    sourceChainId: isBridge ? BigInt(params.chainId) : params.prev?.sourceChainId,
+    destinationChainId: isClaim ? BigInt(params.chainId) : params.prev?.destinationChainId,
     eventType: matched ? "matched" : params.eventType,
     lastUpdated: params.timestamp,
   };
@@ -884,4 +986,156 @@ ReceiveUln301.PacketDelivered.handler(async ({ event, context }) => {
     blockTimestamp: timestamp,
     txHash: event.transaction.hash,
   } as ReceiveUln301_PacketDelivered);
+});
+
+/* ---------- Agglayer Bridge Event Handlers ---------- */
+/*
+ * Agglayer bridge handling provides robust cross-chain event matching for the Polygon zkEVM ecosystem.
+ * 
+ * Key Features:
+ * - Deterministic matching using (assetOriginNetwork, assetOriginAddress, destinationAddress, amount, depositCount)
+ * - Unordered event processing (bridge/claim events can arrive in any sequence)
+ * - Enhanced validation: matches require both transaction existence AND depositCount == localRootIndex
+ * - Comprehensive metadata decoding for token information (name, symbol, decimals)
+ * - Global index decoding for mainnet flag, rollup index, and local root index analysis
+ * 
+ * Matching Logic:
+ * - Bridge events create transfer records with source-side data
+ * - Claim events update existing transfers with destination-side data
+ * - Strict matching prevents overcounting: requires exact field matches + nonce verification
+ * - Orphaned events are preserved for separate analysis
+ * 
+ * Supported Networks:
+ * - Ethereum (Network 0) ↔ Polygon zkEVM (Network 1)
+ * - Asset bridging (leafType=0) and message bridging (leafType=1)
+ */
+
+/**
+ * Agglayer Bridge Event Handler
+ * 
+ * Processes BridgeEvent from PolygonZkEVMBridgeV2 contract.
+ * This event is emitted when assets/messages are sent from one network to another.
+ * 
+ * Event contains:
+ * - leafType: 0 for asset bridging, 1 for message bridging
+ * - originNetwork/destinationNetwork: Network IDs (0=Ethereum, 1=Polygon zkEVM)
+ * - originAddress: Token contract address on origin network
+ * - destinationAddress: Recipient address on destination network
+ * - amount: Amount being bridged
+ * - metadata: ABI-encoded token info (name, symbol, decimals)
+ * - depositCount: Sequential nonce for this origin network
+ */
+PolygonZkEVMBridgeV2.BridgeEvent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Create deterministic ID using all matching fields
+  // Including depositCount ensures uniqueness for identical transfers
+  const transferId = createAgglayerTransferId(
+    event.params.originNetwork,
+    event.params.originAddress,
+    event.params.destinationAddress,
+    event.params.amount,
+    event.params.depositCount
+  );
+  
+  // Check for existing transfer (claim event may have been processed first)
+  const existingTransfer = await context.AgglayerTransfer.get(transferId);
+  
+  const transfer = createAgglayerTransfer({
+    id: transferId,
+    assetOriginNetwork: event.params.originNetwork,
+    assetDestinationNetwork: event.params.destinationNetwork,
+    assetOriginAddress: event.params.originAddress,
+    destinationAddress: event.params.destinationAddress,
+    amount: event.params.amount,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'bridge',
+    prev: existingTransfer,
+    leafType: event.params.leafType,
+    metadata: event.params.metadata,
+    depositCount: event.params.depositCount,
+  });
+  
+  context.AgglayerTransfer.set(transfer);
+  
+  // Enhanced raw event log
+  context.PolygonZkEVMBridgeV2_BridgeEvent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as PolygonZkEVMBridgeV2_BridgeEvent);
+});
+
+/**
+ * Agglayer Claim Event Handler
+ * 
+ * Processes ClaimEvent from PolygonZkEVMBridgeV2 contract.
+ * This event is emitted when assets/messages are claimed on the destination network.
+ * 
+ * Event contains:
+ * - globalIndex: Encoded index containing mainnet flag, rollup index, and local root index
+ * - originNetwork: Network where the asset originated (0=Ethereum, 1=Polygon zkEVM)  
+ * - originAddress: Token contract address on origin network
+ * - destinationAddress: Recipient address on destination network
+ * - amount: Amount being claimed
+ * 
+ * Key insight: localRootIndex from globalIndex equals depositCount from BridgeEvent
+ * This enables deterministic matching between bridge and claim events.
+ */
+PolygonZkEVMBridgeV2.ClaimEvent.handler(async ({ event, context }) => {
+  const timestamp = BigInt(event.block.timestamp);
+  
+  // Decode globalIndex to extract mainnet flag, rollup index, and local root index
+  const globalIndexDecoded = decodeGlobalIndex(event.params.globalIndex);
+  
+  // Use localRootIndex as depositCount for matching with BridgeEvent
+  // This is the key insight that enables robust event matching
+  const depositCount = globalIndexDecoded.localRootIndex;
+  
+  // Create identical ID as BridgeEvent for matching
+  const transferId = createAgglayerTransferId(
+    event.params.originNetwork,
+    event.params.originAddress,
+    event.params.destinationAddress,
+    event.params.amount,
+    depositCount
+  );
+  
+  // Check for existing transfer (bridge event may have been processed first)
+  const existingTransfer = await context.AgglayerTransfer.get(transferId);
+  
+  const transfer = createAgglayerTransfer({
+    id: transferId,
+    assetOriginNetwork: event.params.originNetwork,
+    assetDestinationNetwork: existingTransfer?.assetDestinationNetwork, // May not be in claim event
+    assetOriginAddress: event.params.originAddress,
+    destinationAddress: event.params.destinationAddress,
+    amount: event.params.amount,
+    chainId: event.chainId,
+    timestamp,
+    txHash: event.transaction.hash,
+    eventType: 'claim',
+    prev: existingTransfer,
+    globalIndex: event.params.globalIndex,
+    mainnetFlag: globalIndexDecoded.mainnetFlag,
+    rollupIndex: globalIndexDecoded.rollupIndex,
+    localRootIndex: globalIndexDecoded.localRootIndex,
+  });
+  
+  context.AgglayerTransfer.set(transfer);
+  
+  // Enhanced raw event log
+  context.PolygonZkEVMBridgeV2_ClaimEvent.set({
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    ...event.params,
+    chainId: BigInt(event.chainId),
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: timestamp,
+    txHash: event.transaction.hash,
+  } as PolygonZkEVMBridgeV2_ClaimEvent);
 });
