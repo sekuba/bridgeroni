@@ -14,7 +14,8 @@
     "tui:watch": "tsx watch tui.ts",
     "lzTui": "tsx lzTui.ts",
     "lzTui:watch": "tsx watch lzTui.ts",
-    "lz1-feed": "node scripts/lz1-feed.js"
+    "lz1-feed": "node scripts/lz1-feed.js",
+    "agglayer-stats": "tsx agglayer-stats.ts"
   },
   "devDependencies": {
     "@types/chai": "^4.3.11",
