@@ -93,6 +93,20 @@ networks:
   - name: PolygonZkEVMBridgeV2
     address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
 
+# - id: 752025  # Ternoa
+#   start_block: 2617987
+#   rpc: https://rpc-mainnet.zkevm.ternoa.network
+#   contracts:
+#   - name: PolygonZkEVMBridgeV2
+#     address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
+
+- id: 196 # XLayer
+  start_block: 23212889
+  rpc: https://rpc.xlayer.tech
+  contracts:
+  - name: PolygonZkEVMBridgeV2
+    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
+
 - id: 10  # OP Mainnet
   start_block: 138131801
   contracts:
