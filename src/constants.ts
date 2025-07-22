@@ -202,6 +202,9 @@ export const AGGLAYER_NETWORK_BY_CHAIN_ID: Record<number, bigint> = {
   1: 0n,       // Ethereum -> Agglayer Network 0
   1101: 1n,    // Polygon zkEVM -> Agglayer Network 1
   747474: 20n,  // Katana -> Agglayer Network 20
+  752025: 13n, // Ternoa
+  196: 3n,    // XLayer 
+  938: 12n,   // Haust Network 
 };
 
 // Chain ID to Agglayer network mapping (reverse lookup)
@@ -214,6 +217,9 @@ export const AGGLAYER_NETWORK_TO_CHAIN_NAME: Record<number, string> = {
   0: 'ethereum',
   1: 'polygonzkevm',
   20: 'katana',
+  13: 'ternoa',
+  3: 'xlayer',
+  12: 'haust.network'
 };
 
 // Agglayer protocol constants

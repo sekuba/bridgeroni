@@ -550,8 +550,7 @@ async function showStatistics() {
       const rollupCounts = unmatchedClaims.reduce((acc: any, claim: any) => {
         const rollup = claim.rollupIndex || 'unknown';
         const originNetwork = claim.assetOriginNetwork;
-        const networkName = getChainNameFromAgglayerNetwork(parseInt(originNetwork));
-        const key = `${networkName} (rollup ${rollup})`;
+        const key = `${getChainNameFromAgglayerNetwork(parseInt(rollup))}`;
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
