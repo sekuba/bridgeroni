@@ -1,195 +1,26 @@
-# Cross-Chain Bridge Monitor - Envio Indexer Configuration
-# Tracks CCTP v1/v2 and LayerZero v2 events for comprehensive cross-chain monitoring
-
-name: cctp-bridge-monitor
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: envio-indexer
 contracts:
-# CCTP v1 Contracts
-- name: TokenMessenger
+- name: L1AssetRouter
   handler: src/EventHandlers.ts
   events:
-    - event: DepositForBurn(uint64 indexed nonce, address indexed burnToken, uint256 amount, address indexed depositor, bytes32 mintRecipient, uint32 destinationDomain, bytes32 destinationTokenMessenger, bytes32 destinationCaller)
-
-- name: MessageTransmitter
-  handler: src/EventHandlers.ts
-  events:
-    - event: MessageReceived(address indexed caller, uint32 sourceDomain, uint64 indexed nonce, bytes32 sender, bytes messageBody)
-
-# CCTP v2 Contracts
-- name: TokenMessengerV2
-  handler: src/EventHandlers.ts
-  events:
-    - event: DepositForBurn(address indexed burnToken, uint256 amount, address indexed depositor, bytes32 mintRecipient, uint32 destinationDomain, bytes32 destinationTokenMessenger, bytes32 destinationCaller, uint256 maxFee, uint32 indexed minFinalityThreshold, bytes hookData)
-
-- name: MessageTransmitterV2
-  handler: src/EventHandlers.ts
-  events:
-    - event: MessageReceived(address indexed caller, uint32 sourceDomain, bytes32 indexed nonce, bytes32 sender, uint32 indexed finalityThresholdExecuted, bytes messageBody)
-
-# LayerZero v1 Contracts
-- name: UltraLightNodeV2
-  handler: src/EventHandlers.ts
-  events:
-    - event: Packet(bytes payload)
-    - event: PacketReceived(uint16 indexed srcChainId, bytes srcAddress, address indexed dstAddress, uint64 nonce, bytes32 payloadHash)
-
-- name: SendUln301
-  handler: src/EventHandlers.ts
-  events:
-    - event: PacketSent(bytes encodedPayload, bytes options, uint256 nativeFee, uint256 lzTokenFee)
-
-- name: ReceiveUln301
-  handler: src/EventHandlers.ts
-  events:
-    - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
-
-# LayerZero v2 Contracts
-- name: EndpointV2
-  handler: src/EventHandlers.ts
-  events:
-    - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
-    - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
-
-# Agglayer Bridge Contracts
-- name: PolygonZkEVMBridgeV2
-  handler: src/EventHandlers.ts
-  events:
-    - event: BridgeEvent(uint8 leafType, uint32 originNetwork, address originAddress, uint32 destinationNetwork, address destinationAddress, uint256 amount, bytes metadata, uint32 depositCount)
-    - event: ClaimEvent(uint256 globalIndex, uint32 originNetwork, address originAddress, address destinationAddress, uint256 amount)
-
+  - event: BridgehubDepositBaseTokenInitiated(uint256 indexed chainId, address indexed from, bytes32 assetId, uint256 amount)
+  - event: BridgehubDepositFinalized(uint256 indexed chainId, bytes32 indexed txDataHash, bytes32 indexed l2DepositTxHash)
+  - event: BridgehubDepositInitiated(uint256 indexed chainId, bytes32 indexed txDataHash, address indexed from, bytes32 assetId, bytes bridgeMintCalldata)
+  - event: ClaimedFailedDepositAssetRouter(uint256 indexed chainId, bytes32 indexed assetId, bytes assetData)
+  - event: DepositFinalizedAssetRouter(uint256 indexed chainId, bytes32 indexed assetId, bytes assetData)
+  - event: LegacyDepositInitiated(uint256 indexed chainId, bytes32 indexed l2DepositTxHash, address indexed from, address to, address l1Token, uint256 amount)
 networks:
-# Standard CCTP v1 + v2 chains + LayerZero v2
-- id: 1  # Ethereum
-  start_block: 22864921
+- id: 1
+  start_block: 23006299
   contracts:
-  - name: TokenMessenger
-    address: [0xBd3fa81B58Ba92a82136038B25aDec7066af3155]
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitter
-    address: [0x0a992d191DEeC32aFe36203Ad87D7d289a738F81]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-  - name: UltraLightNodeV2
-    address: [0x4D73AdB72bC3DD368966edD0f0b2148401A178E2]
-  - name: SendUln301
-    address: [0xD231084BfB234C107D3eE2b22F97F3346fDAF705]
-  - name: ReceiveUln301
-    address: [0x245B6e8FFE9ea5Fc301e32d16F66bD4C2123eEfC]
-  - name: EndpointV2
-    address: [0x1a44076050125825900e736c501f859c50fE728c]
-  - name: PolygonZkEVMBridgeV2
-    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
-
-- id: 1101  # Polygon zkEVM
-  start_block: 23759633
+  - name: L1AssetRouter
+    address:
+    - 0x8829AD80E425C646DAB305381ff105169FeEcE56
+- id: 324
+  start_block: 63394479
   contracts:
-  - name: PolygonZkEVMBridgeV2
-    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
-
-- id: 747474  # Katana
-  start_block: 5380833
-  rpc: https://rpc.katana.network
-  contracts:
-  - name: PolygonZkEVMBridgeV2
-    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
-
-# - id: 752025  # Ternoa
-#   start_block: 2617987
-#   rpc: https://rpc-mainnet.zkevm.ternoa.network
-#   contracts:
-#   - name: PolygonZkEVMBridgeV2
-#     address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
-
-- id: 196 # XLayer
-  start_block: 23212889
-  rpc: https://rpc.xlayer.tech
-  contracts:
-  - name: PolygonZkEVMBridgeV2
-    address: [0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe]
-
-- id: 10  # OP Mainnet
-  start_block: 138131801
-  contracts:
-  - name: TokenMessenger
-    address: [0x2B4069517957735bE00ceE0fadAE88a26365528f]
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitter
-    address: [0x4D41f22c5a0e5c74090899E5a8Fb597a8842b3e8]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-
-- id: 42161  # Arbitrum
-  start_block: 355077971
-  contracts:
-  - name: TokenMessenger
-    address: [0x19330d10D9Cc8751218eaf51E8885D058642E08A]
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitter
-    address: [0xC30362313FBBA5cf9163F0bb16a0e01f01A896ca]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-  - name: UltraLightNodeV2
-    address: [0x4D73AdB72bC3DD368966edD0f0b2148401A178E2]
-  - name: SendUln301
-    address: [0x5cDc927876031B4Ef910735225c425A7Fc8efed9]
-  - name: ReceiveUln301
-    address: [0xe4DD168822767C4342e54e6241f0b91DE0d3c241]
-  - name: EndpointV2
-    address: [0x1a44076050125825900e736c501f859c50fE728c]
-
-- id: 8453  # Base
-  start_block: 32536517
-  contracts:
-  - name: TokenMessenger
-    address: [0x1682Ae6375C4E4A97e4B583BC394c861A46D8962]
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitter
-    address: [0xAD09780d193884d503182aD4588450C416D6F9D4]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-  - name: UltraLightNodeV2
-    address: [0x38dE71124f7a447a01D67945a51eDcE9FF491251]
-  - name: SendUln301
-    address: [0x9DB3714048B5499Ec65F807787897D3b3Aa70072]
-  - name: ReceiveUln301
-    address: [0x58D53a2d6a08B72a15137F3381d21b90638bd753]
-  - name: EndpointV2
-    address: [0x1a44076050125825900e736c501f859c50fE728c]
-
-- id: 130  # Unichain
-  start_block: 21114021
-  contracts:
-  - name: TokenMessenger
-    address: [0x4e744b28E787c3aD0e810eD65A24461D4ac5a762]
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitter
-    address: [0x353bE9E2E38AB1D19104534e4edC21c643Df86f4]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-
-# CCTP v2 only chains
-- id: 59144  # Linea
-  start_block: 20646338
-  contracts:
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-
-- id: 480  # World Chain
-  start_block: 16267833
-  contracts:
-  - name: TokenMessengerV2
-    address: [0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d]
-  - name: MessageTransmitterV2
-    address: [0x81D40F21F12A8F0E3252Bccb954D722d4c464B64]
-
-field_selection:
-  transaction_fields:
-    - hash
-          
+  - name: L1AssetRouter
+    address:
+    - '0x0000000000000000000000000000000000010003'
 unordered_multichain_mode: true

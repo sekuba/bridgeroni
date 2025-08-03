@@ -1,347 +1,48 @@
-# Raw events with enhanced metadata for TUI display
-type MessageTransmitter_MessageReceived {
+type L1AssetRouter_BridgehubDepositBaseTokenInitiated {
   id: ID!
-  caller: String!
-  sourceDomain: BigInt!
-  nonce: BigInt!
-  sender: String!
-  messageBody: String!
-  # Enhanced metadata
   chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# CCTPv2 MessageReceived event
-type MessageTransmitter_MessageReceivedV2 {
-  id: ID!
-  caller: String!
-  sourceDomain: BigInt!
-  nonce: String!  # bytes32 in v2
-  sender: String!
-  finalityThresholdExecuted: BigInt!
-  messageBody: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-type TokenMessenger_DepositForBurn {
-  id: ID!
-  nonce: BigInt!
-  burnToken: String!
+  from: String!
+  assetId: String!
   amount: BigInt!
-  depositor: String!
-  mintRecipient: String!
-  destinationDomain: BigInt!
-  destinationTokenMessenger: String!
-  destinationCaller: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
 }
 
-# CCTPv2 DepositForBurn event
-type TokenMessenger_DepositForBurnV2 {
+type L1AssetRouter_BridgehubDepositFinalized {
   id: ID!
-  burnToken: String!
+  chainId: BigInt!
+  txDataHash: String!
+  l2DepositTxHash: String!
+}
+
+type L1AssetRouter_BridgehubDepositInitiated {
+  id: ID!
+  chainId: BigInt!
+  txDataHash: String!
+  from: String!
+  assetId: String!
+  bridgeMintCalldata: String!
+}
+
+type L1AssetRouter_ClaimedFailedDepositAssetRouter {
+  id: ID!
+  chainId: BigInt!
+  assetId: String!
+  assetData: String!
+}
+
+type L1AssetRouter_DepositFinalizedAssetRouter {
+  id: ID!
+  chainId: BigInt!
+  assetId: String!
+  assetData: String!
+}
+
+type L1AssetRouter_LegacyDepositInitiated {
+  id: ID!
+  chainId: BigInt!
+  l2DepositTxHash: String!
+  from: String!
+  to: String!
+  l1Token: String!
   amount: BigInt!
-  depositor: String!
-  mintRecipient: String!
-  destinationDomain: BigInt!
-  destinationTokenMessenger: String!
-  destinationCaller: String!
-  maxFee: BigInt!
-  minFinalityThreshold: BigInt!
-  hookData: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
 }
 
-# LayerZero v1 UltraLightNodeV2 Packet event
-type UltraLightNodeV2_Packet {
-  id: ID!
-  payload: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v1 UltraLightNodeV2 PacketReceived event
-type UltraLightNodeV2_PacketReceived {
-  id: ID!
-  srcChainId: BigInt!
-  srcAddress: String!
-  dstAddress: String!
-  nonce: BigInt!
-  payloadHash: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v1 SendUln301 PacketSent event
-type SendUln301_PacketSent {
-  id: ID!
-  encodedPayload: String!
-  options: String!
-  nativeFee: BigInt!
-  lzTokenFee: BigInt!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v1 ReceiveUln301 PacketDelivered event
-type ReceiveUln301_PacketDelivered {
-  id: ID!
-  originSrcEid: BigInt!
-  originSender: String!
-  originNonce: BigInt!
-  receiver: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v2 PacketSent event
-type EndpointV2_PacketSent {
-  id: ID!
-  encodedPayload: String!
-  options: String!
-  sendLibrary: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v2 PacketDelivered event  
-type EndpointV2_PacketDelivered {
-  id: ID!
-  originSrcEid: BigInt!
-  originSender: String!
-  originNonce: BigInt!
-  receiver: String!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# Agglayer Bridge BridgeEvent
-type PolygonZkEVMBridgeV2_BridgeEvent {
-  id: ID!
-  leafType: BigInt!
-  originNetwork: BigInt!
-  originAddress: String!
-  destinationNetwork: BigInt!
-  destinationAddress: String!
-  amount: BigInt!
-  metadata: String!
-  depositCount: BigInt!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# Agglayer Bridge ClaimEvent
-type PolygonZkEVMBridgeV2_ClaimEvent {
-  id: ID!
-  globalIndex: BigInt!
-  originNetwork: BigInt!
-  originAddress: String!
-  destinationAddress: String!
-  amount: BigInt!
-  # Enhanced metadata
-  chainId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  txHash: String!
-}
-
-# LayerZero v1 packet transfer entity for matching sent/delivered packets
-type LayerZeroV1Packet @entity {
-  id: ID!
-
-  # === Core identifiers ===
-  srcChainId: BigInt!           # v1 uses chain IDs instead of EIDs
-  dstChainId: BigInt
-  nonce: BigInt!
-  ua: String!                   # User Application address
-  dstAddress: String!           # Destination address
-  
-  # === Source-side data (UltraLightNodeV2.Packet or SendUln301.PacketSent) ===
-  payload: String               # Raw payload from Packet event
-  encodedPayload: String        # Encoded payload from SendUln301.PacketSent
-  options: String               # Options from SendUln301.PacketSent
-  nativeFee: BigInt             # Native fee from SendUln301.PacketSent
-  lzTokenFee: BigInt            # LZ token fee from SendUln301.PacketSent
-  sourceTxHash: String
-  sentBlock: BigInt
-  sentTimestamp: BigInt
-
-  # === Destination-side data (UltraLightNodeV2.PacketReceived or ReceiveUln301.PacketDelivered) ===
-  payloadHash: String           # Payload hash from PacketReceived
-  srcAddress: String            # Source address from PacketReceived
-  destinationTxHash: String
-  deliveredBlock: BigInt
-  deliveredTimestamp: BigInt
-
-  # === Derived fields ===
-  latencySeconds: BigInt
-  matched: Boolean!
-  version: String!              # "v1" for LayerZero v1
-  protocol: String!             # "UltraLightNodeV2" or "SendUln301"
-  
-  # === Computed fields for TUI efficiency ===
-  hasPayload: Boolean!          # true if payload is not null/empty
-  sourceChainId: BigInt         # chain ID where packet was sent
-  destinationChainId: BigInt    # chain ID where packet was delivered
-  eventType: String!            # "sent", "delivered", or "matched"
-  lastUpdated: BigInt!          # timestamp of last update to this record
-}
-
-# LayerZero v2 packet transfer entity for matching sent/delivered packets
-type LayerZeroPacket @entity {
-  id: ID!
-
-  # === Core identifiers ===
-  srcEid: BigInt!
-  dstEid: BigInt
-  nonce: BigInt!
-  sender: String!
-  receiver: String!
-
-  # === Source-side data ===
-  encodedPayload: String
-  options: String
-  sendLibrary: String
-  sourceTxHash: String
-  sentBlock: BigInt
-  sentTimestamp: BigInt
-
-  # === Destination-side data ===
-  destinationTxHash: String
-  deliveredBlock: BigInt
-  deliveredTimestamp: BigInt
-
-  # === Derived fields ===
-  latencySeconds: BigInt
-  matched: Boolean!
-  payload: String              # Decoded payload (everything after header)
-  
-  # === Computed fields for TUI efficiency ===
-  hasPayload: Boolean!         # true if payload is not null/empty
-  sourceChainId: BigInt        # chain ID where packet was sent
-  destinationChainId: BigInt   # chain ID where packet was delivered
-  eventType: String!           # "sent", "delivered", or "matched"
-  lastUpdated: BigInt!         # timestamp of last update to this record
-}
-
-type CCTPTransfer @entity {
-  id: ID!
-
-  # === Core identifiers ===
-  sourceDomain: BigInt!
-  destinationDomain: BigInt
-  nonce: String!  # Support both BigInt (v1) and bytes32 (v2) as string
-  version: String!             # "v1" or "v2"
-
-  # === Source-side data ===
-  amount: BigInt
-  burnToken: String
-  depositor: String
-  mintRecipient: String
-  sourceTxHash: String
-  depositBlock: BigInt
-  depositTimestamp: BigInt
-
-  # === CCTP v2 specific fields ===
-  maxFee: BigInt               # v2 only
-  minFinalityThreshold: BigInt # v2 only  
-  hookData: String             # v2 only
-  finalityThresholdExecuted: BigInt # v2 only (destination side)
-
-  # === Destination-side data ===
-  destinationTxHash: String
-  messageReceivedBlock: BigInt
-  messageReceivedTimestamp: BigInt
-
-  # === Derived fields ===
-  latencySeconds: BigInt
-  matched: Boolean!
-  
-  # === Computed fields for TUI efficiency ===
-  hasAmount: Boolean!           # true if amount is not null (for display logic)
-  sourceChainId: BigInt        # chain ID where deposit occurred
-  destinationChainId: BigInt   # chain ID where message was received
-  eventType: String!           # "deposit", "received", or "matched"
-  lastUpdated: BigInt!         # timestamp of last update to this record
-}
-
-# Agglayer bridge transfer entity for matching bridge/claim events
-type AgglayerTransfer @entity {
-  id: ID!
-
-  # === Core identifiers ===
-  assetOriginNetwork: BigInt!     # Network where the asset is native (0=ethereum, 1=polygonzkevm)
-  assetDestinationNetwork: BigInt # Network where asset is being sent
-  assetOriginAddress: String!     # Address of the asset at its origin network
-  destinationAddress: String!     # Recipient address at destination
-  amount: BigInt!
-
-  # === Source-side data (BridgeEvent) ===
-  leafType: BigInt!            # 0 for asset bridging, 1 for message bridging
-  metadata: String             # abi.encode(tokenName, tokenSymbol, tokenDecimals)
-  depositCount: BigInt         # nonce at the origin
-  sourceTxHash: String
-  bridgeBlock: BigInt
-  bridgeTimestamp: BigInt
-
-  # === Decoded token information ===
-  tokenName: String            # Decoded from metadata
-  tokenSymbol: String          # Decoded from metadata
-  tokenDecimals: BigInt        # Decoded from metadata
-
-  # === Destination-side data (ClaimEvent) ===
-  globalIndex: BigInt          # Global index containing mainnetFlag, rollupIndex, localRootIndex
-  mainnetFlag: Boolean         # Extracted from globalIndex
-  rollupIndex: BigInt          # Extracted from globalIndex
-  localRootIndex: BigInt       # Extracted from globalIndex (should match depositCount)
-  destinationTxHash: String
-  claimBlock: BigInt
-  claimTimestamp: BigInt
-
-  # === Derived fields ===
-  latencySeconds: BigInt
-  matched: Boolean!
-  depositCountMatches: Boolean # true if localRootIndex == depositCount
-
-  # === Computed fields for TUI efficiency ===
-  hasAmount: Boolean!          # true if amount is not null
-  sourceChainId: BigInt        # chain ID where bridge occurred
-  destinationChainId: BigInt   # chain ID where claim occurred
-  eventType: String!           # "bridge", "claim", or "matched"
-  lastUpdated: BigInt!         # timestamp of last update to this record
-}
