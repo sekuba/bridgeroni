@@ -240,26 +240,3 @@ export const AGGLAYER_CONSTANTS = {
     DECIMALS_MAX: 255, // Maximum valid decimals for tokens
   },
 } as const;
-
-// Helper function to get Agglayer network from chain ID
-export const getAgglayerNetworkFromChainId = (chainId: number): bigint | undefined =>
-  AGGLAYER_NETWORK_BY_CHAIN_ID[chainId];
-
-// Helper function to get chain name from Agglayer network
-export const getChainNameFromAgglayerNetwork = (network: number): string =>
-  AGGLAYER_NETWORK_TO_CHAIN_NAME[network] || `Network${network}`;
-
-// Helper function to check if chain supports Agglayer
-export const supportsAgglayer = (chainId: number): boolean =>
-  Object.keys(AGGLAYER_NETWORK_BY_CHAIN_ID).map(Number).includes(chainId);
-
-// Helper function to create Agglayer transfer ID
-export const createAgglayerTransferId = (
-  assetOriginNetwork: bigint,
-  assetOriginAddress: string,
-  destinationAddress: string,
-  amount: bigint,
-  depositCount: bigint
-): string => {
-  return `agglayer_${assetOriginNetwork}_${assetOriginAddress.toLowerCase()}_${destinationAddress.toLowerCase()}_${amount}_${depositCount}`;
-};
