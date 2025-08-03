@@ -1,3 +1,23 @@
+type L1AssetRouter_AssetDeploymentTrackerRegistered {
+  id: ID!
+  assetId: String!
+  additionalData: String!
+  assetDeploymentTracker: String!
+}
+
+type L1AssetRouter_AssetDeploymentTrackerSet {
+  id: ID!
+  assetId: String!
+  assetDeploymentTracker: String!
+  additionalData: String!
+}
+
+type L1AssetRouter_AssetHandlerRegistered {
+  id: ID!
+  assetId: String!
+  _assetHandlerAddress: String!
+}
+
 type L1AssetRouter_BridgehubDepositBaseTokenInitiated {
   id: ID!
   chainId: BigInt!
@@ -22,6 +42,19 @@ type L1AssetRouter_BridgehubDepositInitiated {
   bridgeMintCalldata: String!
 }
 
+type L1AssetRouter_BridgehubMintData {
+  id: ID!
+  bridgeMintData: String!
+}
+
+type L1AssetRouter_BridgehubWithdrawalInitiated {
+  id: ID!
+  chainId: BigInt!
+  sender: String!
+  assetId: String!
+  assetDataHash: String!
+}
+
 type L1AssetRouter_ClaimedFailedDepositAssetRouter {
   id: ID!
   chainId: BigInt!
@@ -44,5 +77,78 @@ type L1AssetRouter_LegacyDepositInitiated {
   to: String!
   l1Token: String!
   amount: BigInt!
+}
+
+type L1AssetRouter_Paused {
+  id: ID!
+  account: String!
+}
+
+type L1AssetRouter_Unpaused {
+  id: ID!
+  account: String!
+}
+
+type L2AssetRouter_AssetDeploymentTrackerRegistered {
+  id: ID!
+  assetId: String!
+  additionalData: String!
+  assetDeploymentTracker: String!
+}
+
+type L2AssetRouter_AssetHandlerRegistered {
+  id: ID!
+  assetId: String!
+  _assetHandlerAddress: String!
+}
+
+type L2AssetRouter_BridgehubDepositBaseTokenInitiated {
+  id: ID!
+  chainId: BigInt!
+  from: String!
+  assetId: String!
+  amount: BigInt!
+}
+
+type L2AssetRouter_BridgehubDepositInitiated {
+  id: ID!
+  chainId: BigInt!
+  txDataHash: String!
+  from: String!
+  assetId: String!
+  bridgeMintCalldata: String!
+}
+
+type L2AssetRouter_BridgehubWithdrawalInitiated {
+  id: ID!
+  chainId: BigInt!
+  sender: String!
+  assetId: String!
+  assetDataHash: String!
+}
+
+type L2AssetRouter_DepositFinalizedAssetRouter {
+  id: ID!
+  chainId: BigInt!
+  assetId: String!
+  assetData: String!
+}
+
+type L2AssetRouter_Paused {
+  id: ID!
+  account: String!
+}
+
+type L2AssetRouter_Unpaused {
+  id: ID!
+  account: String!
+}
+
+type L2AssetRouter_WithdrawalInitiatedAssetRouter {
+  id: ID!
+  chainId: BigInt!
+  l2Sender: String!
+  assetId: String!
+  assetData: String!
 }
 
