@@ -27,6 +27,7 @@ import {
   L2AssetRouter_Unpaused,
   L2AssetRouter_WithdrawalInitiatedAssetRouter,
 } from "generated";
+import { decodeBridgeMintData } from "./decoders/zksync";
 
 L1AssetRouter.AssetDeploymentTrackerRegistered.handler(async ({ event, context }) => {
   const entity: L1AssetRouter_AssetDeploymentTrackerRegistered = {
@@ -103,9 +104,16 @@ L1AssetRouter.BridgehubDepositInitiated.handler(async ({ event, context }) => {
 });
 
 L1AssetRouter.BridgehubMintData.handler(async ({ event, context }) => {
+  const decoded = decodeBridgeMintData(event.params.bridgeMintData);
+  
   const entity: L1AssetRouter_BridgehubMintData = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     bridgeMintData: event.params.bridgeMintData,
+    decodedOriginalCaller: decoded?.originalCaller,
+    decodedRemoteReceiver: decoded?.remoteReceiver,
+    decodedParsedOriginToken: decoded?.parsedOriginToken,
+    decodedAmount: decoded?.amount,
+    decodedErc20Metadata: decoded?.erc20Metadata,
     txHash: event.transaction.hash,
   };
 
@@ -126,11 +134,18 @@ L1AssetRouter.BridgehubWithdrawalInitiated.handler(async ({ event, context }) =>
 });
 
 L1AssetRouter.ClaimedFailedDepositAssetRouter.handler(async ({ event, context }) => {
+  const decoded = decodeBridgeMintData(event.params.assetData);
+  
   const entity: L1AssetRouter_ClaimedFailedDepositAssetRouter = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     chainId: event.params.chainId,
     assetId: event.params.assetId,
     assetData: event.params.assetData,
+    decodedOriginalCaller: decoded?.originalCaller,
+    decodedRemoteReceiver: decoded?.remoteReceiver,
+    decodedParsedOriginToken: decoded?.parsedOriginToken,
+    decodedAmount: decoded?.amount,
+    decodedErc20Metadata: decoded?.erc20Metadata,
     txHash: event.transaction.hash,
   };
 
@@ -138,11 +153,18 @@ L1AssetRouter.ClaimedFailedDepositAssetRouter.handler(async ({ event, context })
 });
 
 L1AssetRouter.DepositFinalizedAssetRouter.handler(async ({ event, context }) => {
+  const decoded = decodeBridgeMintData(event.params.assetData);
+  
   const entity: L1AssetRouter_DepositFinalizedAssetRouter = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     chainId: event.params.chainId,
     assetId: event.params.assetId,
     assetData: event.params.assetData,
+    decodedOriginalCaller: decoded?.originalCaller,
+    decodedRemoteReceiver: decoded?.remoteReceiver,
+    decodedParsedOriginToken: decoded?.parsedOriginToken,
+    decodedAmount: decoded?.amount,
+    decodedErc20Metadata: decoded?.erc20Metadata,
     txHash: event.transaction.hash,
   };
 
@@ -248,11 +270,18 @@ L2AssetRouter.BridgehubWithdrawalInitiated.handler(async ({ event, context }) =>
 });
 
 L2AssetRouter.DepositFinalizedAssetRouter.handler(async ({ event, context }) => {
+  const decoded = decodeBridgeMintData(event.params.assetData);
+  
   const entity: L2AssetRouter_DepositFinalizedAssetRouter = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     chainId: event.params.chainId,
     assetId: event.params.assetId,
     assetData: event.params.assetData,
+    decodedOriginalCaller: decoded?.originalCaller,
+    decodedRemoteReceiver: decoded?.remoteReceiver,
+    decodedParsedOriginToken: decoded?.parsedOriginToken,
+    decodedAmount: decoded?.amount,
+    decodedErc20Metadata: decoded?.erc20Metadata,
     txHash: event.transaction.hash,
   };
 
@@ -280,12 +309,19 @@ L2AssetRouter.Unpaused.handler(async ({ event, context }) => {
 });
 
 L2AssetRouter.WithdrawalInitiatedAssetRouter.handler(async ({ event, context }) => {
+  const decoded = decodeBridgeMintData(event.params.assetData);
+  
   const entity: L2AssetRouter_WithdrawalInitiatedAssetRouter = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     chainId: event.params.chainId,
     l2Sender: event.params.l2Sender,
     assetId: event.params.assetId,
     assetData: event.params.assetData,
+    decodedOriginalCaller: decoded?.originalCaller,
+    decodedRemoteReceiver: decoded?.remoteReceiver,
+    decodedParsedOriginToken: decoded?.parsedOriginToken,
+    decodedAmount: decoded?.amount,
+    decodedErc20Metadata: decoded?.erc20Metadata,
     txHash: event.transaction.hash,
   };
 

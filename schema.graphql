@@ -51,6 +51,11 @@ type L1AssetRouter_BridgehubDepositInitiated {
 type L1AssetRouter_BridgehubMintData {
   id: ID!
   bridgeMintData: String!
+  decodedOriginalCaller: String
+  decodedRemoteReceiver: String
+  decodedParsedOriginToken: String
+  decodedAmount: BigInt
+  decodedErc20Metadata: String
   txHash: String!
 }
 
@@ -68,6 +73,11 @@ type L1AssetRouter_ClaimedFailedDepositAssetRouter {
   chainId: BigInt!
   assetId: String!
   assetData: String!
+  decodedOriginalCaller: String
+  decodedRemoteReceiver: String
+  decodedParsedOriginToken: String
+  decodedAmount: BigInt
+  decodedErc20Metadata: String
   txHash: String!
 }
 
@@ -76,6 +86,11 @@ type L1AssetRouter_DepositFinalizedAssetRouter {
   chainId: BigInt!
   assetId: String!
   assetData: String!
+  decodedOriginalCaller: String
+  decodedRemoteReceiver: String
+  decodedParsedOriginToken: String
+  decodedAmount: BigInt
+  decodedErc20Metadata: String
   txHash: String!
 }
 
@@ -150,6 +165,11 @@ type L2AssetRouter_DepositFinalizedAssetRouter {
   chainId: BigInt!
   assetId: String!
   assetData: String!
+  decodedOriginalCaller: String
+  decodedRemoteReceiver: String
+  decodedParsedOriginToken: String
+  decodedAmount: BigInt
+  decodedErc20Metadata: String
   txHash: String!
 }
 
@@ -171,6 +191,11 @@ type L2AssetRouter_WithdrawalInitiatedAssetRouter {
   l2Sender: String!
   assetId: String!
   assetData: String!
+  decodedOriginalCaller: String
+  decodedRemoteReceiver: String
+  decodedParsedOriginToken: String
+  decodedAmount: BigInt
+  decodedErc20Metadata: String
   txHash: String!
 }
 
