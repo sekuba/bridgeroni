@@ -218,7 +218,7 @@ async function handleAcrossAppPayload(
     if (eventData.direction === 'inbound') {
       appPayload = {
         ...appPayload,
-        amountIn: eventData.outputAmount,
+        amountOut: eventData.outputAmount,
         assetAddressInbound: unpadAddress(eventData.outputToken),
         ...(eventData.message !== undefined && { message: eventData.message }),
       };
@@ -227,7 +227,7 @@ async function handleAcrossAppPayload(
       appPayload = {
         ...appPayload,
         assetAddressOutbound: unpadAddress(eventData.inputToken),
-        amountOut: eventData.inputAmount,
+        amountIn: eventData.inputAmount,
         sender: unpadAddress(eventData.depositor),
         message: eventData.message,
       };
@@ -248,8 +248,8 @@ async function handleAcrossAppPayload(
         // Asset information (partial, from inbound)
         assetAddressOutbound: undefined,
         assetAddressInbound: unpadAddress(eventData.outputToken),
-        amountOut: undefined,
-        amountIn: eventData.outputAmount,
+        amountOut: eventData.outputAmount,
+        amountIn: undefined,
 
         // Addresses (from inbound)
         sender: unpadAddress(eventData.depositor),
@@ -279,8 +279,8 @@ async function handleAcrossAppPayload(
         // Asset information
         assetAddressOutbound: unpadAddress(eventData.inputToken),
         assetAddressInbound: unpadAddress(eventData.outputToken),
-        amountOut: eventData.inputAmount,
-        amountIn: eventData.outputAmount,
+        amountIn: eventData.inputAmount,
+        amountOut: eventData.outputAmount,
 
         // Addresses
         sender: unpadAddress(eventData.depositor),
@@ -526,6 +526,6 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
  * LayerZero.MessageSent.handler(async ({ event, context }) => {
  *   // Store raw event
  *   // Extract data
- *   // Call helper functions
+ *   // Call helper functions for message and app payload
  * });
  */
