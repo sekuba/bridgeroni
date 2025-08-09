@@ -15,7 +15,8 @@ import {
   StargatePool_OFTSent,
   StargatePool_OFTReceived,
 } from "generated";
-import { isAddress, getAddress, keccak256, encodeAbiParameters, parseAbiParameters, pad } from "viem";
+import { isAddress, getAddress, keccak256, encodePacked, pad } from "viem";
+import { mapChainIdToChainInfo } from "../analyze/const";
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -521,6 +522,14 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
 // LAYERZERO V2 BRIDGE HELPERS
 // ============================================================================
 
+function getEidForChain(chainId: number): number {
+  const chainInfo = mapChainIdToChainInfo(chainId);
+  if (!chainInfo) {
+    throw new Error(`Unknown EID for chain ID ${chainId}`);
+  }
+  return chainInfo.eid;
+}
+
 interface LayerZeroPacketData {
   version: number;
   nonce: bigint;
@@ -553,17 +562,26 @@ function decodeLayerZeroPacket(encodedPayload: string): LayerZeroPacketData {
   try {
     const payload = encodedPayload.startsWith('0x') ? encodedPayload : '0x' + encodedPayload;
     
-    if (payload.length < 166) {
-      throw new Error(`Payload too short: ${payload.length}, minimum 166 characters expected`);
+    if (payload.length < 164) {
+      throw new Error(`Payload too short: ${payload.length}, minimum 164 characters expected`);
     }
 
-    const version = parseInt(payload.slice(2, 6), 16);
-    const nonce = BigInt('0x' + payload.slice(6, 22));
-    const srcEid = parseInt(payload.slice(22, 30), 16);
-    const sender = '0x' + payload.slice(30, 94);
-    const dstEid = parseInt(payload.slice(94, 102), 16);
-    const receiver = '0x' + payload.slice(102, 166);
-    const appPayload = payload.slice(166);
+    // Correct LayerZero V2 packet format:
+    // Version: 1 byte (2 hex chars)
+    // Nonce: 8 bytes (16 hex chars) - uint64
+    // SrcEid: 4 bytes (8 hex chars) - uint32
+    // Sender: 32 bytes (64 hex chars)
+    // DstEid: 4 bytes (8 hex chars) - uint32
+    // Receiver: 32 bytes (64 hex chars)
+    // Payload: remaining bytes
+
+    const version = parseInt(payload.slice(2, 4), 16);         // 1 byte
+    const nonce = BigInt('0x' + payload.slice(4, 20));        // 8 bytes  
+    const srcEid = parseInt(payload.slice(20, 28), 16);       // 4 bytes
+    const sender = '0x' + payload.slice(28, 92);             // 32 bytes
+    const dstEid = parseInt(payload.slice(92, 100), 16);     // 4 bytes
+    const receiver = '0x' + payload.slice(100, 164);         // 32 bytes
+    const appPayload = payload.slice(164);                   // rest
 
     const guid = calculateLayerZeroGUID(nonce, srcEid, sender, dstEid, receiver);
 
@@ -591,8 +609,10 @@ function calculateLayerZeroGUID(nonce: bigint, srcEid: number | bigint, sender: 
     const srcEidNumber = typeof srcEid === 'bigint' ? Number(srcEid) : srcEid;
     const dstEidNumber = typeof dstEid === 'bigint' ? Number(dstEid) : dstEid;
     
-    return keccak256(encodeAbiParameters(
-      parseAbiParameters('uint64 nonce, uint32 srcEid, bytes32 sender, uint32 dstEid, bytes32 receiver'),
+    // Use encodePacked as specified in LayerZero documentation:
+    // guid = keccak256(abi.encodePacked(_nonce, _srcEid, _sender.toBytes32(), _dstEid, _receiver))
+    return keccak256(encodePacked(
+      ['uint64', 'uint32', 'bytes32', 'uint32', 'bytes32'],
       [nonce, srcEidNumber, paddedSender, dstEidNumber, paddedReceiver]
     ));
   } catch (error) {
@@ -849,11 +869,15 @@ EndpointV2.PacketSent.handler(async ({ event, context }) => {
 
 EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
   try {
+    // For PacketDelivered, we need to use the EID of the destination chain (where the packet is delivered)
+    // not the chain ID itself
+    const dstEid = getEidForChain(event.chainId);
+    
     const guid = calculateLayerZeroGUID(
       event.params.origin[2], // nonce
       Number(event.params.origin[0]), // srcEid
       event.params.origin[1], // sender
-      event.chainId,
+      dstEid, // use the EID of the destination chain
       event.params.receiver
     );
 
