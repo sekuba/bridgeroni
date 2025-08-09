@@ -9,12 +9,31 @@ import {
   CrosschainMessage,
   AppPayload,
 } from "generated";
+import { isAddress, getAddress } from "viem";
+
+// Utility function to clean padded addresses
+function unpad(paddedAddress: string): string {
+  // Remove 0x prefix temporarily
+  const withoutPrefix = paddedAddress.startsWith('0x') ? paddedAddress.slice(2) : paddedAddress;
+  
+  // Take the last 40 characters (20 bytes) which represent the address
+  const addressPart = withoutPrefix.slice(-40);
+  const cleanedAddress = '0x' + addressPart;
+  
+  // Validate and return checksummed address, or return original if invalid
+  if (isAddress(cleanedAddress)) {
+    return getAddress(cleanedAddress); // Returns checksummed address
+  }
+  
+  // If not a valid address, return original (might be zero address or other value)
+  return paddedAddress;
+}
 
 SpokePool.FilledRelay.handler(async ({ event, context }) => {
   const entity: SpokePool_FilledRelay = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    inputToken: event.params.inputToken,
-    outputToken: event.params.outputToken,
+    inputToken: unpad(event.params.inputToken),
+    outputToken: unpad(event.params.outputToken),
     inputAmount: event.params.inputAmount,
     outputAmount: event.params.outputAmount,
     repaymentChainId: event.params.repaymentChainId,
@@ -22,10 +41,10 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     depositId: event.params.depositId,
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
-    exclusiveRelayer: event.params.exclusiveRelayer,
-    relayer: event.params.relayer,
-    depositor: event.params.depositor,
-    recipient: event.params.recipient,
+    exclusiveRelayer: unpad(event.params.exclusiveRelayer),
+    relayer: unpad(event.params.relayer),
+    depositor: unpad(event.params.depositor),
+    recipient: unpad(event.params.recipient),
     messageHash: event.params.messageHash,
     relayExecutionInfo_0: event.params.relayExecutionInfo
         [0]
@@ -64,7 +83,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
       timestampInbound: inboundTimestamp,
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
-      toInbound: event.params.recipient,
+      toInbound: unpad(event.params.recipient),
       matched: isMatched,
       latency: latency,
     };
@@ -87,7 +106,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
       timestampInbound: BigInt(event.block.timestamp),
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
-      toInbound: event.params.recipient,
+      toInbound: unpad(event.params.recipient),
       
       matched: false, // will be true when outbound is also recorded
       latency: undefined, // will be calculated when matched
@@ -105,7 +124,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     appPayload = {
       ...appPayload,
       amountIn: event.params.outputAmount,
-      assetAddressInbound: event.params.outputToken,
+      assetAddressInbound: unpad(event.params.outputToken),
     };
   } else {
     // Create new AppPayload if outbound wasn't seen yet
@@ -120,19 +139,19 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
       
       // Asset information (partial, from inbound)
       assetAddressOutbound: undefined,
-      assetAddressInbound: event.params.outputToken,
+      assetAddressInbound: unpad(event.params.outputToken),
       amountOut: undefined,
       amountIn: event.params.outputAmount,
       
       // Addresses (from inbound)
-      sender: event.params.depositor,
-      recipient: event.params.recipient,
+      sender: unpad(event.params.depositor),
+      recipient: unpad(event.params.recipient),
       targetAddress: event.srcAddress, // SpokePool contract address on destination
       
       // Across-specific data (from inbound)
       fillDeadline: event.params.fillDeadline,
       exclusivityDeadline: event.params.exclusivityDeadline,
-      exclusiveRelayer: event.params.exclusiveRelayer,
+      exclusiveRelayer: unpad(event.params.exclusiveRelayer),
       message: undefined, // Not available in FilledRelay
       
       // Reference to crosschain message
@@ -146,8 +165,8 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
 SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
   const entity: SpokePool_FilledV3Relay = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    inputToken: event.params.inputToken,
-    outputToken: event.params.outputToken,
+    inputToken: unpad(event.params.inputToken),
+    outputToken: unpad(event.params.outputToken),
     inputAmount: event.params.inputAmount,
     outputAmount: event.params.outputAmount,
     repaymentChainId: event.params.repaymentChainId,
@@ -155,10 +174,10 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     depositId: event.params.depositId,
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
-    exclusiveRelayer: event.params.exclusiveRelayer,
-    relayer: event.params.relayer,
-    depositor: event.params.depositor,
-    recipient: event.params.recipient,
+    exclusiveRelayer: unpad(event.params.exclusiveRelayer),
+    relayer: unpad(event.params.relayer),
+    depositor: unpad(event.params.depositor),
+    recipient: unpad(event.params.recipient),
     message: event.params.message,
     relayExecutionInfo_0: event.params.relayExecutionInfo
         [0]
@@ -197,7 +216,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
       timestampInbound: inboundTimestamp,
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
-      toInbound: event.params.recipient,
+      toInbound: unpad(event.params.recipient),
       matched: isMatched,
       latency: latency,
     };
@@ -220,7 +239,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
       timestampInbound: BigInt(event.block.timestamp),
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
-      toInbound: event.params.recipient,
+      toInbound: unpad(event.params.recipient),
       
       matched: false, // will be true when outbound is also recorded
       latency: undefined, // will be calculated when matched
@@ -230,7 +249,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
   context.CrosschainMessage.set(crosschainMessage);
 
   // Update AppPayload entity with inbound data
-  const appPayloadId = `across:${idMatching}:${idMatching}`;
+  const appPayloadId = `acrossV3:${idMatching}:${idMatching}`;
   let appPayload = await context.AppPayload.get(appPayloadId);
   
   if (appPayload) {
@@ -238,7 +257,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     appPayload = {
       ...appPayload,
       amountIn: event.params.outputAmount,
-      assetAddressInbound: event.params.outputToken,
+      assetAddressInbound: unpad(event.params.outputToken),
       message: event.params.message, // FilledV3Relay has message field
     };
   } else {
@@ -254,19 +273,19 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
       
       // Asset information (partial, from inbound)
       assetAddressOutbound: undefined,
-      assetAddressInbound: event.params.outputToken,
+      assetAddressInbound: unpad(event.params.outputToken),
       amountOut: undefined,
       amountIn: event.params.outputAmount,
       
       // Addresses (from inbound)
-      sender: event.params.depositor,
-      recipient: event.params.recipient,
+      sender: unpad(event.params.depositor),
+      recipient: unpad(event.params.recipient),
       targetAddress: event.srcAddress, // SpokePool contract address on destination
       
       // Across-specific data (from inbound)
       fillDeadline: event.params.fillDeadline,
       exclusivityDeadline: event.params.exclusivityDeadline,
-      exclusiveRelayer: event.params.exclusiveRelayer,
+      exclusiveRelayer: unpad(event.params.exclusiveRelayer),
       message: event.params.message, // Available in FilledV3Relay
       
       // Reference to crosschain message
@@ -280,8 +299,8 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
 SpokePool.FundsDeposited.handler(async ({ event, context }) => {
   const entity: SpokePool_FundsDeposited = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    inputToken: event.params.inputToken,
-    outputToken: event.params.outputToken,
+    inputToken: unpad(event.params.inputToken),
+    outputToken: unpad(event.params.outputToken),
     inputAmount: event.params.inputAmount,
     outputAmount: event.params.outputAmount,
     destinationChainId: event.params.destinationChainId,
@@ -289,9 +308,9 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     quoteTimestamp: event.params.quoteTimestamp,
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
-    depositor: event.params.depositor,
-    recipient: event.params.recipient,
-    exclusiveRelayer: event.params.exclusiveRelayer,
+    depositor: unpad(event.params.depositor),
+    recipient: unpad(event.params.recipient),
+    exclusiveRelayer: unpad(event.params.exclusiveRelayer),
     message: event.params.message,
   };
 
@@ -318,7 +337,7 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
       timestampOutbound: outboundTimestamp,
       txHashOutbound: event.transaction.hash,
       chainIdOutbound: BigInt(event.chainId),
-      fromOutbound: event.params.depositor,
+      fromOutbound: unpad(event.params.depositor),
       matched: isMatched,
       latency: latency,
     };
@@ -334,7 +353,7 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
       timestampOutbound: BigInt(event.block.timestamp),
       txHashOutbound: event.transaction.hash,
       chainIdOutbound: BigInt(event.chainId),
-      fromOutbound: event.params.depositor,
+      fromOutbound: unpad(event.params.depositor),
       
       // Inbound data (will be filled by FilledRelay handler)
       blockInbound: undefined,
@@ -358,9 +377,9 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     // Update existing AppPayload with outbound data
     appPayload = {
       ...appPayload,
-      assetAddressOutbound: event.params.inputToken,
+      assetAddressOutbound: unpad(event.params.inputToken),
       amountOut: event.params.inputAmount,
-      sender: event.params.depositor,
+      sender: unpad(event.params.depositor),
       message: event.params.message,
     };
   } else {
@@ -375,20 +394,20 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
       idMatching: idMatching,
       
       // Asset information
-      assetAddressOutbound: event.params.inputToken,
-      assetAddressInbound: event.params.outputToken,
+      assetAddressOutbound: unpad(event.params.inputToken),
+      assetAddressInbound: unpad(event.params.outputToken),
       amountOut: event.params.inputAmount,
       amountIn: event.params.outputAmount,
       
       // Addresses
-      sender: event.params.depositor,
-      recipient: event.params.recipient,
+      sender: unpad(event.params.depositor),
+      recipient: unpad(event.params.recipient),
       targetAddress: event.srcAddress, // SpokePool contract address on origin
       
       // Across-specific data
       fillDeadline: event.params.fillDeadline,
       exclusivityDeadline: event.params.exclusivityDeadline,
-      exclusiveRelayer: event.params.exclusiveRelayer,
+      exclusiveRelayer: unpad(event.params.exclusiveRelayer),
       message: event.params.message,
       
       // Reference to crosschain message
