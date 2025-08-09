@@ -1,13 +1,12 @@
 /*
  * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
+ * or https://docs.envio.dev/docs/HyperIndex-LLM/hyperindex-complete for LLMs
  */
 import {
   SpokePool,
   SpokePool_FilledRelay,
   SpokePool_FilledV3Relay,
   SpokePool_FundsDeposited,
-  CrosschainMessage,
-  AppPayload,
 } from "generated";
 import { isAddress, getAddress } from "viem";
 
@@ -22,16 +21,16 @@ import { isAddress, getAddress } from "viem";
 function unpadAddress(paddedAddress: string): string {
   // Remove 0x prefix temporarily
   const withoutPrefix = paddedAddress.startsWith('0x') ? paddedAddress.slice(2) : paddedAddress;
-  
+
   // Take the last 40 characters (20 bytes) which represent the address
   const addressPart = withoutPrefix.slice(-40);
   const cleanedAddress = '0x' + addressPart;
-  
+
   // Validate and return checksummed address, or return original if invalid
   if (isAddress(cleanedAddress)) {
     return getAddress(cleanedAddress); // Returns checksummed address
   }
-  
+
   // If not a valid address, return original (might be zero address or other value)
   return paddedAddress;
 }
@@ -40,9 +39,10 @@ function unpadAddress(paddedAddress: string): string {
 // ACROSS BRIDGE HELPERS
 // ============================================================================
 
-type AcrossEventDirection = 'inbound' | 'outbound';
+
 
 interface AcrossInboundEventData {
+  // 
   direction: 'inbound';
   originChainId: bigint;
   depositId: bigint;
@@ -54,7 +54,6 @@ interface AcrossInboundEventData {
   fillDeadline: bigint;
   exclusivityDeadline: bigint;
   message?: string;
-  srcAddress: string; // Contract address that emitted the event
 }
 
 interface AcrossOutboundEventData {
@@ -71,7 +70,6 @@ interface AcrossOutboundEventData {
   fillDeadline: bigint;
   exclusivityDeadline: bigint;
   message: string;
-  srcAddress: string; // Contract address that emitted the event
 }
 
 type AcrossEventData = AcrossInboundEventData | AcrossOutboundEventData;
@@ -83,6 +81,7 @@ interface EventMetadata {
   txHash: string;
   txFrom?: string;
   txTo?: string;
+  emitterAddress?: string;
 }
 
 /**
@@ -95,23 +94,23 @@ async function handleAcrossMessage(
   context: any
 ): Promise<void> {
   // Calculate ID matching based on event direction
-  const idMatching = eventData.direction === 'inbound' 
+  const idMatching = eventData.direction === 'inbound'
     ? `${eventData.originChainId}-${eventData.depositId}`
     : `${eventData.chainId}-${eventData.depositId}`;
   const crosschainMessageId = `across:${idMatching}`;
-  
+
   // Try to get existing CrosschainMessage or create new one
   let crosschainMessage = await context.CrosschainMessage.get(crosschainMessageId);
-  
+
   if (crosschainMessage) {
     // Update existing message with new data
     if (eventData.direction === 'inbound') {
       const inboundTimestamp = metadata.blockTimestamp;
       const isMatched = crosschainMessage.blockOutbound !== undefined;
-      const latency = isMatched && crosschainMessage.timestampOutbound !== undefined 
-        ? inboundTimestamp - crosschainMessage.timestampOutbound 
+      const latency = isMatched && crosschainMessage.timestampOutbound !== undefined
+        ? inboundTimestamp - crosschainMessage.timestampOutbound
         : undefined;
-      
+
       crosschainMessage = {
         ...crosschainMessage,
         blockInbound: metadata.blockNumber,
@@ -126,10 +125,10 @@ async function handleAcrossMessage(
       // outbound event
       const outboundTimestamp = metadata.blockTimestamp;
       const isMatched = crosschainMessage.blockInbound !== undefined;
-      const latency = isMatched && crosschainMessage.timestampInbound !== undefined 
-        ? crosschainMessage.timestampInbound - outboundTimestamp 
+      const latency = isMatched && crosschainMessage.timestampInbound !== undefined
+        ? crosschainMessage.timestampInbound - outboundTimestamp
         : undefined;
-      
+
       crosschainMessage = {
         ...crosschainMessage,
         blockOutbound: metadata.blockNumber,
@@ -149,21 +148,21 @@ async function handleAcrossMessage(
         id: crosschainMessageId,
         protocol: "across",
         idMatching: idMatching,
-        
+
         // Outbound data (unknown at this point)
         blockOutbound: undefined,
         timestampOutbound: undefined,
         txHashOutbound: undefined,
         chainIdOutbound: undefined,
         fromOutbound: undefined,
-        
+
         // Inbound data (from fill event)
         blockInbound: metadata.blockNumber,
         timestampInbound: metadata.blockTimestamp,
         txHashInbound: metadata.txHash,
         chainIdInbound: BigInt(metadata.chainId),
         toInbound: unpadAddress(eventData.recipient),
-        
+
         matched: false,
         latency: undefined,
       };
@@ -173,21 +172,21 @@ async function handleAcrossMessage(
         id: crosschainMessageId,
         protocol: "across",
         idMatching: idMatching,
-        
+
         // Outbound data (from deposit event)
         blockOutbound: metadata.blockNumber,
         timestampOutbound: metadata.blockTimestamp,
         txHashOutbound: metadata.txHash,
         chainIdOutbound: BigInt(metadata.chainId),
         fromOutbound: unpadAddress(eventData.depositor),
-        
+
         // Inbound data (will be filled by fill handler)
         blockInbound: undefined,
         timestampInbound: undefined,
         txHashInbound: undefined,
         chainIdInbound: undefined,
         toInbound: undefined,
-        
+
         matched: false,
         latency: undefined,
       };
@@ -213,7 +212,7 @@ async function handleAcrossAppPayload(
   const crosschainMessageId = `across:${idMatching}`;
   const appPayloadId = `across:${idMatching}:${idMatching}`;
   let appPayload = await context.AppPayload.get(appPayloadId);
-  
+
   if (appPayload) {
     // Update existing AppPayload with new data
     if (eventData.direction === 'inbound') {
@@ -240,29 +239,29 @@ async function handleAcrossAppPayload(
       appPayload = {
         id: appPayloadId,
         appName: "Across",
-        
+
         // Message transport info
         transportingMsgProtocol: "across",
         transportingMessageId: idMatching,
         idMatching: idMatching,
-        
+
         // Asset information (partial, from inbound)
         assetAddressOutbound: undefined,
         assetAddressInbound: unpadAddress(eventData.outputToken),
         amountOut: undefined,
         amountIn: eventData.outputAmount,
-        
+
         // Addresses (from inbound)
         sender: unpadAddress(eventData.depositor),
         recipient: unpadAddress(eventData.recipient),
-        targetAddress: eventData.srcAddress, // SpokePool contract address on destination
-        
+        targetAddress: metadata.emitterAddress, // SpokePool contract address on destination (event emitter)
+
         // Across-specific data (from inbound)
         fillDeadline: eventData.fillDeadline,
         exclusivityDeadline: eventData.exclusivityDeadline,
         exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
         message: eventData.message, // Available in V3 events
-        
+
         // Reference to crosschain message
         crosschainMessage_id: crosschainMessageId,
       };
@@ -271,29 +270,29 @@ async function handleAcrossAppPayload(
       appPayload = {
         id: appPayloadId,
         appName: "Across",
-        
+
         // Message transport info
         transportingMsgProtocol: "across",
         transportingMessageId: idMatching,
         idMatching: idMatching,
-        
+
         // Asset information
         assetAddressOutbound: unpadAddress(eventData.inputToken),
         assetAddressInbound: unpadAddress(eventData.outputToken),
         amountOut: eventData.inputAmount,
         amountIn: eventData.outputAmount,
-        
+
         // Addresses
         sender: unpadAddress(eventData.depositor),
         recipient: unpadAddress(eventData.recipient),
-        targetAddress: eventData.srcAddress, // SpokePool contract address on origin
-        
+        targetAddress: metadata.emitterAddress, // SpokePool contract address on origin
+
         // Across-specific data
         fillDeadline: eventData.fillDeadline,
         exclusivityDeadline: eventData.exclusivityDeadline,
         exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
         message: eventData.message,
-        
+
         // Reference to crosschain message
         crosschainMessage_id: crosschainMessageId,
       };
@@ -354,7 +353,6 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     exclusiveRelayer: event.params.exclusiveRelayer,
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
-    srcAddress: event.srcAddress,
     // Note: V2 FilledRelay doesn't have message field
   };
 
@@ -365,6 +363,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     txHash: event.transaction.hash,
     txFrom: event.transaction.from,
     txTo: event.transaction.to,
+    emitterAddress: event.srcAddress,
   };
 
   await handleAcrossMessage(eventData, metadata, context);
@@ -419,7 +418,6 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
     message: event.params.message, // V3 has message field
-    srcAddress: event.srcAddress,
   };
 
   const metadata: EventMetadata = {
@@ -429,6 +427,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     txHash: event.transaction.hash,
     txFrom: event.transaction.from,
     txTo: event.transaction.to,
+    emitterAddress: event.srcAddress,
   };
 
   await handleAcrossMessage(eventData, metadata, context);
@@ -480,7 +479,6 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     fillDeadline: event.params.fillDeadline,
     exclusivityDeadline: event.params.exclusivityDeadline,
     message: event.params.message,
-    srcAddress: event.srcAddress,
   };
 
   const metadata: EventMetadata = {
