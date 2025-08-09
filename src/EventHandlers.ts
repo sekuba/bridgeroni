@@ -39,6 +39,16 @@ function unpadAddress(paddedAddress: string): string {
 // ACROSS BRIDGE HELPERS
 // ============================================================================
 
+/**
+ * Calculate Across protocol idMatching value for message correlation
+ * This ID is used to match inbound (fill) and outbound (deposit) events
+ */
+function calculateAcrossIdMatching(eventData: AcrossEventData): string {
+  return eventData.direction === 'inbound'
+    ? `${eventData.originChainId}-${eventData.depositId}`
+    : `${eventData.chainId}-${eventData.depositId}`;
+}
+
 
 
 interface AcrossInboundEventData {
@@ -94,9 +104,7 @@ async function handleAcrossMessage(
   context: any
 ): Promise<void> {
   // Calculate ID matching based on event direction
-  const idMatching = eventData.direction === 'inbound'
-    ? `${eventData.originChainId}-${eventData.depositId}`
-    : `${eventData.chainId}-${eventData.depositId}`;
+  const idMatching = calculateAcrossIdMatching(eventData);
   const crosschainMessageId = `across:${idMatching}`;
 
   // Try to get existing CrosschainMessage or create new one
@@ -206,11 +214,15 @@ async function handleAcrossAppPayload(
   context: any
 ): Promise<void> {
   // Calculate ID matching based on event direction
-  const idMatching = eventData.direction === 'inbound'
-    ? `${eventData.originChainId}-${eventData.depositId}`
-    : `${eventData.chainId}-${eventData.depositId}`;
+  const idMatching = calculateAcrossIdMatching(eventData);
   const crosschainMessageId = `across:${idMatching}`;
-  const appPayloadId = `across:${idMatching}:${idMatching}`;
+  const transportingMsgProtocol = "across";
+  const transportingMsgId = idMatching;
+
+  // For now, Across has exactly one appPayload per CrosschainMessage, so we use counter 0
+  // In the future, when supporting multiple appPayloads per message, increment this counter
+  const counter = 0;
+  const appPayloadId = `${transportingMsgProtocol}:${transportingMsgId}:${counter}`;
   let appPayload = await context.AppPayload.get(appPayloadId);
 
   if (appPayload) {
@@ -241,8 +253,8 @@ async function handleAcrossAppPayload(
         appName: "Across",
 
         // Message transport info
-        transportingMsgProtocol: "across",
-        transportingMessageId: idMatching,
+        transportingMsgProtocol: transportingMsgProtocol,
+        transportingMsgId: transportingMsgId,
         idMatching: idMatching,
 
         // Asset information (partial, from inbound)
@@ -272,8 +284,8 @@ async function handleAcrossAppPayload(
         appName: "Across",
 
         // Message transport info
-        transportingMsgProtocol: "across",
-        transportingMessageId: idMatching,
+        transportingMsgProtocol: transportingMsgProtocol,
+        transportingMsgId: transportingMsgId,
         idMatching: idMatching,
 
         // Asset information

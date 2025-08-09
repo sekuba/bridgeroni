@@ -99,13 +99,13 @@ type CrosschainMessage {
 }
 
 type AppPayload {
-  id: ID! # Format: "{transportingMsgProtocol}:{transportingMessageId}:{idMatching}"
+  id: ID! # Format: "{transportingMsgProtocol}:{transportingMsgId}:{counter}"
   appName: String! # "AcrossV3"
   
   # Associated message info
   transportingMsgProtocol: String! # "acrossV3"
-  transportingMessageId: String! # "{originChainId}-{depositId}"
-  idMatching: String! # For Across, same as transportingMessageId since layers are fused
+  transportingMsgId: String! # "{originChainId}-{depositId}"
+  idMatching: String! # For Across, same as transportingMsgId since layers are fused
   
   # Asset information
   assetAddressOutbound: String # inputToken address
