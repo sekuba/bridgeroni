@@ -40,7 +40,10 @@ function unpadAddress(paddedAddress: string): string {
 // ACROSS BRIDGE HELPERS
 // ============================================================================
 
+type AcrossEventDirection = 'inbound' | 'outbound';
+
 interface AcrossInboundEventData {
+  direction: 'inbound';
   originChainId: bigint;
   depositId: bigint;
   recipient: string;
@@ -55,6 +58,7 @@ interface AcrossInboundEventData {
 }
 
 interface AcrossOutboundEventData {
+  direction: 'outbound';
   chainId: number;
   depositId: bigint;
   depositor: string;
@@ -70,6 +74,8 @@ interface AcrossOutboundEventData {
   srcAddress: string; // Contract address that emitted the event
 }
 
+type AcrossEventData = AcrossInboundEventData | AcrossOutboundEventData;
+
 interface EventMetadata {
   chainId: number;
   blockNumber: bigint;
@@ -80,237 +86,218 @@ interface EventMetadata {
 }
 
 /**
- * Updates or creates CrosschainMessage entity for Across inbound events (fills)
+ * Updates or creates CrosschainMessage entity for Across events
+ * Handles both inbound (fills) and outbound (deposits) events
  */
-async function handleAcrossInboundMessage(
-  eventData: AcrossInboundEventData,
+async function handleAcrossMessage(
+  eventData: AcrossEventData,
   metadata: EventMetadata,
   context: any
 ): Promise<void> {
-  const idMatching = `${eventData.originChainId}-${eventData.depositId}`;
+  // Calculate ID matching based on event direction
+  const idMatching = eventData.direction === 'inbound' 
+    ? `${eventData.originChainId}-${eventData.depositId}`
+    : `${eventData.chainId}-${eventData.depositId}`;
   const crosschainMessageId = `across:${idMatching}`;
   
   // Try to get existing CrosschainMessage or create new one
   let crosschainMessage = await context.CrosschainMessage.get(crosschainMessageId);
   
   if (crosschainMessage) {
-    // Update existing message with inbound data
-    const inboundTimestamp = metadata.blockTimestamp;
-    const isMatched = crosschainMessage.blockOutbound !== undefined;
-    const latency = isMatched && crosschainMessage.timestampOutbound !== undefined 
-      ? inboundTimestamp - crosschainMessage.timestampOutbound 
-      : undefined;
-    
-    crosschainMessage = {
-      ...crosschainMessage,
-      blockInbound: metadata.blockNumber,
-      timestampInbound: inboundTimestamp,
-      txHashInbound: metadata.txHash,
-      chainIdInbound: BigInt(metadata.chainId),
-      toInbound: unpadAddress(eventData.recipient),
-      matched: isMatched,
-      latency: latency,
-    };
+    // Update existing message with new data
+    if (eventData.direction === 'inbound') {
+      const inboundTimestamp = metadata.blockTimestamp;
+      const isMatched = crosschainMessage.blockOutbound !== undefined;
+      const latency = isMatched && crosschainMessage.timestampOutbound !== undefined 
+        ? inboundTimestamp - crosschainMessage.timestampOutbound 
+        : undefined;
+      
+      crosschainMessage = {
+        ...crosschainMessage,
+        blockInbound: metadata.blockNumber,
+        timestampInbound: inboundTimestamp,
+        txHashInbound: metadata.txHash,
+        chainIdInbound: BigInt(metadata.chainId),
+        toInbound: unpadAddress(eventData.recipient),
+        matched: isMatched,
+        latency: latency,
+      };
+    } else {
+      // outbound event
+      const outboundTimestamp = metadata.blockTimestamp;
+      const isMatched = crosschainMessage.blockInbound !== undefined;
+      const latency = isMatched && crosschainMessage.timestampInbound !== undefined 
+        ? crosschainMessage.timestampInbound - outboundTimestamp 
+        : undefined;
+      
+      crosschainMessage = {
+        ...crosschainMessage,
+        blockOutbound: metadata.blockNumber,
+        timestampOutbound: outboundTimestamp,
+        txHashOutbound: metadata.txHash,
+        chainIdOutbound: BigInt(metadata.chainId),
+        fromOutbound: unpadAddress(eventData.depositor),
+        matched: isMatched,
+        latency: latency,
+      };
+    }
   } else {
-    // Create new message if outbound wasn't seen yet (inbound came first)
-    crosschainMessage = {
-      id: crosschainMessageId,
-      protocol: "across",
-      idMatching: idMatching,
-      
-      // Outbound data (unknown at this point)
-      blockOutbound: undefined,
-      timestampOutbound: undefined,
-      txHashOutbound: undefined,
-      chainIdOutbound: undefined,
-      fromOutbound: undefined,
-      
-      // Inbound data (from fill event)
-      blockInbound: metadata.blockNumber,
-      timestampInbound: metadata.blockTimestamp,
-      txHashInbound: metadata.txHash,
-      chainIdInbound: BigInt(metadata.chainId),
-      toInbound: unpadAddress(eventData.recipient),
-      
-      matched: false, // will be true when outbound is also recorded
-      latency: undefined, // will be calculated when matched
-    };
+    // Create new message
+    if (eventData.direction === 'inbound') {
+      // Inbound came first - create with inbound data
+      crosschainMessage = {
+        id: crosschainMessageId,
+        protocol: "across",
+        idMatching: idMatching,
+        
+        // Outbound data (unknown at this point)
+        blockOutbound: undefined,
+        timestampOutbound: undefined,
+        txHashOutbound: undefined,
+        chainIdOutbound: undefined,
+        fromOutbound: undefined,
+        
+        // Inbound data (from fill event)
+        blockInbound: metadata.blockNumber,
+        timestampInbound: metadata.blockTimestamp,
+        txHashInbound: metadata.txHash,
+        chainIdInbound: BigInt(metadata.chainId),
+        toInbound: unpadAddress(eventData.recipient),
+        
+        matched: false,
+        latency: undefined,
+      };
+    } else {
+      // Outbound came first - create with outbound data
+      crosschainMessage = {
+        id: crosschainMessageId,
+        protocol: "across",
+        idMatching: idMatching,
+        
+        // Outbound data (from deposit event)
+        blockOutbound: metadata.blockNumber,
+        timestampOutbound: metadata.blockTimestamp,
+        txHashOutbound: metadata.txHash,
+        chainIdOutbound: BigInt(metadata.chainId),
+        fromOutbound: unpadAddress(eventData.depositor),
+        
+        // Inbound data (will be filled by fill handler)
+        blockInbound: undefined,
+        timestampInbound: undefined,
+        txHashInbound: undefined,
+        chainIdInbound: undefined,
+        toInbound: undefined,
+        
+        matched: false,
+        latency: undefined,
+      };
+    }
   }
 
   context.CrosschainMessage.set(crosschainMessage);
 }
 
 /**
- * Updates or creates CrosschainMessage entity for Across outbound events (deposits)
+ * Updates or creates AppPayload entity for Across events
+ * Handles both inbound (fills) and outbound (deposits) events
  */
-async function handleAcrossOutboundMessage(
-  eventData: AcrossOutboundEventData,
+async function handleAcrossAppPayload(
+  eventData: AcrossEventData,
   metadata: EventMetadata,
   context: any
 ): Promise<void> {
-  const idMatching = `${eventData.chainId}-${eventData.depositId}`;
-  const crosschainMessageId = `across:${idMatching}`;
-  
-  // Try to get existing CrosschainMessage or create new one
-  let crosschainMessage = await context.CrosschainMessage.get(crosschainMessageId);
-  
-  if (crosschainMessage) {
-    // Update existing message with outbound data
-    const outboundTimestamp = metadata.blockTimestamp;
-    const isMatched = crosschainMessage.blockInbound !== undefined;
-    const latency = isMatched && crosschainMessage.timestampInbound !== undefined 
-      ? crosschainMessage.timestampInbound - outboundTimestamp 
-      : undefined;
-    
-    crosschainMessage = {
-      ...crosschainMessage,
-      blockOutbound: metadata.blockNumber,
-      timestampOutbound: outboundTimestamp,
-      txHashOutbound: metadata.txHash,
-      chainIdOutbound: BigInt(metadata.chainId),
-      fromOutbound: unpadAddress(eventData.depositor),
-      matched: isMatched,
-      latency: latency,
-    };
-  } else {
-    // Create new message with outbound data
-    crosschainMessage = {
-      id: crosschainMessageId,
-      protocol: "across",
-      idMatching: idMatching,
-      
-      // Outbound data (from deposit event)
-      blockOutbound: metadata.blockNumber,
-      timestampOutbound: metadata.blockTimestamp,
-      txHashOutbound: metadata.txHash,
-      chainIdOutbound: BigInt(metadata.chainId),
-      fromOutbound: unpadAddress(eventData.depositor),
-      
-      // Inbound data (will be filled by fill handler)
-      blockInbound: undefined,
-      timestampInbound: undefined,
-      txHashInbound: undefined,
-      chainIdInbound: undefined,
-      toInbound: undefined,
-      
-      matched: false,
-      latency: undefined, // will be calculated when matched
-    };
-  }
-
-  context.CrosschainMessage.set(crosschainMessage);
-}
-
-/**
- * Updates or creates AppPayload entity for Across inbound events (fills)
- */
-async function handleAcrossInboundAppPayload(
-  eventData: AcrossInboundEventData,
-  metadata: EventMetadata,
-  context: any
-): Promise<void> {
-  const idMatching = `${eventData.originChainId}-${eventData.depositId}`;
+  // Calculate ID matching based on event direction
+  const idMatching = eventData.direction === 'inbound'
+    ? `${eventData.originChainId}-${eventData.depositId}`
+    : `${eventData.chainId}-${eventData.depositId}`;
   const crosschainMessageId = `across:${idMatching}`;
   const appPayloadId = `across:${idMatching}:${idMatching}`;
   let appPayload = await context.AppPayload.get(appPayloadId);
   
   if (appPayload) {
-    // Update existing AppPayload with inbound data
-    appPayload = {
-      ...appPayload,
-      amountIn: eventData.outputAmount,
-      assetAddressInbound: unpadAddress(eventData.outputToken),
-      ...(eventData.message !== undefined && { message: eventData.message }),
-    };
+    // Update existing AppPayload with new data
+    if (eventData.direction === 'inbound') {
+      appPayload = {
+        ...appPayload,
+        amountIn: eventData.outputAmount,
+        assetAddressInbound: unpadAddress(eventData.outputToken),
+        ...(eventData.message !== undefined && { message: eventData.message }),
+      };
+    } else {
+      // outbound event
+      appPayload = {
+        ...appPayload,
+        assetAddressOutbound: unpadAddress(eventData.inputToken),
+        amountOut: eventData.inputAmount,
+        sender: unpadAddress(eventData.depositor),
+        message: eventData.message,
+      };
+    }
   } else {
-    // Create new AppPayload if outbound wasn't seen yet
-    appPayload = {
-      id: appPayloadId,
-      appName: "Across",
-      
-      // Message transport info
-      transportingMsgProtocol: "across",
-      transportingMessageId: idMatching,
-      idMatching: idMatching,
-      
-      // Asset information (partial, from inbound)
-      assetAddressOutbound: undefined,
-      assetAddressInbound: unpadAddress(eventData.outputToken),
-      amountOut: undefined,
-      amountIn: eventData.outputAmount,
-      
-      // Addresses (from inbound)
-      sender: unpadAddress(eventData.depositor),
-      recipient: unpadAddress(eventData.recipient),
-      targetAddress: eventData.srcAddress, // SpokePool contract address on destination
-      
-      // Across-specific data (from inbound)
-      fillDeadline: eventData.fillDeadline,
-      exclusivityDeadline: eventData.exclusivityDeadline,
-      exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
-      message: eventData.message, // Available in V3 events
-      
-      // Reference to crosschain message
-      crosschainMessage_id: crosschainMessageId,
-    };
-  }
-
-  context.AppPayload.set(appPayload);
-}
-
-/**
- * Updates or creates AppPayload entity for Across outbound events (deposits)
- */
-async function handleAcrossOutboundAppPayload(
-  eventData: AcrossOutboundEventData,
-  metadata: EventMetadata,
-  context: any
-): Promise<void> {
-  const idMatching = `${eventData.chainId}-${eventData.depositId}`;
-  const crosschainMessageId = `across:${idMatching}`;
-  const appPayloadId = `across:${idMatching}:${idMatching}`;
-  let appPayload = await context.AppPayload.get(appPayloadId);
-  
-  if (appPayload) {
-    // Update existing AppPayload with outbound data
-    appPayload = {
-      ...appPayload,
-      assetAddressOutbound: unpadAddress(eventData.inputToken),
-      amountOut: eventData.inputAmount,
-      sender: unpadAddress(eventData.depositor),
-      message: eventData.message,
-    };
-  } else {
-    // Create new AppPayload with outbound data
-    appPayload = {
-      id: appPayloadId,
-      appName: "Across",
-      
-      // Message transport info
-      transportingMsgProtocol: "across",
-      transportingMessageId: idMatching,
-      idMatching: idMatching,
-      
-      // Asset information
-      assetAddressOutbound: unpadAddress(eventData.inputToken),
-      assetAddressInbound: unpadAddress(eventData.outputToken),
-      amountOut: eventData.inputAmount,
-      amountIn: eventData.outputAmount,
-      
-      // Addresses
-      sender: unpadAddress(eventData.depositor),
-      recipient: unpadAddress(eventData.recipient),
-      targetAddress: eventData.srcAddress, // SpokePool contract address on origin
-      
-      // Across-specific data
-      fillDeadline: eventData.fillDeadline,
-      exclusivityDeadline: eventData.exclusivityDeadline,
-      exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
-      message: eventData.message,
-      
-      // Reference to crosschain message
-      crosschainMessage_id: crosschainMessageId,
-    };
+    // Create new AppPayload
+    if (eventData.direction === 'inbound') {
+      // Inbound came first - create with inbound data
+      appPayload = {
+        id: appPayloadId,
+        appName: "Across",
+        
+        // Message transport info
+        transportingMsgProtocol: "across",
+        transportingMessageId: idMatching,
+        idMatching: idMatching,
+        
+        // Asset information (partial, from inbound)
+        assetAddressOutbound: undefined,
+        assetAddressInbound: unpadAddress(eventData.outputToken),
+        amountOut: undefined,
+        amountIn: eventData.outputAmount,
+        
+        // Addresses (from inbound)
+        sender: unpadAddress(eventData.depositor),
+        recipient: unpadAddress(eventData.recipient),
+        targetAddress: eventData.srcAddress, // SpokePool contract address on destination
+        
+        // Across-specific data (from inbound)
+        fillDeadline: eventData.fillDeadline,
+        exclusivityDeadline: eventData.exclusivityDeadline,
+        exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
+        message: eventData.message, // Available in V3 events
+        
+        // Reference to crosschain message
+        crosschainMessage_id: crosschainMessageId,
+      };
+    } else {
+      // Outbound came first - create with outbound data
+      appPayload = {
+        id: appPayloadId,
+        appName: "Across",
+        
+        // Message transport info
+        transportingMsgProtocol: "across",
+        transportingMessageId: idMatching,
+        idMatching: idMatching,
+        
+        // Asset information
+        assetAddressOutbound: unpadAddress(eventData.inputToken),
+        assetAddressInbound: unpadAddress(eventData.outputToken),
+        amountOut: eventData.inputAmount,
+        amountIn: eventData.outputAmount,
+        
+        // Addresses
+        sender: unpadAddress(eventData.depositor),
+        recipient: unpadAddress(eventData.recipient),
+        targetAddress: eventData.srcAddress, // SpokePool contract address on origin
+        
+        // Across-specific data
+        fillDeadline: eventData.fillDeadline,
+        exclusivityDeadline: eventData.exclusivityDeadline,
+        exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
+        message: eventData.message,
+        
+        // Reference to crosschain message
+        crosschainMessage_id: crosschainMessageId,
+      };
+    }
   }
 
   context.AppPayload.set(appPayload);
@@ -357,6 +344,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
 
   // Process crosschain message and app payload
   const eventData: AcrossInboundEventData = {
+    direction: 'inbound',
     originChainId: event.params.originChainId,
     depositId: event.params.depositId,
     recipient: event.params.recipient,
@@ -379,8 +367,8 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     txTo: event.transaction.to,
   };
 
-  await handleAcrossInboundMessage(eventData, metadata, context);
-  await handleAcrossInboundAppPayload(eventData, metadata, context);
+  await handleAcrossMessage(eventData, metadata, context);
+  await handleAcrossAppPayload(eventData, metadata, context);
 });
 
 /**
@@ -420,6 +408,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
 
   // Process crosschain message and app payload
   const eventData: AcrossInboundEventData = {
+    direction: 'inbound',
     originChainId: event.params.originChainId,
     depositId: event.params.depositId,
     recipient: event.params.recipient,
@@ -442,8 +431,8 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     txTo: event.transaction.to,
   };
 
-  await handleAcrossInboundMessage(eventData, metadata, context);
-  await handleAcrossInboundAppPayload(eventData, metadata, context);
+  await handleAcrossMessage(eventData, metadata, context);
+  await handleAcrossAppPayload(eventData, metadata, context);
 });
 
 /**
@@ -478,6 +467,7 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
 
   // Process crosschain message and app payload
   const eventData: AcrossOutboundEventData = {
+    direction: 'outbound',
     chainId: event.chainId,
     depositId: event.params.depositId,
     depositor: event.params.depositor,
@@ -502,8 +492,8 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     txTo: event.transaction.to,
   };
 
-  await handleAcrossOutboundMessage(eventData, metadata, context);
-  await handleAcrossOutboundAppPayload(eventData, metadata, context);
+  await handleAcrossMessage(eventData, metadata, context);
+  await handleAcrossAppPayload(eventData, metadata, context);
 });
 
 // ============================================================================
