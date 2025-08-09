@@ -1,55 +1,15 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
 name: envio-indexer
-contracts:
-- name: L2AssetRouter
-  handler: src/EventHandlers.ts
-  events:
-  - event: AssetDeploymentTrackerRegistered(bytes32 indexed assetId, bytes32 indexed additionalData, address assetDeploymentTracker)
-  - event: AssetHandlerRegistered(bytes32 indexed assetId, address indexed _assetHandlerAddress)
-  - event: BridgehubDepositBaseTokenInitiated(uint256 indexed chainId, address indexed from, bytes32 assetId, uint256 amount)
-  - event: BridgehubDepositInitiated(uint256 indexed chainId, bytes32 indexed txDataHash, address indexed from, bytes32 assetId, bytes bridgeMintCalldata)
-  - event: BridgehubWithdrawalInitiated(uint256 chainId, address indexed sender, bytes32 indexed assetId, bytes32 assetDataHash)
-  - event: DepositFinalizedAssetRouter(uint256 indexed chainId, bytes32 indexed assetId, bytes assetData)
-  - event: Paused(address account)
-  - event: Unpaused(address account)
-  - event: WithdrawalInitiatedAssetRouter(uint256 chainId, address indexed l2Sender, bytes32 indexed assetId, bytes assetData)
 networks:
-- id: 1
-  start_block: 23006299
+- id: 42161
+  start_block: 0
   contracts:
-  - name: L1AssetRouter
+  - name: Arbitrum_SpokePool
     address:
-    - 0x8829AD80E425C646DAB305381ff105169FeEcE56
+    - 0x91F1804aCaf87C2D34A34A70be1bb16bB85D6748
     handler: src/EventHandlers.ts
     events:
-    - event: AssetDeploymentTrackerRegistered(bytes32 indexed assetId, bytes32 indexed additionalData, address assetDeploymentTracker)
-    - event: AssetDeploymentTrackerSet(bytes32 indexed assetId, address indexed assetDeploymentTracker, bytes32 indexed additionalData)
-    - event: AssetHandlerRegistered(bytes32 indexed assetId, address indexed _assetHandlerAddress)
-    - event: BridgehubDepositBaseTokenInitiated(uint256 indexed chainId, address indexed from, bytes32 assetId, uint256 amount)
-    - event: BridgehubDepositFinalized(uint256 indexed chainId, bytes32 indexed txDataHash, bytes32 indexed l2DepositTxHash)
-    - event: BridgehubDepositInitiated(uint256 indexed chainId, bytes32 indexed txDataHash, address indexed from, bytes32 assetId, bytes bridgeMintCalldata)
-    - event: BridgehubMintData(bytes bridgeMintData)
-    - event: BridgehubWithdrawalInitiated(uint256 chainId, address indexed sender, bytes32 indexed assetId, bytes32 assetDataHash)
-    - event: ClaimedFailedDepositAssetRouter(uint256 indexed chainId, bytes32 indexed assetId, bytes assetData)
-    - event: DepositFinalizedAssetRouter(uint256 indexed chainId, bytes32 indexed assetId, bytes assetData)
-    - event: LegacyDepositInitiated(uint256 indexed chainId, bytes32 indexed l2DepositTxHash, address indexed from, address to, address l1Token, uint256 amount)
-    - event: Paused(address account)
-    - event: Unpaused(address account)
-- id: 324
-  start_block: 63394479
-  contracts:
-  - name: L2AssetRouter
-    address:
-    - '0x0000000000000000000000000000000000010003'
-- id: 2741
-  start_block: 15349559
-  contracts:
-  - name: L2AssetRouter
-    address:
-    - '0x0000000000000000000000000000000000010003'
+    - event: FilledRelay(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint256 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 exclusiveRelayer, bytes32 indexed relayer, bytes32 depositor, bytes32 recipient, bytes32 messageHash, (bytes32,bytes32,uint256,uint8) relayExecutionInfo)
+    - event: FilledV3Relay(address inputToken, address outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint32 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, address exclusiveRelayer, address indexed relayer, address depositor, address recipient, bytes message, (address,bytes,uint256,uint8) relayExecutionInfo)
+    - event: FundsDeposited(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 indexed destinationChainId, uint256 indexed depositId, uint32 quoteTimestamp, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 indexed depositor, bytes32 recipient, bytes32 exclusiveRelayer, bytes message)
 unordered_multichain_mode: true
-field_selection:
-  transaction_fields:
-    - "hash"
-    - "from"
-    - "to"

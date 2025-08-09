@@ -1,37 +1,52 @@
 import assert from "assert";
 import { 
   TestHelpers,
-  L1AssetRouter_AssetDeploymentTrackerRegistered
+  Arbitrum_SpokePool_FilledRelay
 } from "generated";
-const { MockDb, L1AssetRouter } = TestHelpers;
+const { MockDb, Arbitrum_SpokePool } = TestHelpers;
 
-describe("L1AssetRouter contract AssetDeploymentTrackerRegistered event tests", () => {
+describe("Arbitrum_SpokePool contract FilledRelay event tests", () => {
   // Create mock db
   const mockDb = MockDb.createMockDb();
 
-  // Creating mock for L1AssetRouter contract AssetDeploymentTrackerRegistered event
-  const event = L1AssetRouter.AssetDeploymentTrackerRegistered.createMockEvent({/* It mocks event fields with default values. You can overwrite them if you need */});
+  // Creating mock for Arbitrum_SpokePool contract FilledRelay event
+  const event = Arbitrum_SpokePool.FilledRelay.createMockEvent({/* It mocks event fields with default values. You can overwrite them if you need */});
 
-  it("L1AssetRouter_AssetDeploymentTrackerRegistered is created correctly", async () => {
+  it("Arbitrum_SpokePool_FilledRelay is created correctly", async () => {
     // Processing the event
-    const mockDbUpdated = await L1AssetRouter.AssetDeploymentTrackerRegistered.processEvent({
+    const mockDbUpdated = await Arbitrum_SpokePool.FilledRelay.processEvent({
       event,
       mockDb,
     });
 
     // Getting the actual entity from the mock database
-    let actualL1AssetRouterAssetDeploymentTrackerRegistered = mockDbUpdated.entities.L1AssetRouter_AssetDeploymentTrackerRegistered.get(
+    let actualArbitrum_SpokePoolFilledRelay = mockDbUpdated.entities.Arbitrum_SpokePool_FilledRelay.get(
       `${event.chainId}_${event.block.number}_${event.logIndex}`
     );
 
     // Creating the expected entity
-    const expectedL1AssetRouterAssetDeploymentTrackerRegistered: L1AssetRouter_AssetDeploymentTrackerRegistered = {
+    const expectedArbitrum_SpokePoolFilledRelay: Arbitrum_SpokePool_FilledRelay = {
       id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-      assetId: event.params.assetId,
-      additionalData: event.params.additionalData,
-      assetDeploymentTracker: event.params.assetDeploymentTracker,
+      inputToken: event.params.inputToken,
+      outputToken: event.params.outputToken,
+      inputAmount: event.params.inputAmount,
+      outputAmount: event.params.outputAmount,
+      repaymentChainId: event.params.repaymentChainId,
+      originChainId: event.params.originChainId,
+      depositId: event.params.depositId,
+      fillDeadline: event.params.fillDeadline,
+      exclusivityDeadline: event.params.exclusivityDeadline,
+      exclusiveRelayer: event.params.exclusiveRelayer,
+      relayer: event.params.relayer,
+      depositor: event.params.depositor,
+      recipient: event.params.recipient,
+      messageHash: event.params.messageHash,
+      relayExecutionInfo: event.params.relayExecutionInfo,
+      relayExecutionInfo: event.params.relayExecutionInfo,
+      relayExecutionInfo: event.params.relayExecutionInfo,
+      relayExecutionInfo: event.params.relayExecutionInfo,
     };
     // Asserting that the entity in the mock database is the same as the expected entity
-    assert.deepEqual(actualL1AssetRouterAssetDeploymentTrackerRegistered, expectedL1AssetRouterAssetDeploymentTrackerRegistered, "Actual L1AssetRouterAssetDeploymentTrackerRegistered should be the same as the expectedL1AssetRouterAssetDeploymentTrackerRegistered");
+    assert.deepEqual(actualArbitrum_SpokePoolFilledRelay, expectedArbitrum_SpokePoolFilledRelay, "Actual Arbitrum_SpokePoolFilledRelay should be the same as the expectedArbitrum_SpokePoolFilledRelay");
   });
 });

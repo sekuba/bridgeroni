@@ -1,201 +1,61 @@
-type L1AssetRouter_AssetDeploymentTrackerRegistered {
+type Arbitrum_SpokePool_FilledRelay {
   id: ID!
-  assetId: String!
-  additionalData: String!
-  assetDeploymentTracker: String!
-  txHash: String!
+  inputToken: String!
+  outputToken: String!
+  inputAmount: BigInt!
+  outputAmount: BigInt!
+  repaymentChainId: BigInt!
+  originChainId: BigInt!
+  depositId: BigInt!
+  fillDeadline: BigInt!
+  exclusivityDeadline: BigInt!
+  exclusiveRelayer: String!
+  relayer: String!
+  depositor: String!
+  recipient: String!
+  messageHash: String!
+  relayExecutionInfo_0: String!
+  relayExecutionInfo_1: String!
+  relayExecutionInfo_2: BigInt!
+  relayExecutionInfo_3: BigInt!
 }
 
-type L1AssetRouter_AssetDeploymentTrackerSet {
+type Arbitrum_SpokePool_FilledV3Relay {
   id: ID!
-  assetId: String!
-  assetDeploymentTracker: String!
-  additionalData: String!
-  txHash: String!
+  inputToken: String!
+  outputToken: String!
+  inputAmount: BigInt!
+  outputAmount: BigInt!
+  repaymentChainId: BigInt!
+  originChainId: BigInt!
+  depositId: BigInt!
+  fillDeadline: BigInt!
+  exclusivityDeadline: BigInt!
+  exclusiveRelayer: String!
+  relayer: String!
+  depositor: String!
+  recipient: String!
+  message: String!
+  relayExecutionInfo_0: String!
+  relayExecutionInfo_1: String!
+  relayExecutionInfo_2: BigInt!
+  relayExecutionInfo_3: BigInt!
 }
 
-type L1AssetRouter_AssetHandlerRegistered {
+type Arbitrum_SpokePool_FundsDeposited {
   id: ID!
-  assetId: String!
-  _assetHandlerAddress: String!
-  txHash: String!
-}
-
-type L1AssetRouter_BridgehubDepositBaseTokenInitiated {
-  id: ID!
-  chainId: BigInt!
-  from: String!
-  assetId: String!
-  amount: BigInt!
-  txHash: String!
-}
-
-type L1AssetRouter_BridgehubDepositFinalized {
-  id: ID!
-  chainId: BigInt!
-  txDataHash: String!
-  l2DepositTxHash: String!
-  txHash: String!
-}
-
-type L1AssetRouter_BridgehubDepositInitiated {
-  id: ID!
-  chainId: BigInt!
-  txDataHash: String!
-  from: String!
-  assetId: String!
-  bridgeMintCalldata: String!
-  txHash: String!
-}
-
-type L1AssetRouter_BridgehubMintData {
-  id: ID!
-  bridgeMintData: String!
-  decodedOriginalCaller: String
-  decodedRemoteReceiver: String
-  decodedParsedOriginToken: String
-  decodedAmount: BigInt
-  decodedErc20Metadata: String
-  txHash: String!
-}
-
-type L1AssetRouter_BridgehubWithdrawalInitiated {
-  id: ID!
-  chainId: BigInt!
-  sender: String!
-  assetId: String!
-  assetDataHash: String!
-  txHash: String!
-}
-
-type L1AssetRouter_ClaimedFailedDepositAssetRouter {
-  id: ID!
-  chainId: BigInt!
-  assetId: String!
-  assetData: String!
-  decodedOriginalCaller: String
-  decodedRemoteReceiver: String
-  decodedParsedOriginToken: String
-  decodedAmount: BigInt
-  decodedErc20Metadata: String
-  txHash: String!
-}
-
-type L1AssetRouter_DepositFinalizedAssetRouter {
-  id: ID!
-  chainId: BigInt!
-  assetId: String!
-  assetData: String!
-  decodedOriginalCaller: String
-  decodedRemoteReceiver: String
-  decodedParsedOriginToken: String
-  decodedAmount: BigInt
-  decodedErc20Metadata: String
-  txHash: String!
-}
-
-type L1AssetRouter_LegacyDepositInitiated {
-  id: ID!
-  chainId: BigInt!
-  l2DepositTxHash: String!
-  from: String!
-  to: String!
-  l1Token: String!
-  amount: BigInt!
-  txHash: String!
-}
-
-type L1AssetRouter_Paused {
-  id: ID!
-  account: String!
-  txHash: String!
-}
-
-type L1AssetRouter_Unpaused {
-  id: ID!
-  account: String!
-  txHash: String!
-}
-
-type L2AssetRouter_AssetDeploymentTrackerRegistered {
-  id: ID!
-  assetId: String!
-  additionalData: String!
-  assetDeploymentTracker: String!
-  txHash: String!
-}
-
-type L2AssetRouter_AssetHandlerRegistered {
-  id: ID!
-  assetId: String!
-  _assetHandlerAddress: String!
-  txHash: String!
-}
-
-type L2AssetRouter_BridgehubDepositBaseTokenInitiated {
-  id: ID!
-  chainId: BigInt!
-  from: String!
-  assetId: String!
-  amount: BigInt!
-  txHash: String!
-}
-
-type L2AssetRouter_BridgehubDepositInitiated {
-  id: ID!
-  chainId: BigInt!
-  txDataHash: String!
-  from: String!
-  assetId: String!
-  bridgeMintCalldata: String!
-  txHash: String!
-}
-
-type L2AssetRouter_BridgehubWithdrawalInitiated {
-  id: ID!
-  chainId: BigInt!
-  sender: String!
-  assetId: String!
-  assetDataHash: String!
-  txHash: String!
-}
-
-type L2AssetRouter_DepositFinalizedAssetRouter {
-  id: ID!
-  chainId: BigInt!
-  assetId: String!
-  assetData: String!
-  decodedOriginalCaller: String
-  decodedRemoteReceiver: String
-  decodedParsedOriginToken: String
-  decodedAmount: BigInt
-  decodedErc20Metadata: String
-  txHash: String!
-}
-
-type L2AssetRouter_Paused {
-  id: ID!
-  account: String!
-  txHash: String!
-}
-
-type L2AssetRouter_Unpaused {
-  id: ID!
-  account: String!
-  txHash: String!
-}
-
-type L2AssetRouter_WithdrawalInitiatedAssetRouter {
-  id: ID!
-  chainId: BigInt!
-  l2Sender: String!
-  assetId: String!
-  assetData: String!
-  decodedOriginalCaller: String
-  decodedRemoteReceiver: String
-  decodedParsedOriginToken: String
-  decodedAmount: BigInt
-  decodedErc20Metadata: String
-  txHash: String!
+  inputToken: String!
+  outputToken: String!
+  inputAmount: BigInt!
+  outputAmount: BigInt!
+  destinationChainId: BigInt!
+  depositId: BigInt!
+  quoteTimestamp: BigInt!
+  fillDeadline: BigInt!
+  exclusivityDeadline: BigInt!
+  depositor: String!
+  recipient: String!
+  exclusiveRelayer: String!
+  message: String!
 }
 
