@@ -52,14 +52,21 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
   
   if (crosschainMessage) {
     // Update existing message with inbound data
+    const inboundTimestamp = BigInt(event.block.timestamp);
+    const isMatched = crosschainMessage.blockOutbound !== undefined;
+    const latency = isMatched && crosschainMessage.timestampOutbound !== undefined 
+      ? inboundTimestamp - crosschainMessage.timestampOutbound 
+      : undefined;
+    
     crosschainMessage = {
       ...crosschainMessage,
       blockInbound: BigInt(event.block.number),
-      timestampInbound: BigInt(event.block.timestamp),
+      timestampInbound: inboundTimestamp,
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
       toInbound: event.params.recipient,
-      matched: crosschainMessage.blockOutbound !== undefined, // true if outbound data already exists
+      matched: isMatched,
+      latency: latency,
     };
   } else {
     // Create new message if outbound wasn't seen yet (inbound came first)
@@ -83,6 +90,7 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
       toInbound: event.params.recipient,
       
       matched: false, // will be true when outbound is also recorded
+      latency: undefined, // will be calculated when matched
     };
   }
 
@@ -177,14 +185,21 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
   
   if (crosschainMessage) {
     // Update existing message with inbound data
+    const inboundTimestamp = BigInt(event.block.timestamp);
+    const isMatched = crosschainMessage.blockOutbound !== undefined;
+    const latency = isMatched && crosschainMessage.timestampOutbound !== undefined 
+      ? inboundTimestamp - crosschainMessage.timestampOutbound 
+      : undefined;
+    
     crosschainMessage = {
       ...crosschainMessage,
       blockInbound: BigInt(event.block.number),
-      timestampInbound: BigInt(event.block.timestamp),
+      timestampInbound: inboundTimestamp,
       txHashInbound: event.transaction.hash,
       chainIdInbound: BigInt(event.chainId),
       toInbound: event.params.recipient,
-      matched: crosschainMessage.blockOutbound !== undefined, // true if outbound data already exists
+      matched: isMatched,
+      latency: latency,
     };
   } else {
     // Create new message if outbound wasn't seen yet (inbound came first)
@@ -208,6 +223,7 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
       toInbound: event.params.recipient,
       
       matched: false, // will be true when outbound is also recorded
+      latency: undefined, // will be calculated when matched
     };
   }
 
@@ -290,14 +306,21 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
   
   if (crosschainMessage) {
     // Update existing message with outbound data
+    const outboundTimestamp = BigInt(event.block.timestamp);
+    const isMatched = crosschainMessage.blockInbound !== undefined;
+    const latency = isMatched && crosschainMessage.timestampInbound !== undefined 
+      ? crosschainMessage.timestampInbound - outboundTimestamp 
+      : undefined;
+    
     crosschainMessage = {
       ...crosschainMessage,
       blockOutbound: BigInt(event.block.number),
-      timestampOutbound: BigInt(event.block.timestamp),
+      timestampOutbound: outboundTimestamp,
       txHashOutbound: event.transaction.hash,
       chainIdOutbound: BigInt(event.chainId),
       fromOutbound: event.params.depositor,
-      matched: crosschainMessage.blockInbound !== undefined, // true if inbound data already exists
+      matched: isMatched,
+      latency: latency,
     };
   } else {
     // Create new message with outbound data
@@ -321,6 +344,7 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
       toInbound: undefined,
       
       matched: false,
+      latency: undefined, // will be calculated when matched
     };
   }
 

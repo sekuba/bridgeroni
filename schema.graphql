@@ -80,6 +80,7 @@ type CrosschainMessage {
   
   # Status tracking
   matched: Boolean! # true when both outbound and inbound are recorded
+  latency: BigInt # timestamp difference (inbound - outbound) in seconds, only set when matched
 }
 
 type AppPayload {
