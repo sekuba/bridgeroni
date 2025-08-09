@@ -1,4 +1,4 @@
-type Arbitrum_SpokePool_FilledRelay {
+type SpokePool_FilledRelay {
   id: ID!
   inputToken: String!
   outputToken: String!
@@ -20,7 +20,7 @@ type Arbitrum_SpokePool_FilledRelay {
   relayExecutionInfo_3: BigInt!
 }
 
-type Arbitrum_SpokePool_FilledV3Relay {
+type SpokePool_FilledV3Relay {
   id: ID!
   inputToken: String!
   outputToken: String!
@@ -42,7 +42,7 @@ type Arbitrum_SpokePool_FilledV3Relay {
   relayExecutionInfo_3: BigInt!
 }
 
-type Arbitrum_SpokePool_FundsDeposited {
+type SpokePool_FundsDeposited {
   id: ID!
   inputToken: String!
   outputToken: String!

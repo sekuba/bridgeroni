@@ -1,31 +1,31 @@
 import assert from "assert";
 import { 
   TestHelpers,
-  Arbitrum_SpokePool_FilledRelay
+  SpokePool_FilledRelay
 } from "generated";
-const { MockDb, Arbitrum_SpokePool } = TestHelpers;
+const { MockDb, SpokePool } = TestHelpers;
 
-describe("Arbitrum_SpokePool contract FilledRelay event tests", () => {
+describe("SpokePool contract FilledRelay event tests", () => {
   // Create mock db
   const mockDb = MockDb.createMockDb();
 
-  // Creating mock for Arbitrum_SpokePool contract FilledRelay event
-  const event = Arbitrum_SpokePool.FilledRelay.createMockEvent({/* It mocks event fields with default values. You can overwrite them if you need */});
+  // Creating mock for SpokePool contract FilledRelay event
+  const event = SpokePool.FilledRelay.createMockEvent({/* It mocks event fields with default values. You can overwrite them if you need */});
 
-  it("Arbitrum_SpokePool_FilledRelay is created correctly", async () => {
+  it("SpokePool_FilledRelay is created correctly", async () => {
     // Processing the event
-    const mockDbUpdated = await Arbitrum_SpokePool.FilledRelay.processEvent({
+    const mockDbUpdated = await SpokePool.FilledRelay.processEvent({
       event,
       mockDb,
     });
 
     // Getting the actual entity from the mock database
-    let actualArbitrum_SpokePoolFilledRelay = mockDbUpdated.entities.Arbitrum_SpokePool_FilledRelay.get(
+    let actualSpokePoolFilledRelay = mockDbUpdated.entities.SpokePool_FilledRelay.get(
       `${event.chainId}_${event.block.number}_${event.logIndex}`
     );
 
     // Creating the expected entity
-    const expectedArbitrum_SpokePoolFilledRelay: Arbitrum_SpokePool_FilledRelay = {
+    const expectedSpokePoolFilledRelay: SpokePool_FilledRelay = {
       id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
       inputToken: event.params.inputToken,
       outputToken: event.params.outputToken,
@@ -47,6 +47,6 @@ describe("Arbitrum_SpokePool contract FilledRelay event tests", () => {
       relayExecutionInfo: event.params.relayExecutionInfo,
     };
     // Asserting that the entity in the mock database is the same as the expected entity
-    assert.deepEqual(actualArbitrum_SpokePoolFilledRelay, expectedArbitrum_SpokePoolFilledRelay, "Actual Arbitrum_SpokePoolFilledRelay should be the same as the expectedArbitrum_SpokePoolFilledRelay");
+    assert.deepEqual(actualSpokePoolFilledRelay, expectedSpokePoolFilledRelay, "Actual SpokePoolFilledRelay should be the same as the expectedSpokePoolFilledRelay");
   });
 });

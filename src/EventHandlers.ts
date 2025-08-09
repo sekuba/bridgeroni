@@ -2,14 +2,14 @@
  * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
  */
 import {
-  Arbitrum_SpokePool,
-  Arbitrum_SpokePool_FilledRelay,
-  Arbitrum_SpokePool_FilledV3Relay,
-  Arbitrum_SpokePool_FundsDeposited,
+  SpokePool,
+  SpokePool_FilledRelay,
+  SpokePool_FilledV3Relay,
+  SpokePool_FundsDeposited,
 } from "generated";
 
-Arbitrum_SpokePool.FilledRelay.handler(async ({ event, context }) => {
-  const entity: Arbitrum_SpokePool_FilledRelay = {
+SpokePool.FilledRelay.handler(async ({ event, context }) => {
+  const entity: SpokePool_FilledRelay = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     inputToken: event.params.inputToken,
     outputToken: event.params.outputToken,
@@ -39,11 +39,11 @@ Arbitrum_SpokePool.FilledRelay.handler(async ({ event, context }) => {
     ,
   };
 
-  context.Arbitrum_SpokePool_FilledRelay.set(entity);
+  context.SpokePool_FilledRelay.set(entity);
 });
 
-Arbitrum_SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
-  const entity: Arbitrum_SpokePool_FilledV3Relay = {
+SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
+  const entity: SpokePool_FilledV3Relay = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     inputToken: event.params.inputToken,
     outputToken: event.params.outputToken,
@@ -73,11 +73,11 @@ Arbitrum_SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     ,
   };
 
-  context.Arbitrum_SpokePool_FilledV3Relay.set(entity);
+  context.SpokePool_FilledV3Relay.set(entity);
 });
 
-Arbitrum_SpokePool.FundsDeposited.handler(async ({ event, context }) => {
-  const entity: Arbitrum_SpokePool_FundsDeposited = {
+SpokePool.FundsDeposited.handler(async ({ event, context }) => {
+  const entity: SpokePool_FundsDeposited = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     inputToken: event.params.inputToken,
     outputToken: event.params.outputToken,
@@ -94,5 +94,5 @@ Arbitrum_SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     message: event.params.message,
   };
 
-  context.Arbitrum_SpokePool_FundsDeposited.set(entity);
+  context.SpokePool_FundsDeposited.set(entity);
 });
