@@ -2,13 +2,20 @@
  * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
  * or https://docs.envio.dev/docs/HyperIndex-LLM/hyperindex-complete for LLMs
  */
+import { match } from "assert";
 import {
   SpokePool,
   SpokePool_FilledRelay,
   SpokePool_FilledV3Relay,
   SpokePool_FundsDeposited,
+  EndpointV2,
+  EndpointV2_PacketSent,
+  EndpointV2_PacketDelivered,
+  StargatePool,
+  StargatePool_OFTSent,
+  StargatePool_OFTReceived,
 } from "generated";
-import { isAddress, getAddress } from "viem";
+import { isAddress, getAddress, keccak256, encodeAbiParameters, parseAbiParameters, pad } from "viem";
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -230,6 +237,7 @@ async function handleAcrossAppPayload(
     if (eventData.direction === 'inbound') {
       appPayload = {
         ...appPayload,
+        matched: true,
         amountInbound: eventData.outputAmount,
         assetAddressInbound: unpadAddress(eventData.outputToken),
         ...(eventData.message !== undefined && { message: eventData.message }),
@@ -238,6 +246,7 @@ async function handleAcrossAppPayload(
       // outbound event
       appPayload = {
         ...appPayload,
+        matched: true,
         assetAddressOutbound: unpadAddress(eventData.inputToken),
         amountOutbound: eventData.inputAmount,
         sender: unpadAddress(eventData.depositor),
@@ -256,6 +265,7 @@ async function handleAcrossAppPayload(
         transportingMsgProtocol: transportingMsgProtocol,
         transportingMsgId: transportingMsgId,
         idMatching: idMatching,
+        matched: false,
 
         // Asset information (partial, from inbound)
         assetAddressOutbound: undefined,
@@ -287,6 +297,7 @@ async function handleAcrossAppPayload(
         transportingMsgProtocol: transportingMsgProtocol,
         transportingMsgId: transportingMsgId,
         idMatching: idMatching,
+        matched: false,
 
         // Asset information
         assetAddressOutbound: unpadAddress(eventData.inputToken),
@@ -504,6 +515,464 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
 
   await handleAcrossMessage(eventData, metadata, context);
   await handleAcrossAppPayload(eventData, metadata, context);
+});
+
+// ============================================================================
+// LAYERZERO V2 BRIDGE HELPERS
+// ============================================================================
+
+interface LayerZeroPacketData {
+  version: number;
+  nonce: bigint;
+  srcEid: number;
+  sender: string;
+  dstEid: number;
+  receiver: string;
+  payload: string;
+  guid: string;
+}
+
+interface LayerZeroInboundEventData {
+  direction: 'inbound';
+  originSrcEid: number;
+  originSender: string;
+  originNonce: bigint;
+  receiver: string;
+  guid: string;
+}
+
+interface LayerZeroOutboundEventData {
+  direction: 'outbound';
+  chainId: number;
+  packet: LayerZeroPacketData;
+}
+
+type LayerZeroEventData = LayerZeroInboundEventData | LayerZeroOutboundEventData;
+
+function decodeLayerZeroPacket(encodedPayload: string): LayerZeroPacketData {
+  try {
+    const payload = encodedPayload.startsWith('0x') ? encodedPayload : '0x' + encodedPayload;
+    
+    if (payload.length < 166) {
+      throw new Error(`Payload too short: ${payload.length}, minimum 166 characters expected`);
+    }
+
+    const version = parseInt(payload.slice(2, 6), 16);
+    const nonce = BigInt('0x' + payload.slice(6, 22));
+    const srcEid = parseInt(payload.slice(22, 30), 16);
+    const sender = '0x' + payload.slice(30, 94);
+    const dstEid = parseInt(payload.slice(94, 102), 16);
+    const receiver = '0x' + payload.slice(102, 166);
+    const appPayload = payload.slice(166);
+
+    const guid = calculateLayerZeroGUID(nonce, srcEid, sender, dstEid, receiver);
+
+    return {
+      version,
+      nonce,
+      srcEid,
+      sender: unpadAddress(sender),
+      dstEid,
+      receiver: unpadAddress(receiver),
+      payload: '0x' + appPayload,
+      guid,
+    };
+  } catch (error) {
+    console.error('Error decoding LayerZero packet:', error);
+    throw error;
+  }
+}
+
+function calculateLayerZeroGUID(nonce: bigint, srcEid: number | bigint, sender: string, dstEid: number | bigint, receiver: string): string {
+  try {
+    const paddedSender = pad(sender as `0x${string}`);
+    const paddedReceiver = pad(receiver as `0x${string}`);
+    
+    const srcEidNumber = typeof srcEid === 'bigint' ? Number(srcEid) : srcEid;
+    const dstEidNumber = typeof dstEid === 'bigint' ? Number(dstEid) : dstEid;
+    
+    return keccak256(encodeAbiParameters(
+      parseAbiParameters('uint64 nonce, uint32 srcEid, bytes32 sender, uint32 dstEid, bytes32 receiver'),
+      [nonce, srcEidNumber, paddedSender, dstEidNumber, paddedReceiver]
+    ));
+  } catch (error) {
+    console.error('Error calculating LayerZero GUID:', error);
+    throw error;
+  }
+}
+
+async function handleLayerZeroMessage(
+  eventData: LayerZeroEventData,
+  metadata: EventMetadata,
+  context: any
+): Promise<void> {
+  const guid = eventData.direction === 'inbound' ? eventData.guid : eventData.packet.guid;
+  const crosschainMessageId = `layerzero:${guid}`;
+
+  let crosschainMessage = await context.CrosschainMessage.get(crosschainMessageId);
+
+  if (crosschainMessage) {
+    if (eventData.direction === 'inbound') {
+      const inboundTimestamp = metadata.blockTimestamp;
+      const latency = crosschainMessage.timestampOutbound !== undefined
+        ? inboundTimestamp - crosschainMessage.timestampOutbound
+        : undefined;
+
+      crosschainMessage = {
+        ...crosschainMessage,
+        blockInbound: metadata.blockNumber,
+        timestampInbound: inboundTimestamp,
+        txHashInbound: metadata.txHash,
+        chainIdInbound: BigInt(metadata.chainId),
+        toInbound: unpadAddress(eventData.receiver),
+        matched: true,
+        latency: latency,
+      };
+    } else {
+      const outboundTimestamp = metadata.blockTimestamp;
+      const latency = crosschainMessage.timestampInbound !== undefined
+        ? crosschainMessage.timestampInbound - outboundTimestamp
+        : undefined;
+
+      crosschainMessage = {
+        ...crosschainMessage,
+        blockOutbound: metadata.blockNumber,
+        timestampOutbound: outboundTimestamp,
+        txHashOutbound: metadata.txHash,
+        chainIdOutbound: BigInt(metadata.chainId),
+        fromOutbound: unpadAddress(eventData.packet.sender),
+        matched: true,
+        latency: latency,
+      };
+    }
+  } else {
+    if (eventData.direction === 'inbound') {
+      crosschainMessage = {
+        id: crosschainMessageId,
+        protocol: "layerzero",
+        idMatching: guid,
+        blockOutbound: undefined,
+        timestampOutbound: undefined,
+        txHashOutbound: undefined,
+        chainIdOutbound: undefined,
+        fromOutbound: undefined,
+        blockInbound: metadata.blockNumber,
+        timestampInbound: metadata.blockTimestamp,
+        txHashInbound: metadata.txHash,
+        chainIdInbound: BigInt(metadata.chainId),
+        toInbound: unpadAddress(eventData.receiver),
+        matched: false,
+        latency: undefined,
+      };
+    } else {
+      crosschainMessage = {
+        id: crosschainMessageId,
+        protocol: "layerzero",
+        idMatching: guid,
+        blockOutbound: metadata.blockNumber,
+        timestampOutbound: metadata.blockTimestamp,
+        txHashOutbound: metadata.txHash,
+        chainIdOutbound: BigInt(metadata.chainId),
+        fromOutbound: unpadAddress(eventData.packet.sender),
+        blockInbound: undefined,
+        timestampInbound: undefined,
+        txHashInbound: undefined,
+        chainIdInbound: undefined,
+        toInbound: undefined,
+        matched: false,
+        latency: undefined,
+      };
+    }
+  }
+
+  context.CrosschainMessage.set(crosschainMessage);
+}
+
+// ============================================================================
+// STARGATE V2 BRIDGE HELPERS  
+// ============================================================================
+
+interface StargateInboundEventData {
+  direction: 'inbound';
+  guid: string;
+  srcEid: number;
+  toAddress: string;
+  amountReceivedLD: bigint;
+}
+
+interface StargateOutboundEventData {
+  direction: 'outbound';
+  guid: string;
+  dstEid: number;
+  fromAddress: string;
+  amountSentLD: bigint;
+  amountReceivedLD: bigint;
+}
+
+type StargateEventData = StargateInboundEventData | StargateOutboundEventData;
+
+async function handleStargateAppPayload(
+  eventData: StargateEventData,
+  metadata: EventMetadata,
+  context: any
+): Promise<void> {
+  const crosschainMessageId = `layerzero:${eventData.guid}`;
+  const transportingMsgProtocol = "layerzero";
+  const transportingMsgId = eventData.guid;
+
+  let counter = 0;
+  let appPayloadId = `${transportingMsgProtocol}:${transportingMsgId}:${counter}`;
+  let appPayload;
+
+  // Find an unmatched id
+  while (true) {
+    const candidate = await context.AppPayload.get(appPayloadId);
+    if (!candidate) {
+      appPayload = undefined;
+      break;
+    }
+    if (candidate.matched === true) {
+      counter++;
+      appPayloadId = `${transportingMsgProtocol}:${transportingMsgId}:${counter}`;
+    } else {
+      appPayload = candidate;
+      break;
+    }
+  }
+
+  // Build or update the AppPayload
+  if (appPayload) {
+    if (eventData.direction === 'inbound') {
+      appPayload = {
+        ...appPayload,
+        matched: true,
+        amountInbound: eventData.amountReceivedLD,
+        recipient: unpadAddress(eventData.toAddress),
+      };
+    } else {
+      appPayload = {
+        ...appPayload,
+        matched: true,
+        amountOutbound: eventData.amountSentLD,
+        amountInbound: eventData.amountReceivedLD,
+        sender: unpadAddress(eventData.fromAddress),
+      };
+    }
+  } else {
+    // Create new AppPayload
+    const basePayload = {
+      id: appPayloadId,
+      appName: "StargateV2",
+      transportingMsgProtocol,
+      transportingMsgId,
+      idMatching: eventData.guid,
+      matched: false,
+      assetAddressOutbound: undefined,
+      assetAddressInbound: undefined,
+      amountOutbound: undefined,
+      amountInbound: undefined,
+      sender: undefined,
+      recipient: undefined,
+      targetAddress: metadata.emitterAddress,
+      crosschainMessage_id: crosschainMessageId,
+    };
+    if (eventData.direction === 'inbound') {
+      appPayload = {
+        ...basePayload,
+        amountInbound: eventData.amountReceivedLD,
+        recipient: unpadAddress(eventData.toAddress),
+      };
+    } else {
+      appPayload = {
+        ...basePayload,
+        amountOutbound: eventData.amountSentLD,
+        amountInbound: eventData.amountReceivedLD,
+        sender: unpadAddress(eventData.fromAddress),
+        fillDeadline: undefined,
+      };
+    }
+  }
+
+  await context.AppPayload.set(appPayload);
+}
+
+// ============================================================================
+// LAYERZERO V2 EVENT HANDLERS
+// ============================================================================
+
+EndpointV2.PacketSent.handler(async ({ event, context }) => {
+  try {
+    const packet = decodeLayerZeroPacket(event.params.encodedPayload);
+    
+    const entity: EndpointV2_PacketSent = {
+      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+      encodedPayload: event.params.encodedPayload,
+      options: event.params.options,
+      sendLibrary: event.params.sendLibrary,
+      packetVersion: BigInt(packet.version),
+      nonce: packet.nonce,
+      srcEid: BigInt(packet.srcEid),
+      sender: packet.sender,
+      dstEid: BigInt(packet.dstEid),
+      receiver: packet.receiver,
+      payload: packet.payload,
+      guid: packet.guid,
+      chainId: BigInt(event.chainId),
+      txHash: event.transaction.hash,
+      from: event.transaction.from,
+      to: event.transaction.to,
+    };
+
+    context.EndpointV2_PacketSent.set(entity);
+
+    const eventData: LayerZeroOutboundEventData = {
+      direction: 'outbound',
+      chainId: event.chainId,
+      packet: packet,
+    };
+
+    const metadata: EventMetadata = {
+      chainId: event.chainId,
+      blockNumber: BigInt(event.block.number),
+      blockTimestamp: BigInt(event.block.timestamp),
+      txHash: event.transaction.hash,
+      txFrom: event.transaction.from,
+      txTo: event.transaction.to,
+      emitterAddress: event.srcAddress,
+    };
+
+    await handleLayerZeroMessage(eventData, metadata, context);
+  } catch (error) {
+    console.error(`Error handling PacketSent event: ${error}`);
+  }
+});
+
+EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
+  try {
+    const guid = calculateLayerZeroGUID(
+      event.params.origin[2], // nonce
+      Number(event.params.origin[0]), // srcEid
+      event.params.origin[1], // sender
+      event.chainId,
+      event.params.receiver
+    );
+
+    const entity: EndpointV2_PacketDelivered = {
+      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+      originSrcEid: event.params.origin[0], // srcEid
+      originSender: unpadAddress(event.params.origin[1]), // sender
+      originNonce: event.params.origin[2], // nonce
+      receiver: unpadAddress(event.params.receiver),
+      guid: guid,
+      chainId: BigInt(event.chainId),
+      txHash: event.transaction.hash,
+      from: event.transaction.from,
+      to: event.transaction.to,
+    };
+
+    context.EndpointV2_PacketDelivered.set(entity);
+
+    const eventData: LayerZeroInboundEventData = {
+      direction: 'inbound',
+      originSrcEid: Number(event.params.origin[0]), // srcEid
+      originSender: event.params.origin[1], // sender
+      originNonce: event.params.origin[2], // nonce
+      receiver: event.params.receiver,
+      guid: guid,
+    };
+
+    const metadata: EventMetadata = {
+      chainId: event.chainId,
+      blockNumber: BigInt(event.block.number),
+      blockTimestamp: BigInt(event.block.timestamp),
+      txHash: event.transaction.hash,
+      txFrom: event.transaction.from,
+      txTo: event.transaction.to,
+      emitterAddress: event.srcAddress,
+    };
+
+    await handleLayerZeroMessage(eventData, metadata, context);
+  } catch (error) {
+    console.error(`Error handling PacketDelivered event: ${error}`);
+  }
+});
+
+// ============================================================================
+// STARGATE V2 EVENT HANDLERS
+// ============================================================================
+
+StargatePool.OFTSent.handler(async ({ event, context }) => {
+  const entity: StargatePool_OFTSent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    guid: event.params.guid,
+    dstEid: event.params.dstEid,
+    fromAddress: unpadAddress(event.params.fromAddress),
+    amountSentLD: event.params.amountSentLD,
+    amountReceivedLD: event.params.amountReceivedLD,
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
+  };
+
+  context.StargatePool_OFTSent.set(entity);
+
+  const eventData: StargateOutboundEventData = {
+    direction: 'outbound',
+    guid: event.params.guid,
+    dstEid: Number(event.params.dstEid),
+    fromAddress: event.params.fromAddress,
+    amountSentLD: event.params.amountSentLD,
+    amountReceivedLD: event.params.amountReceivedLD,
+  };
+
+  const metadata: EventMetadata = {
+    chainId: event.chainId,
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: BigInt(event.block.timestamp),
+    txHash: event.transaction.hash,
+    txFrom: event.transaction.from,
+    txTo: event.transaction.to,
+    emitterAddress: event.srcAddress,
+  };
+
+  await handleStargateAppPayload(eventData, metadata, context);
+});
+
+StargatePool.OFTReceived.handler(async ({ event, context }) => {
+  const entity: StargatePool_OFTReceived = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    guid: event.params.guid,
+    srcEid: event.params.srcEid,
+    toAddress: unpadAddress(event.params.toAddress),
+    amountReceivedLD: event.params.amountReceivedLD,
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
+  };
+
+  context.StargatePool_OFTReceived.set(entity);
+
+  const eventData: StargateInboundEventData = {
+    direction: 'inbound',
+    guid: event.params.guid,
+    srcEid: Number(event.params.srcEid),
+    toAddress: event.params.toAddress,
+    amountReceivedLD: event.params.amountReceivedLD,
+  };
+
+  const metadata: EventMetadata = {
+    chainId: event.chainId,
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: BigInt(event.block.timestamp),
+    txHash: event.transaction.hash,
+    txFrom: event.transaction.from,
+    txTo: event.transaction.to,
+    emitterAddress: event.srcAddress,
+  };
+
+  await handleStargateAppPayload(eventData, metadata, context);
 });
 
 // ============================================================================

@@ -7,6 +7,16 @@ contracts:
   - event: FilledRelay(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint256 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 exclusiveRelayer, bytes32 indexed relayer, bytes32 depositor, bytes32 recipient, bytes32 messageHash, (bytes32,bytes32,uint256,uint8) relayExecutionInfo)
   - event: FilledV3Relay(address inputToken, address outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint32 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, address exclusiveRelayer, address indexed relayer, address depositor, address recipient, bytes message, (address,bytes,uint256,uint8) relayExecutionInfo)
   - event: FundsDeposited(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 indexed destinationChainId, uint256 indexed depositId, uint32 quoteTimestamp, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 indexed depositor, bytes32 recipient, bytes32 exclusiveRelayer, bytes message)
+- name: EndpointV2
+  handler: src/EventHandlers.ts
+  events:
+  - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
+  - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
+- name: StargatePool
+  handler: src/EventHandlers.ts
+  events:
+  - event: OFTSent(bytes32 indexed guid, uint32 dstEid, address indexed fromAddress, uint256 amountSentLD, uint256 amountReceivedLD)
+  - event: OFTReceived(bytes32 indexed guid, uint32 srcEid, address indexed toAddress, uint256 amountReceivedLD)
 networks:
 - id: 1 # etherium
   start_block: 23102140
@@ -14,48 +24,95 @@ networks:
   - name: SpokePool
     address:
     - 0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931  # StargatePoolNative
+    - 0xc026395860Db2d07ee33e05fE50ed7bD583189C7  # StargatePoolUSDC
 - id: 42161 # arbitrum
   start_block: 366538029
   contracts:
   - name: SpokePool
     address:
     - 0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0xA45B5130f36CDcA45667738e2a258AB09f4A5f7F  # StargatePoolNative
+    - 0xe8CDF27AcD73a434D661C84887215F7598e7d0d3  # StargatePoolUSDC
 - id: 10 # opmainnet
   start_block: 139563673
   contracts:
   - name: SpokePool
     address:
     - 0x6f26Bf09B1C792e3228e5467807a900A503c0281
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0xe8CDF27AcD73a434D661C84887215F7598e7d0d3  # StargatePoolNative
+    - 0xcE8CcA271Ebc0533920C83d39F417ED6A0abB7D0  # StargatePoolUSDC
 - id: 324 # zksyncera
   start_block: 63857674
   contracts:
   - name: SpokePool
     address:
     - 0xE0B015E54d54fc84a6cB9B666099c46adE9335FF
+  - name: EndpointV2
+    address:
+    - 0xd07C30aF3Ff30D96BDc9c6044958230Eb797DDBF
 - id: 8453 # base
   start_block: 33968388
   contracts:
   - name: SpokePool
     address:
     - 0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0xdc181Bd607330aeeBEF6ea62e03e5e1Fb4B6f7C7  # StargatePoolNative
+    - 0x27a16dc786820B16E5c9028b75B99F6f604b5d26  # StargatePoolUSDC
 - id: 57073 # ink
   start_block: 21228108
   contracts:
   - name: SpokePool
     address:
     - 0xeF684C38F94F48775959ECf2012D7E864ffb9dd4
+  - name: EndpointV2
+    address:
+    - 0xca29f3A6f966Cb2fc0dE625F8f325c0C46dbE958
 - id: 59144 # linea
   start_block: 21808495
   contracts:
   - name: SpokePool
     address:
     - 0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0x81F6138153d473E8c5EcebD3DC8Cd4903506B075  # StargatePoolNative
 - id: 534352 # scroll
   start_block: 18734126
   contracts:
   - name: SpokePool
     address:
     - 0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96
+  - name: EndpointV2
+    address:
+    - 0x1a44076050125825900e736c501f859c50fE728c
+  - name: StargatePool
+    address:
+    - 0xC2b638Cb5042c1B3c5d5C969361fB50569840583  # StargatePoolNative
+    - 0x3Fc69CC4A842838bCDC9499178740226062b14E4  # StargatePoolUSDC
 unordered_multichain_mode: true
 field_selection:
   transaction_fields:

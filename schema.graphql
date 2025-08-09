@@ -100,11 +100,11 @@ type CrosschainMessage {
 
 type AppPayload {
   id: ID! # Format: "{transportingMsgProtocol}:{transportingMsgId}:{counter}"
-  appName: String! # "AcrossV3"
+  appName: String! # "AcrossV3", "StargateV2"
   
   # Associated message info
-  transportingMsgProtocol: String! # "acrossV3"
-  transportingMsgId: String! # "{originChainId}-{depositId}"
+  transportingMsgProtocol: String! # "acrossV3", "layerzero"
+  transportingMsgId: String! # "{originChainId}-{depositId}" for Across, GUID for LayerZero
   idMatching: String! # For Across, same as transportingMsgId since layers are fused
   
   # Asset information
@@ -126,5 +126,70 @@ type AppPayload {
   
   # References
   crosschainMessage: CrosschainMessage!
+
+  # Status tracking
+  matched: Boolean! # true when both outbound and inbound are recorded
+}
+
+type EndpointV2_PacketSent {
+  id: ID!
+  encodedPayload: String!
+  options: String!
+  sendLibrary: String!
+  # Decoded packet header fields
+  packetVersion: BigInt
+  nonce: BigInt
+  srcEid: BigInt
+  sender: String
+  dstEid: BigInt
+  receiver: String
+  payload: String
+  guid: String! # Calculated GUID for matching
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
+}
+
+type EndpointV2_PacketDelivered {
+  id: ID!
+  originSrcEid: BigInt!
+  originSender: String!
+  originNonce: BigInt!
+  receiver: String!
+  guid: String! # Calculated GUID for matching
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
+}
+
+type StargatePool_OFTSent {
+  id: ID!
+  guid: String!
+  dstEid: BigInt!
+  fromAddress: String!
+  amountSentLD: BigInt!
+  amountReceivedLD: BigInt!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
+}
+
+type StargatePool_OFTReceived {
+  id: ID!
+  guid: String!
+  srcEid: BigInt!
+  toAddress: String!
+  amountReceivedLD: BigInt!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
 }
 
