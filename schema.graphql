@@ -59,3 +59,56 @@ type SpokePool_FundsDeposited {
   message: String!
 }
 
+type CrosschainMessage {
+  id: ID! # Format: "acrossV3:{originChainId}-{depositId}"
+  protocol: String! # "acrossV3"
+  idMatching: String! # "{originChainId}-{depositId}"
+  
+  # Outbound message data
+  blockOutbound: BigInt
+  timestampOutbound: BigInt
+  txHashOutbound: String
+  chainIdOutbound: BigInt
+  fromOutbound: String # depositor address
+  
+  # Inbound message data  
+  blockInbound: BigInt
+  timestampInbound: BigInt
+  txHashInbound: String
+  chainIdInbound: BigInt
+  toInbound: String # recipient address
+  
+  # Status tracking
+  matched: Boolean! # true when both outbound and inbound are recorded
+}
+
+type AppPayload {
+  id: ID! # Format: "{transportingMsgProtocol}:{transportingMessageId}:{idMatching}"
+  appName: String! # "AcrossV3"
+  
+  # Associated message info
+  transportingMsgProtocol: String! # "acrossV3"
+  transportingMessageId: String! # "{originChainId}-{depositId}"
+  idMatching: String! # For Across, same as transportingMessageId since layers are fused
+  
+  # Asset information
+  assetAddressOutbound: String # inputToken address
+  assetAddressInbound: String # outputToken address  
+  amountOut: BigInt # inputAmount
+  amountIn: BigInt # outputAmount
+  
+  # Addresses
+  sender: String # depositor
+  recipient: String # recipient
+  targetAddress: String # For Across, this would be the SpokePool address on destination
+  
+  # Additional Across-specific data
+  fillDeadline: BigInt
+  exclusivityDeadline: BigInt
+  exclusiveRelayer: String
+  message: String
+  
+  # References
+  crosschainMessage: CrosschainMessage!
+}
+
