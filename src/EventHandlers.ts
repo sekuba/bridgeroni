@@ -58,6 +58,11 @@ SpokePool.FilledRelay.handler(async ({ event, context }) => {
     relayExecutionInfo_3: event.params.relayExecutionInfo
         [3]
     ,
+    // metadata
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
   };
 
   context.SpokePool_FilledRelay.set(entity);
@@ -191,6 +196,11 @@ SpokePool.FilledV3Relay.handler(async ({ event, context }) => {
     relayExecutionInfo_3: event.params.relayExecutionInfo
         [3]
     ,
+    // metadata
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
   };
 
   context.SpokePool_FilledV3Relay.set(entity);
@@ -312,6 +322,11 @@ SpokePool.FundsDeposited.handler(async ({ event, context }) => {
     recipient: unpadAddress(event.params.recipient),
     exclusiveRelayer: unpadAddress(event.params.exclusiveRelayer),
     message: event.params.message,
+    // metadata
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
   };
 
   context.SpokePool_FundsDeposited.set(entity);

@@ -18,6 +18,11 @@ type SpokePool_FilledRelay {
   relayExecutionInfo_1: String!
   relayExecutionInfo_2: BigInt!
   relayExecutionInfo_3: BigInt!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
 }
 
 type SpokePool_FilledV3Relay {
@@ -40,6 +45,11 @@ type SpokePool_FilledV3Relay {
   relayExecutionInfo_1: String!
   relayExecutionInfo_2: BigInt!
   relayExecutionInfo_3: BigInt!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
 }
 
 type SpokePool_FundsDeposited {
@@ -57,6 +67,11 @@ type SpokePool_FundsDeposited {
   recipient: String!
   exclusiveRelayer: String!
   message: String!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
 }
 
 type CrosschainMessage {
