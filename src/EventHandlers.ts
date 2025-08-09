@@ -218,7 +218,7 @@ async function handleAcrossAppPayload(
     if (eventData.direction === 'inbound') {
       appPayload = {
         ...appPayload,
-        amountOut: eventData.outputAmount,
+        amountInbound: eventData.outputAmount,
         assetAddressInbound: unpadAddress(eventData.outputToken),
         ...(eventData.message !== undefined && { message: eventData.message }),
       };
@@ -227,7 +227,7 @@ async function handleAcrossAppPayload(
       appPayload = {
         ...appPayload,
         assetAddressOutbound: unpadAddress(eventData.inputToken),
-        amountIn: eventData.inputAmount,
+        amountOutbound: eventData.inputAmount,
         sender: unpadAddress(eventData.depositor),
         message: eventData.message,
       };
@@ -248,8 +248,8 @@ async function handleAcrossAppPayload(
         // Asset information (partial, from inbound)
         assetAddressOutbound: undefined,
         assetAddressInbound: unpadAddress(eventData.outputToken),
-        amountOut: eventData.outputAmount,
-        amountIn: undefined,
+        amountOutbound: undefined,
+        amountInbound: eventData.outputAmount,
 
         // Addresses (from inbound)
         sender: unpadAddress(eventData.depositor),
@@ -279,8 +279,8 @@ async function handleAcrossAppPayload(
         // Asset information
         assetAddressOutbound: unpadAddress(eventData.inputToken),
         assetAddressInbound: unpadAddress(eventData.outputToken),
-        amountIn: eventData.inputAmount,
-        amountOut: eventData.outputAmount,
+        amountInbound: eventData.outputAmount,
+        amountOutbound: eventData.inputAmount,
 
         // Addresses
         sender: unpadAddress(eventData.depositor),

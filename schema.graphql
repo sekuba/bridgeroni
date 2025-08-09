@@ -110,8 +110,8 @@ type AppPayload {
   # Asset information
   assetAddressOutbound: String # inputToken address
   assetAddressInbound: String # outputToken address  
-  amountOut: BigInt # inputAmount
-  amountIn: BigInt # outputAmount
+  amountOutbound: BigInt # inputAmount
+  amountInbound: BigInt # outputAmount
   
   # Addresses
   sender: String # depositor
