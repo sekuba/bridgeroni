@@ -2,7 +2,6 @@
  * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
  * or https://docs.envio.dev/docs/HyperIndex-LLM/hyperindex-complete for LLMs
  */
-import { match } from "assert";
 import {
   SpokePool,
   SpokePool_FilledRelay,
@@ -561,7 +560,7 @@ type LayerZeroEventData = LayerZeroInboundEventData | LayerZeroOutboundEventData
 function decodeLayerZeroPacket(encodedPayload: string): LayerZeroPacketData {
   try {
     const payload = encodedPayload.startsWith('0x') ? encodedPayload : '0x' + encodedPayload;
-    
+
     if (payload.length < 164) {
       throw new Error(`Payload too short: ${payload.length}, minimum 164 characters expected`);
     }
@@ -605,10 +604,10 @@ function calculateLayerZeroGUID(nonce: bigint, srcEid: number | bigint, sender: 
   try {
     const paddedSender = pad(sender as `0x${string}`);
     const paddedReceiver = pad(receiver as `0x${string}`);
-    
+
     const srcEidNumber = typeof srcEid === 'bigint' ? Number(srcEid) : srcEid;
     const dstEidNumber = typeof dstEid === 'bigint' ? Number(dstEid) : dstEid;
-    
+
     // Use encodePacked as specified in LayerZero documentation:
     // guid = keccak256(abi.encodePacked(_nonce, _srcEid, _sender.toBytes32(), _dstEid, _receiver))
     return keccak256(encodePacked(
@@ -823,7 +822,7 @@ async function handleStargateAppPayload(
 EndpointV2.PacketSent.handler(async ({ event, context }) => {
   try {
     const packet = decodeLayerZeroPacket(event.params.encodedPayload);
-    
+
     const entity: EndpointV2_PacketSent = {
       id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
       encodedPayload: event.params.encodedPayload,
@@ -872,7 +871,7 @@ EndpointV2.PacketDelivered.handler(async ({ event, context }) => {
     // For PacketDelivered, we need to use the EID of the destination chain (where the packet is delivered)
     // not the chain ID itself
     const dstEid = getEidForChain(event.chainId);
-    
+
     const guid = calculateLayerZeroGUID(
       event.params.origin[2], // nonce
       Number(event.params.origin[0]), // srcEid
