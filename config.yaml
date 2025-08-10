@@ -17,6 +17,11 @@ contracts:
   events:
   - event: OFTSent(bytes32 indexed guid, uint32 dstEid, address indexed fromAddress, uint256 amountSentLD, uint256 amountReceivedLD)
   - event: OFTReceived(bytes32 indexed guid, uint32 srcEid, address indexed toAddress, uint256 amountReceivedLD)
+- name: TokenMessaging
+  handler: src/EventHandlers.ts
+  events:
+  - event: BusRode(uint32 dstEid, uint72 ticketId, uint80 fare, bytes passenger)
+  - event: BusDriven(uint32 dstEid, uint72 startTicketId, uint8 numPassengers, bytes32 guid)
 networks:
 - id: 1 # etherium
   start_block: 23102140
@@ -31,6 +36,9 @@ networks:
     address:
     - 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931  # StargatePoolNative
     - 0xc026395860Db2d07ee33e05fE50ed7bD583189C7  # StargatePoolUSDC
+    - name: TokenMessaging
+      address:
+      - 0x6d6620eFa72948C5f68A3C8646d58C00d3f4A980
 - id: 42161 # arbitrum
   start_block: 366538029
   contracts:
@@ -44,6 +52,9 @@ networks:
     address:
     - 0xA45B5130f36CDcA45667738e2a258AB09f4A5f7F  # StargatePoolNative
     - 0xe8CDF27AcD73a434D661C84887215F7598e7d0d3  # StargatePoolUSDC
+    - name: TokenMessaging
+      address:
+      - 0x6E3d884C96d640526F273C61dfcF08915eBd7e2B
 - id: 10 # opmainnet
   start_block: 139563673
   contracts:
@@ -57,6 +68,9 @@ networks:
     address:
     - 0xe8CDF27AcD73a434D661C84887215F7598e7d0d3  # StargatePoolNative
     - 0xcE8CcA271Ebc0533920C83d39F417ED6A0abB7D0  # StargatePoolUSDC
+    - name: TokenMessaging
+      address:
+      - 0x17E450Be3Ba9557F2378E20d64AD417E59Ef9A34
 - id: 324 # zksyncera
   start_block: 63857674
   contracts:
@@ -66,6 +80,9 @@ networks:
   - name: EndpointV2
     address:
     - 0xd07C30aF3Ff30D96BDc9c6044958230Eb797DDBF
+    - name: TokenMessaging
+      address:
+      - 0x6CE9bf8CDaB780416AD1fd87b318A077D2f50EaC
 - id: 8453 # base
   start_block: 33968388
   contracts:
@@ -79,6 +96,9 @@ networks:
     address:
     - 0xdc181Bd607330aeeBEF6ea62e03e5e1Fb4B6f7C7  # StargatePoolNative
     - 0x27a16dc786820B16E5c9028b75B99F6f604b5d26  # StargatePoolUSDC
+    - name: TokenMessaging
+      address:
+      - 0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47
 - id: 57073 # ink
   start_block: 21228108
   contracts:
@@ -88,6 +108,9 @@ networks:
   - name: EndpointV2
     address:
     - 0xca29f3A6f966Cb2fc0dE625F8f325c0C46dbE958
+    - name: TokenMessaging
+      address:
+      - 0x6B73D3cBbb278Ce2E8698E983AecCdD94Dc4594B
 - id: 59144 # linea
   start_block: 21808495
   contracts:
@@ -100,6 +123,9 @@ networks:
   - name: StargatePool
     address:
     - 0x81F6138153d473E8c5EcebD3DC8Cd4903506B075  # StargatePoolNative
+    - name: TokenMessaging
+      address:
+      - 0x5f688F563Dc16590e570f97b542FA87931AF2feD
 - id: 534352 # scroll
   start_block: 18734126
   contracts:
@@ -113,6 +139,9 @@ networks:
     address:
     - 0xC2b638Cb5042c1B3c5d5C969361fB50569840583  # StargatePoolNative
     - 0x3Fc69CC4A842838bCDC9499178740226062b14E4  # StargatePoolUSDC
+    - name: TokenMessaging
+      address:
+      - 0x4e422B0aCb2Bd7e3aC70B5c0E5eb806e86a94038
 unordered_multichain_mode: true
 field_selection:
   transaction_fields:
