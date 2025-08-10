@@ -193,3 +193,29 @@ type StargatePool_OFTReceived {
   to: String
 }
 
+type TokenMessaging_BusRode {
+  id: ID!
+  dstEid: BigInt!
+  ticketId: BigInt!
+  fare: BigInt!
+  passenger: String!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
+}
+
+type TokenMessaging_BusDriven {
+  id: ID!
+  dstEid: BigInt!
+  startTicketId: BigInt!
+  numPassengers: BigInt!
+  guid: String!
+  # Metadata fields
+  chainId: BigInt!
+  txHash: String!
+  from: String
+  to: String
+}
+

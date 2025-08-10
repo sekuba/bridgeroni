@@ -13,6 +13,9 @@ import {
   StargatePool,
   StargatePool_OFTSent,
   StargatePool_OFTReceived,
+  TokenMessaging,
+  TokenMessaging_BusRode,
+  TokenMessaging_BusDriven,
 } from "generated";
 import { isAddress, getAddress, keccak256, encodePacked, pad } from "viem";
 import { mapChainIdToChainInfo } from "../analyze/const";
@@ -996,6 +999,42 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
   };
 
   await handleStargateAppPayload(eventData, metadata, context);
+});
+
+// ============================================================================
+// TOKENMESSAGING EVENT HANDLERS (Stargate)
+// ============================================================================
+
+TokenMessaging.BusRode.handler(async ({ event, context }) => {
+  const entity: TokenMessaging_BusRode = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    dstEid: event.params.dstEid,
+    ticketId: event.params.ticketId,
+    fare: event.params.fare,
+    passenger: event.params.passenger,
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
+  };
+
+  context.TokenMessaging_BusRode.set(entity);
+});
+
+TokenMessaging.BusDriven.handler(async ({ event, context }) => {
+  const entity: TokenMessaging_BusDriven = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    dstEid: event.params.dstEid,
+    startTicketId: event.params.startTicketId,
+    numPassengers: event.params.numPassengers,
+    guid: event.params.guid,
+    chainId: BigInt(event.chainId),
+    txHash: event.transaction.hash,
+    from: event.transaction.from,
+    to: event.transaction.to,
+  };
+
+  context.TokenMessaging_BusDriven.set(entity);
 });
 
 // ============================================================================
