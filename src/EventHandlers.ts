@@ -975,26 +975,30 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
 
   context.StargatePool_OFTSent.set(entity);
 
-  const eventData: StargateOutboundEventData = {
-    direction: 'outbound',
-    guid: event.params.guid,
-    dstEid: Number(event.params.dstEid),
-    fromAddress: event.params.fromAddress,
-    amountSentLD: event.params.amountSentLD,
-    amountReceivedLD: event.params.amountReceivedLD,
-  };
+  // Skip creating AppPayload for bus passengers (zero GUID)
+  const zeroGuid = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  if (event.params.guid !== zeroGuid) {
+    const eventData: StargateOutboundEventData = {
+      direction: 'outbound',
+      guid: event.params.guid,
+      dstEid: Number(event.params.dstEid),
+      fromAddress: event.params.fromAddress,
+      amountSentLD: event.params.amountSentLD,
+      amountReceivedLD: event.params.amountReceivedLD,
+    };
 
-  const metadata: EventMetadata = {
-    chainId: event.chainId,
-    blockNumber: BigInt(event.block.number),
-    blockTimestamp: BigInt(event.block.timestamp),
-    txHash: event.transaction.hash,
-    txFrom: event.transaction.from,
-    txTo: event.transaction.to,
-    emitterAddress: event.srcAddress,
-  };
+    const metadata: EventMetadata = {
+      chainId: event.chainId,
+      blockNumber: BigInt(event.block.number),
+      blockTimestamp: BigInt(event.block.timestamp),
+      txHash: event.transaction.hash,
+      txFrom: event.transaction.from,
+      txTo: event.transaction.to,
+      emitterAddress: event.srcAddress,
+    };
 
-  await handleStargateAppPayload(eventData, metadata, context);
+    await handleStargateAppPayload(eventData, metadata, context);
+  }
 });
 
 StargatePool.OFTReceived.handler(async ({ event, context }) => {
@@ -1012,25 +1016,29 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
 
   context.StargatePool_OFTReceived.set(entity);
 
-  const eventData: StargateInboundEventData = {
-    direction: 'inbound',
-    guid: event.params.guid,
-    srcEid: Number(event.params.srcEid),
-    toAddress: event.params.toAddress,
-    amountReceivedLD: event.params.amountReceivedLD,
-  };
+  // Skip creating AppPayload for bus passengers (zero GUID)
+  const zeroGuid = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  if (event.params.guid !== zeroGuid) {
+    const eventData: StargateInboundEventData = {
+      direction: 'inbound',
+      guid: event.params.guid,
+      srcEid: Number(event.params.srcEid),
+      toAddress: event.params.toAddress,
+      amountReceivedLD: event.params.amountReceivedLD,
+    };
 
-  const metadata: EventMetadata = {
-    chainId: event.chainId,
-    blockNumber: BigInt(event.block.number),
-    blockTimestamp: BigInt(event.block.timestamp),
-    txHash: event.transaction.hash,
-    txFrom: event.transaction.from,
-    txTo: event.transaction.to,
-    emitterAddress: event.srcAddress,
-  };
+    const metadata: EventMetadata = {
+      chainId: event.chainId,
+      blockNumber: BigInt(event.block.number),
+      blockTimestamp: BigInt(event.block.timestamp),
+      txHash: event.transaction.hash,
+      txFrom: event.transaction.from,
+      txTo: event.transaction.to,
+      emitterAddress: event.srcAddress,
+    };
 
-  await handleStargateAppPayload(eventData, metadata, context);
+    await handleStargateAppPayload(eventData, metadata, context);
+  }
 });
 
 // ============================================================================
