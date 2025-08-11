@@ -744,6 +744,200 @@ async function handleLayerZeroMessage(
 }
 
 // ============================================================================
+// STARGATE V2 BUS PASSENGER HELPERS
+// ============================================================================
+
+/**
+ * Helper function to create AppPayload for bus passengers
+ * Creates AppPayload with temporary ID before the real GUID is known
+ */
+async function handleBusPassengerAppPayload(
+  ticketId: bigint,
+  dstEid: number,
+  passengerData: BusPassenger,
+  ofTSentAmount: bigint | undefined,
+  metadata: EventMetadata,
+  context: any
+): Promise<void> {
+  // Use ticketId-based temporary ID until we get the real GUID from BusDriven
+  const temporaryTransportingMsgId = `${metadata.chainId}-${dstEid}-${ticketId}`;
+  const appPayloadId = `bus-temp:${temporaryTransportingMsgId}:0`;
+  const tempCrosschainMessageId = `bus-temp:${temporaryTransportingMsgId}`;
+  
+  // Create a temporary CrosschainMessage for the bus passenger until BusDriven provides real GUID
+  const tempCrosschainMessage = {
+    id: tempCrosschainMessageId,
+    protocol: "layerzero",
+    idMatching: temporaryTransportingMsgId,
+    
+    // Outbound data (from current chain)
+    blockOutbound: metadata.blockNumber,
+    timestampOutbound: metadata.blockTimestamp,
+    txHashOutbound: metadata.txHash,
+    chainIdOutbound: BigInt(metadata.chainId),
+    fromOutbound: undefined, // Will be filled from OFTSent if available
+    
+    // Inbound data (unknown until OFTReceived)
+    blockInbound: undefined,
+    timestampInbound: undefined,
+    txHashInbound: undefined,
+    chainIdInbound: undefined,
+    toInbound: undefined,
+    
+    matched: false,
+    latency: undefined,
+  };
+  
+  context.CrosschainMessage.set(tempCrosschainMessage);
+  
+  // Create AppPayload for the bus passenger
+  const appPayload = {
+    id: appPayloadId,
+    appName: "StargateV2-buspassenger",
+    
+    // Transport info (temporary until BusDriven provides real GUID)
+    transportingMsgProtocol: "layerzero",
+    transportingMsgId: temporaryTransportingMsgId, // Will be updated when BusDriven provides GUID
+    idMatching: temporaryTransportingMsgId, // Will be updated to real GUID
+    matched: false,
+    
+    // Asset information from passenger data
+    assetAddressOutbound: undefined, // Asset ID needs to be resolved to address
+    assetAddressInbound: undefined,
+    amountOutbound: ofTSentAmount || passengerData.amountSD, // Use OFTSent amount if available
+    amountInbound: undefined, // Will be filled by OFTReceived
+    
+    // Addresses
+    sender: undefined, // Will be filled from OFTSent if available
+    recipient: passengerData.receiver,
+    targetAddress: metadata.emitterAddress,
+    
+    // Reference to temporary CrosschainMessage
+    crosschainMessage_id: tempCrosschainMessageId,
+  };
+  
+  context.AppPayload.set(appPayload);
+}
+
+/**
+ * Helper function to update bus passenger AppPayloads when BusDriven provides the real GUID
+ * Links all passengers in the bus to the proper CrosschainMessage
+ */
+async function linkBusPassengersToGuid(
+  dstEid: number, 
+  startTicketId: bigint,
+  numPassengers: number,
+  guid: string,
+  metadata: EventMetadata,
+  context: any
+): Promise<void> {
+  const crosschainMessageId = `layerzero:${guid}`;
+  
+  // Create the proper LayerZero CrosschainMessage
+  const crosschainMessage = {
+    id: crosschainMessageId,
+    protocol: "layerzero",
+    idMatching: guid,
+    
+    // Outbound data (from BusDriven event)
+    blockOutbound: metadata.blockNumber,
+    timestampOutbound: metadata.blockTimestamp,
+    txHashOutbound: metadata.txHash,
+    chainIdOutbound: BigInt(metadata.chainId),
+    fromOutbound: undefined, // LayerZero sender info not available in BusDriven
+    
+    // Inbound data (will be filled by OFTReceived/PacketDelivered)
+    blockInbound: undefined,
+    timestampInbound: undefined,
+    txHashInbound: undefined,
+    chainIdInbound: undefined,
+    toInbound: undefined,
+    
+    matched: false,
+    latency: undefined,
+  };
+  
+  context.CrosschainMessage.set(crosschainMessage);
+  
+  // Update all passenger AppPayloads in this bus
+  for (let i = 0; i < numPassengers; i++) {
+    const ticketId = startTicketId + BigInt(i);
+    const temporaryTransportingMsgId = `${metadata.chainId}-${dstEid}-${ticketId}`;
+    const appPayloadId = `bus-temp:${temporaryTransportingMsgId}:0`;
+    
+    // Try to get the existing AppPayload
+    const existingAppPayload = await context.AppPayload.get(appPayloadId);
+    if (existingAppPayload) {
+      // Create new AppPayload with proper layerzero transport info
+      const updatedAppPayload = {
+        ...existingAppPayload,
+        id: `layerzero:${guid}:${i}`, // New ID with counter for each passenger
+        transportingMsgId: guid,
+        idMatching: guid,
+        crosschainMessage_id: crosschainMessageId,
+      };
+      
+      // Set the updated AppPayload
+      context.AppPayload.set(updatedAppPayload);
+      
+      // Mark the temporary AppPayload as "migrated" instead of deleting
+      // This avoids transaction issues with deleteUnsafe
+      const migratedTempPayload = {
+        ...existingAppPayload,
+        appName: "StargateV2-buspassenger-migrated", // Mark as migrated
+        matched: true, // Mark as processed
+      };
+      context.AppPayload.set(migratedTempPayload);
+    }
+  }
+}
+
+/**
+ * Helper function to match inbound OFTReceived to bus passenger AppPayload
+ * Finds the correct passenger AppPayload by matching amounts or using counter
+ */
+async function matchInboundBusPassenger(
+  guid: string,
+  toAddress: string,
+  amountReceived: bigint,
+  context: any
+): Promise<void> {
+  // Try to find an unmatched bus passenger AppPayload with this GUID
+  let counter = 0;
+  let foundMatch = false;
+  
+  while (!foundMatch && counter < 100) { // Safety limit
+    const appPayloadId = `layerzero:${guid}:${counter}`;
+    const appPayload = await context.AppPayload.get(appPayloadId);
+    
+    if (!appPayload) {
+      // No more passengers in this bus
+      break;
+    }
+    
+    if (!appPayload.matched) {
+      // Found an unmatched passenger - check if it matches
+      const isMatch = appPayload.recipient === toAddress || 
+                     appPayload.amountOutbound === amountReceived;
+                     
+      if (isMatch || counter === 0) { // First unmatched or exact match
+        const updatedAppPayload = {
+          ...appPayload,
+          matched: true,
+          amountInbound: amountReceived,
+          recipient: toAddress, // Update in case it was matched by amount
+        };
+        
+        context.AppPayload.set(updatedAppPayload);
+        foundMatch = true;
+      }
+    }
+    
+    counter++;
+  }
+}
+
+// ============================================================================
 // STARGATE V2 BRIDGE HELPERS  
 // ============================================================================
 
@@ -975,9 +1169,10 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
 
   context.StargatePool_OFTSent.set(entity);
 
-  // Skip creating AppPayload for bus passengers (zero GUID)
   const zeroGuid = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  
   if (event.params.guid !== zeroGuid) {
+    // Regular taxi mode - create normal AppPayload
     const eventData: StargateOutboundEventData = {
       direction: 'outbound',
       guid: event.params.guid,
@@ -998,6 +1193,15 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
     };
 
     await handleStargateAppPayload(eventData, metadata, context);
+  } else {
+    // Bus passenger mode - OFTSent with zero GUID
+    // Try to find a corresponding BusRode event in the same transaction to update the AppPayload
+    // Note: In bus mode, OFTSent and BusRode should be in the same transaction
+    // We could enhance this by looking up BusRode events from the same transaction
+    // For now, we rely on BusRode handler to create the initial AppPayload
+    
+    // Log for debugging
+    console.log(`OFTSent with zero GUID (bus passenger) in tx ${event.transaction.hash}, dstEid: ${event.params.dstEid}, amount: ${event.params.amountSentLD}`);
   }
 });
 
@@ -1016,28 +1220,51 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
 
   context.StargatePool_OFTReceived.set(entity);
 
-  // Skip creating AppPayload for bus passengers (zero GUID)
   const zeroGuid = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  
   if (event.params.guid !== zeroGuid) {
-    const eventData: StargateInboundEventData = {
-      direction: 'inbound',
-      guid: event.params.guid,
-      srcEid: Number(event.params.srcEid),
-      toAddress: event.params.toAddress,
-      amountReceivedLD: event.params.amountReceivedLD,
-    };
+    // Check if this is a bus passenger (try to find bus passenger AppPayload first)
+    let isBusPassenger = false;
+    try {
+      const testAppPayloadId = `layerzero:${event.params.guid}:0`;
+      const testAppPayload = await context.AppPayload.get(testAppPayloadId);
+      if (testAppPayload && testAppPayload.appName === "StargateV2-buspassenger") {
+        isBusPassenger = true;
+      }
+    } catch (error) {
+      // Not a bus passenger, continue with regular flow
+    }
 
-    const metadata: EventMetadata = {
-      chainId: event.chainId,
-      blockNumber: BigInt(event.block.number),
-      blockTimestamp: BigInt(event.block.timestamp),
-      txHash: event.transaction.hash,
-      txFrom: event.transaction.from,
-      txTo: event.transaction.to,
-      emitterAddress: event.srcAddress,
-    };
+    if (isBusPassenger) {
+      // Handle bus passenger matching
+      await matchInboundBusPassenger(
+        event.params.guid,
+        unpadAddress(event.params.toAddress),
+        event.params.amountReceivedLD,
+        context
+      );
+    } else {
+      // Handle regular taxi AppPayload
+      const eventData: StargateInboundEventData = {
+        direction: 'inbound',
+        guid: event.params.guid,
+        srcEid: Number(event.params.srcEid),
+        toAddress: event.params.toAddress,
+        amountReceivedLD: event.params.amountReceivedLD,
+      };
 
-    await handleStargateAppPayload(eventData, metadata, context);
+      const metadata: EventMetadata = {
+        chainId: event.chainId,
+        blockNumber: BigInt(event.block.number),
+        blockTimestamp: BigInt(event.block.timestamp),
+        txHash: event.transaction.hash,
+        txFrom: event.transaction.from,
+        txTo: event.transaction.to,
+        emitterAddress: event.srcAddress,
+      };
+
+      await handleStargateAppPayload(eventData, metadata, context);
+    }
   }
 });
 
@@ -1068,6 +1295,29 @@ TokenMessaging.BusRode.handler(async ({ event, context }) => {
     };
 
     context.TokenMessaging_BusRode.set(entity);
+
+    // Create AppPayload for this bus passenger
+    const metadata: EventMetadata = {
+      chainId: event.chainId,
+      blockNumber: BigInt(event.block.number),
+      blockTimestamp: BigInt(event.block.timestamp),
+      txHash: event.transaction.hash,
+      txFrom: event.transaction.from,
+      txTo: event.transaction.to,
+      emitterAddress: event.srcAddress,
+    };
+
+    console.log(`BusRode: Creating AppPayload for passenger ticketId ${event.params.ticketId}, dstEid ${event.params.dstEid}, receiver ${decodedPassenger.receiver}, amount ${decodedPassenger.amountSD}`);
+    
+    await handleBusPassengerAppPayload(
+      event.params.ticketId,
+      Number(event.params.dstEid),
+      decodedPassenger,
+      undefined, // No OFTSent amount available yet
+      metadata,
+      context
+    );
+
   } catch (error) {
     console.error(`Error handling BusRode event: ${error}`);
     // Store the entity without decoded fields if decoding fails
@@ -1105,6 +1355,32 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
   };
 
   context.TokenMessaging_BusDriven.set(entity);
+
+  console.log(`BusDriven: Linking ${event.params.numPassengers} passengers from ticketId ${event.params.startTicketId} to GUID ${event.params.guid}`);
+
+  // Link all bus passengers to the real LayerZero GUID
+  const metadata: EventMetadata = {
+    chainId: event.chainId,
+    blockNumber: BigInt(event.block.number),
+    blockTimestamp: BigInt(event.block.timestamp),
+    txHash: event.transaction.hash,
+    txFrom: event.transaction.from,
+    txTo: event.transaction.to,
+    emitterAddress: event.srcAddress,
+  };
+
+  try {
+    await linkBusPassengersToGuid(
+      Number(event.params.dstEid),
+      event.params.startTicketId,
+      Number(event.params.numPassengers),
+      event.params.guid,
+      metadata,
+      context
+    );
+  } catch (error) {
+    console.error(`Error linking bus passengers to GUID: ${error}`);
+  }
 });
 
 // ============================================================================
