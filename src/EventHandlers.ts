@@ -62,7 +62,6 @@ function calculateAcrossIdMatching(eventData: AcrossEventData): string {
 
 
 interface AcrossInboundEventData {
-  // 
   direction: 'inbound';
   originChainId: bigint;
   depositId: bigint;
@@ -281,12 +280,6 @@ async function handleAcrossAppPayload(
         recipient: unpadAddress(eventData.recipient),
         targetAddress: metadata.emitterAddress, // SpokePool contract address on destination (event emitter)
 
-        // Across-specific data (from inbound)
-        fillDeadline: eventData.fillDeadline,
-        exclusivityDeadline: eventData.exclusivityDeadline,
-        exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
-        message: eventData.message, // Available in V3 events
-
         // Reference to crosschain message
         crosschainMessage_id: crosschainMessageId,
       };
@@ -312,12 +305,6 @@ async function handleAcrossAppPayload(
         sender: unpadAddress(eventData.depositor),
         recipient: unpadAddress(eventData.recipient),
         targetAddress: metadata.emitterAddress, // SpokePool contract address on origin
-
-        // Across-specific data
-        fillDeadline: eventData.fillDeadline,
-        exclusivityDeadline: eventData.exclusivityDeadline,
-        exclusiveRelayer: unpadAddress(eventData.exclusiveRelayer),
-        message: eventData.message,
 
         // Reference to crosschain message
         crosschainMessage_id: crosschainMessageId,
@@ -810,7 +797,6 @@ async function handleStargateAppPayload(
         amountOutbound: eventData.amountSentLD,
         amountInbound: eventData.amountReceivedLD,
         sender: unpadAddress(eventData.fromAddress),
-        fillDeadline: undefined,
       };
     }
   }

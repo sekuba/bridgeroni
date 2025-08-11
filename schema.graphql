@@ -118,12 +118,6 @@ type AppPayload {
   recipient: String # recipient
   targetAddress: String # For Across, this would be the SpokePool address on destination
   
-  # Additional Across-specific data
-  fillDeadline: BigInt
-  exclusivityDeadline: BigInt
-  exclusiveRelayer: String
-  message: String
-  
   # References
   crosschainMessage: CrosschainMessage!
 
