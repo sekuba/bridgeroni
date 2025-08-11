@@ -193,6 +193,11 @@ type TokenMessaging_BusRode {
   ticketId: BigInt!
   fare: BigInt!
   passenger: String!
+  # Decoded passenger fields
+  passengerAssetId: BigInt!
+  passengerReceiver: String!
+  passengerAmountSD: BigInt!
+  passengerNativeDrop: Boolean!
   # Metadata fields
   chainId: BigInt!
   txHash: String!

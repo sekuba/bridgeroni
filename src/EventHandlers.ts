@@ -45,6 +45,52 @@ function unpadAddress(paddedAddress: string): string {
   return paddedAddress;
 }
 
+/**
+ * Interface for decoded BusPassenger data
+ */
+interface BusPassenger {
+  assetId: number;
+  receiver: string;
+  amountSD: bigint;
+  nativeDrop: boolean;
+}
+
+/**
+ * Decode passenger bytes from BusRode event
+ * Based on Solidity struct: { uint16 assetId, bytes32 receiver, uint64 amountSD, bool nativeDrop }
+ */
+function decodeBusPassenger(passengerBytes: string): BusPassenger {
+  try {
+    const bytes = passengerBytes.startsWith('0x') ? passengerBytes : '0x' + passengerBytes;
+    
+    // Expected length: 2 + 32 + 8 + 1 = 43 bytes = 86 hex chars + 2 for 0x = 88 chars
+    if (bytes.length < 88) {
+      throw new Error(`Passenger bytes too short: ${bytes.length}, expected at least 88 characters`);
+    }
+
+    // Decode according to abi.encodePacked format:
+    // uint16 assetId: 2 bytes (4 hex chars)
+    // bytes32 receiver: 32 bytes (64 hex chars) 
+    // uint64 amountSD: 8 bytes (16 hex chars)
+    // bool nativeDrop: 1 byte (2 hex chars)
+    
+    const assetId = parseInt(bytes.slice(2, 6), 16);                    // 2 bytes
+    const receiver = '0x' + bytes.slice(6, 70);                       // 32 bytes
+    const amountSD = BigInt('0x' + bytes.slice(70, 86));              // 8 bytes
+    const nativeDrop = parseInt(bytes.slice(86, 88), 16) !== 0;       // 1 byte
+
+    return {
+      assetId,
+      receiver: unpadAddress(receiver),
+      amountSD,
+      nativeDrop,
+    };
+  } catch (error) {
+    console.error('Error decoding bus passenger:', error);
+    throw error;
+  }
+}
+
 // ============================================================================
 // ACROSS BRIDGE HELPERS
 // ============================================================================
@@ -992,19 +1038,49 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
 // ============================================================================
 
 TokenMessaging.BusRode.handler(async ({ event, context }) => {
-  const entity: TokenMessaging_BusRode = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    dstEid: event.params.dstEid,
-    ticketId: event.params.ticketId,
-    fare: event.params.fare,
-    passenger: event.params.passenger,
-    chainId: BigInt(event.chainId),
-    txHash: event.transaction.hash,
-    from: event.transaction.from,
-    to: event.transaction.to,
-  };
+  try {
+    // Decode the passenger bytes
+    const decodedPassenger = decodeBusPassenger(event.params.passenger);
+    
+    const entity: TokenMessaging_BusRode = {
+      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+      dstEid: event.params.dstEid,
+      ticketId: event.params.ticketId,
+      fare: event.params.fare,
+      passenger: event.params.passenger,
+      // Decoded passenger fields
+      passengerAssetId: BigInt(decodedPassenger.assetId),
+      passengerReceiver: decodedPassenger.receiver,
+      passengerAmountSD: decodedPassenger.amountSD,
+      passengerNativeDrop: decodedPassenger.nativeDrop,
+      chainId: BigInt(event.chainId),
+      txHash: event.transaction.hash,
+      from: event.transaction.from,
+      to: event.transaction.to,
+    };
 
-  context.TokenMessaging_BusRode.set(entity);
+    context.TokenMessaging_BusRode.set(entity);
+  } catch (error) {
+    console.error(`Error handling BusRode event: ${error}`);
+    // Store the entity without decoded fields if decoding fails
+    const entity: TokenMessaging_BusRode = {
+      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+      dstEid: event.params.dstEid,
+      ticketId: event.params.ticketId,
+      fare: event.params.fare,
+      passenger: event.params.passenger,
+      // Default values for decoded fields when decoding fails
+      passengerAssetId: BigInt(0),
+      passengerReceiver: "0x0000000000000000000000000000000000000000",
+      passengerAmountSD: BigInt(0),
+      passengerNativeDrop: false,
+      chainId: BigInt(event.chainId),
+      txHash: event.transaction.hash,
+      from: event.transaction.from,
+      to: event.transaction.to,
+    };
+    context.TokenMessaging_BusRode.set(entity);
+  }
 });
 
 TokenMessaging.BusDriven.handler(async ({ event, context }) => {
