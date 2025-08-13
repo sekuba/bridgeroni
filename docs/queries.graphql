@@ -1,0 +1,99 @@
+# Recent matched envelopes
+query RecentMatchedEnvelopes {
+  CrosschainMessage(limit: 20, order_by: {inboundTimestamp: desc}, where: {matched: {_eq: true}}) {
+    id
+    transport
+    messageKey
+    outboundChainId
+    inboundChainId
+    routeSrcSlug
+    routeDstSlug
+    routeSrcEid
+    routeDstEid
+    outboundTimestamp
+    inboundTimestamp
+    latency
+  }
+}
+
+# Unmatched envelopes
+query UnmatchedEnvelopes {
+  CrosschainMessage(limit: 20, order_by: {outboundTimestamp: desc}, where: {matched: {_eq: false}}) {
+    id
+    transport
+    messageKey
+    outboundChainId
+    inboundChainId
+    routeSrcSlug
+    routeDstSlug
+    outboundTimestamp
+    inboundTimestamp
+  }
+}
+
+# Across by deposit
+query AcrossByDeposit($key: String!) {
+  CrosschainMessage(where: {transport: {_eq: "across"}, messageKey: {_eq: $key}}) {
+    id
+    matched
+    latency
+    routeSrcSlug
+    routeDstSlug
+  }
+  AppPayload(where: {transportingProtocol: {_eq: "across"}, transportingMessageId: {_eq: $key}}) {
+    id
+    payloadType
+    outboundAmount
+    inboundAmount
+    matched
+  }
+}
+
+# LZ Taxi payload by GUID
+query LZTaxiByGuid($guid: String!) {
+  AppPayload(where: {app: {_eq: "StargateV2"}, payloadType: {_eq: "transfer"}, transportingMessageId: {_eq: $guid}}) {
+    id
+    matched
+    outboundAmount
+    inboundAmount
+    crosschainMessage {
+      id
+      matched
+      latency
+      routeSrcSlug
+      routeDstSlug
+    }
+  }
+}
+
+# Stargate Bus by GUID
+query StargateBusByGuid($guid: String!) {
+  BusIndex_by_pk(id: $guid) {
+    id
+    ticketStart
+    numPassengers
+    nextInboundOrdinal
+  }
+  AppPayload(where: {payloadType: {_eq: "busPassenger"}, transportingMessageId: {_eq: $guid}}, order_by: {id: asc}) {
+    id
+    matched
+    outboundAmount
+    inboundAmount
+    inboundRecipient
+  }
+}
+
+# Inbound buffer state for a GUID
+query InboundBufferState($guid: String!) {
+  InboundBufferHead_by_pk(id: $guid) {
+    id
+    nextSeq
+    assignedSeq
+  }
+  InboundBufferEntry(where: {guid: {_eq: $guid}}, order_by: {seq: asc}, limit: 10) {
+    id
+    seq
+    toAddress
+    amount
+  }
+}
