@@ -601,7 +601,7 @@ function decodeLayerZeroPacket(encodedPayload: string): LayerZeroPacketData {
       throw new Error(`Payload too short: ${payload.length}, minimum 164 characters expected`);
     }
 
-    // Correct LayerZero V2 packet format:
+    // LayerZero V2 packet format:
     // Version: 1 byte (2 hex chars)
     // Nonce: 8 bytes (16 hex chars) - uint64
     // SrcEid: 4 bytes (8 hex chars) - uint32
@@ -960,7 +960,7 @@ interface StargateOutboundEventData {
 
 type StargateEventData = StargateInboundEventData | StargateOutboundEventData;
 
-async function handleStargateAppPayload(
+async function handleAppPayloadStargateTaxi(
   eventData: StargateEventData,
   metadata: EventMetadata,
   context: any
@@ -1192,17 +1192,9 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
       emitterAddress: event.srcAddress,
     };
 
-    await handleStargateAppPayload(eventData, metadata, context);
-  } else {
-    // Bus passenger mode - OFTSent with zero GUID
-    // Try to find a corresponding BusRode event in the same transaction to update the AppPayload
-    // Note: In bus mode, OFTSent and BusRode should be in the same transaction
-    // We could enhance this by looking up BusRode events from the same transaction
-    // For now, we rely on BusRode handler to create the initial AppPayload
-    
-    // Log for debugging
-    console.log(`OFTSent with zero GUID (bus passenger) in tx ${event.transaction.hash}, dstEid: ${event.params.dstEid}, amount: ${event.params.amountSentLD}`);
+    await handleAppPayloadStargateTaxi(eventData, metadata, context);
   }
+  // else is bus mode and handled in BusRode event handler
 });
 
 StargatePool.OFTReceived.handler(async ({ event, context }) => {
@@ -1220,9 +1212,6 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
 
   context.StargatePool_OFTReceived.set(entity);
 
-  const zeroGuid = '0x0000000000000000000000000000000000000000000000000000000000000000';
-  
-  if (event.params.guid !== zeroGuid) {
     // Check if this is a bus passenger (try to find bus passenger AppPayload first)
     let isBusPassenger = false;
     try {
@@ -1263,8 +1252,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
         emitterAddress: event.srcAddress,
       };
 
-      await handleStargateAppPayload(eventData, metadata, context);
-    }
+      await handleAppPayloadStargateTaxi(eventData, metadata, context);
   }
 });
 
@@ -1307,8 +1295,6 @@ TokenMessaging.BusRode.handler(async ({ event, context }) => {
       emitterAddress: event.srcAddress,
     };
 
-    console.log(`BusRode: Creating AppPayload for passenger ticketId ${event.params.ticketId}, dstEid ${event.params.dstEid}, receiver ${decodedPassenger.receiver}, amount ${decodedPassenger.amountSD}`);
-    
     await handleBusPassengerAppPayload(
       event.params.ticketId,
       Number(event.params.dstEid),
@@ -1320,24 +1306,6 @@ TokenMessaging.BusRode.handler(async ({ event, context }) => {
 
   } catch (error) {
     console.error(`Error handling BusRode event: ${error}`);
-    // Store the entity without decoded fields if decoding fails
-    const entity: TokenMessaging_BusRode = {
-      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-      dstEid: event.params.dstEid,
-      ticketId: event.params.ticketId,
-      fare: event.params.fare,
-      passenger: event.params.passenger,
-      // Default values for decoded fields when decoding fails
-      passengerAssetId: BigInt(0),
-      passengerReceiver: "0x0000000000000000000000000000000000000000",
-      passengerAmountSD: BigInt(0),
-      passengerNativeDrop: false,
-      chainId: BigInt(event.chainId),
-      txHash: event.transaction.hash,
-      from: event.transaction.from,
-      to: event.transaction.to,
-    };
-    context.TokenMessaging_BusRode.set(entity);
   }
 });
 
@@ -1355,8 +1323,6 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
   };
 
   context.TokenMessaging_BusDriven.set(entity);
-
-  console.log(`BusDriven: Linking ${event.params.numPassengers} passengers from ticketId ${event.params.startTicketId} to GUID ${event.params.guid}`);
 
   // Link all bus passengers to the real LayerZero GUID
   const metadata: EventMetadata = {
