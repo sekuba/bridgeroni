@@ -30,7 +30,7 @@ type AppPayload {
   payloadType: String!
   # Transport association (relinkable)
   transportingProtocol: String
-  transportingMessageId: String
+  transportingMessageId: String @index
   crosschainMessage: CrosschainMessage
   # Outbound fields
   outboundAssetAddress: String
@@ -47,27 +47,28 @@ type AppPayload {
   matched: Boolean!
 }
 
-# Stargate bus support: ticket mapping and inbound buffering
-type BusIndex {
-  id: ID! # "layerzero:{guid}"
-  srcChainId: BigInt!
-  ticketStart: BigInt!
-  numPassengers: BigInt!
-  nextInboundOrdinal: BigInt!
+"""
+Stargate V2 Bus mode support entities.
+
+We avoid sequence buffering and instead link bus passengers via their GUID and ticket IDs.
+"""
+
+type BusRodeOftSentLfg {
+  id: ID!
+  dstEid: BigInt!
+  ticketId: BigInt! @index
+  fare: BigInt!
+  passengerAssetId: String!
+  passengerReceiver: String!
+  passengerAmountSD: BigInt!
+  passengerNativeDrop: String!
+  # Filled by OFTSent (same tx):
+  fromAddress: String
+  amountSentLD: BigInt
+  amountReceivedLD: BigInt
 }
 
-type InboundBufferHead {
-  id: ID! # "layerzero:{guid}"
-  nextSeq: BigInt!
-  assignedSeq: BigInt!
-}
-
-type InboundBufferEntry {
-  id: ID! # "layerzero:{guid}:{seq}"
-  guid: String!
-  seq: BigInt!
-  chainId: BigInt!
-  toAddress: String!
-  amount: BigInt!
-  txHash: String!
+type BusDrivenOftReceivedLfg {
+  id: ID! # guid
+  passengerIds: [String!]!
 }
