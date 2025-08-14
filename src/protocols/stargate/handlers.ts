@@ -99,7 +99,7 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
     numPassengers: event.params.numPassengers,
     nextInboundOrdinal: BigInt((await context.BusIndex.get(id))?.nextInboundOrdinal ?? 0n),
   };
-  await context.BusIndex.set(index);
+  context.BusIndex.set(index);
 
   // Link all known passengers to the envelope id (may not exist yet if PacketSent not seen)
   for (let i = 0n; i < event.params.numPassengers; i++) {
@@ -107,7 +107,7 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
     const pid = busPayloadId(event.chainId, ticketId);
     const payload = await context.AppPayload.get(pid);
     if (payload) {
-      await context.AppPayload.set({
+      context.AppPayload.set({
         ...payload,
         transportingProtocol: 'layerzero',
         transportingMessageId: guid,
@@ -130,7 +130,7 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
     const pid = busPayloadId(Number(index.srcChainId), ticketId);
     const payload = await context.AppPayload.get(pid);
     if (payload) {
-      await context.AppPayload.set({
+      context.AppPayload.set({
         ...payload,
         transportingProtocol: 'layerzero',
         transportingMessageId: guid,
@@ -143,8 +143,8 @@ TokenMessaging.BusDriven.handler(async ({ event, context }) => {
     assigned = assigned + 1n;
     index.nextInboundOrdinal = index.nextInboundOrdinal + 1n;
   }
-  await context.InboundBufferHead.set({ id: headId, nextSeq: head.nextSeq, assignedSeq: assigned });
-  await context.BusIndex.set(index);
+  context.InboundBufferHead.set({ id: headId, nextSeq: head.nextSeq, assignedSeq: assigned });
+  context.BusIndex.set(index);
 });
 
 // Taxi outbound
@@ -157,6 +157,7 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
 // Both taxi and bus inbound; bus uses buffering and index to map
 StargatePool.OFTReceived.handler(async ({ event, context }) => {
   const guid = event.params.guid;
+  // sekuba: so far i have only seen 0x0 guids in OFTSent in the wild
   if (guid !== ZERO_GUID) {
     // Taxi or already-known bus GUID
     const index = await context.BusIndex.get(`layerzero:${guid}`);
@@ -171,7 +172,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
     if (!head) head = { id: headId, nextSeq: 0n, assignedSeq: 0n };
     const seq = head.nextSeq;
     const entryId = `${headId}:${seq}`;
-    await context.InboundBufferEntry.set({
+    context.InboundBufferEntry.set({
       id: entryId,
       guid,
       seq,
@@ -181,7 +182,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
       txHash: event.transaction.hash,
     });
     const updatedHead = { id: head.id, nextSeq: head.nextSeq + 1n, assignedSeq: head.assignedSeq };
-    await context.InboundBufferHead.set(updatedHead);
+    context.InboundBufferHead.set(updatedHead);
 
     // Attempt immediate assignment if possible
     let assigned = updatedHead.assignedSeq;
@@ -198,7 +199,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
       const pid = busPayloadId(Number(indexNow.srcChainId), ticketId);
       const payload = await context.AppPayload.get(pid);
       if (payload) {
-        await context.AppPayload.set({
+        context.AppPayload.set({
           ...payload,
           transportingProtocol: 'layerzero',
           transportingMessageId: guid,
@@ -211,8 +212,8 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
       assigned = assigned + 1n;
       nextInboundOrdinal = nextInboundOrdinal + 1n;
     }
-    await context.InboundBufferHead.set({ id: headId, nextSeq: nextSeqCurrent, assignedSeq: assigned });
-    await context.BusIndex.set({ id: indexNow.id, srcChainId: indexNow.srcChainId, ticketStart: indexNow.ticketStart, numPassengers: indexNow.numPassengers, nextInboundOrdinal });
+    context.InboundBufferHead.set({ id: headId, nextSeq: nextSeqCurrent, assignedSeq: assigned });
+    context.BusIndex.set({ id: indexNow.id, srcChainId: indexNow.srcChainId, ticketStart: indexNow.ticketStart, numPassengers: indexNow.numPassengers, nextInboundOrdinal });
     return;
   }
 });
