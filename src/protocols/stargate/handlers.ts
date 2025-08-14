@@ -30,6 +30,8 @@ function decodeBusPassenger(passengerBytes: string) {
   } as const;
 }
 
+// No explicit inbound buffer; we use AppPayload as a buffer entity.
+
 // Taxi upserts
 async function upsertPayloadOutboundTaxi(context: any, guid: string, event: any) {
   const pid = taxiPayloadId(guid);
@@ -128,96 +130,143 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
   await upsertPayloadOutboundTaxi(context, guid, event);
 });
 
-// TokenMessaging.BusDriven — may happen before or after inbound
-TokenMessaging.BusDriven.handler(async ({ event, context }) => {
-  const guid: string = event.params.guid;
-  const tmid = `layerzero:${guid}`;
-
-  const srcEid = getEidForChain(event.chainId);
-  const passengerIds: string[] = [];
-  for (let i = 0n; i < event.params.numPassengers; i++) {
-    const ticketId = event.params.startTicketId + i;
-    const passengerId = busPassengerEntityId(srcEid, Number(event.params.dstEid), ticketId);
-    passengerIds.push(passengerId);
-  }
-  // Decide path: if any inbound AppPayload already exists for these passengerIds, enrich; else, store LFG
-  const anyInboundExists = await (async () => {
-    for (const pid of passengerIds) {
-      const maybe = await context.AppPayload.get(pid);
-      if (maybe && maybe.inboundRecipient) return true;
+// TokenMessaging.BusDriven — use loader to get pre-existing AppPayload buffers (inbound-first)
+TokenMessaging.BusDriven.handlerWithLoader({
+  loader: async ({ event, context }) => {
+    const guid: string = event.params.guid;
+    const tmid = `layerzero:${guid}`;
+    const payloads = await context.AppPayload.getWhere.transportingMessageId.eq(tmid);
+    return { payloads };
+  },
+  handler: async ({ event, context, loaderReturn }) => {
+    const guid: string = event.params.guid;
+    const tmid = `layerzero:${guid}`;
+    const srcEid = getEidForChain(event.chainId);
+    const passengerIds: string[] = [];
+    for (let i = 0n; i < event.params.numPassengers; i++) {
+      const ticketId = event.params.startTicketId + i;
+      passengerIds.push(busPassengerEntityId(srcEid, Number(event.params.dstEid), ticketId));
     }
-    return false;
-  })();
-
-  if (anyInboundExists) {
-    for (const pid of passengerIds) {
-      const rodeEntity = await context.BusRodeOftSentLfg.get(pid);
-      const inbound = await context.AppPayload.get(pid);
-      if (!rodeEntity || !inbound) continue;
-      await context.AppPayload.set({
-        id: pid,
-        app: 'StargateV2-bus-passenger',
-        payloadType: 'transfer',
-        transportingProtocol: 'layerzero',
-        transportingMessageId: tmid,
-        crosschainMessage_id: tmid,
-        outboundAssetAddress: undefined,
-        outboundAmount: rodeEntity.amountSentLD ?? rodeEntity.fare,
-        outboundSender: rodeEntity.fromAddress ? unpadAddress(rodeEntity.fromAddress) : undefined,
-        outboundTargetAddress: rodeEntity.passengerReceiver ? unpadAddress(rodeEntity.passengerReceiver) : undefined,
-        outboundRaw: undefined,
-        inboundAssetAddress: inbound.inboundAssetAddress,
-        inboundAmount: inbound.inboundAmount,
-        inboundRecipient: inbound.inboundRecipient ? unpadAddress(inbound.inboundRecipient) : undefined,
-        inboundRaw: inbound.inboundRaw,
-        matched: Boolean((rodeEntity.amountSentLD ?? rodeEntity.fare) && inbound.inboundAmount),
-      });
+    const existingForGuid = loaderReturn?.payloads ?? [];
+    if (existingForGuid.length > 0) {
+      for (const pid of passengerIds) {
+        const rode = await context.BusRodeOftSentLfg.get(pid);
+        if (!rode) continue;
+        const target = rode.passengerReceiver ? unpadAddress(rode.passengerReceiver) : undefined;
+        const match = existingForGuid.find((p: any) => p.app === 'StargateV2-bus-passenger' && p.inboundRecipient && target && unpadAddress(p.inboundRecipient) === target);
+        if (!match) continue;
+        await context.AppPayload.set({
+          id: match.id, // keep buffer id
+          app: 'StargateV2-bus-passenger',
+          payloadType: 'transfer',
+          transportingProtocol: 'layerzero',
+          transportingMessageId: tmid,
+          crosschainMessage_id: tmid,
+          outboundAssetAddress: undefined,
+          outboundAmount: rode.amountSentLD ?? rode.fare,
+          outboundSender: rode.fromAddress ? unpadAddress(rode.fromAddress) : undefined,
+          outboundTargetAddress: rode.passengerReceiver ? unpadAddress(rode.passengerReceiver) : undefined,
+          outboundRaw: undefined,
+          inboundAssetAddress: match.inboundAssetAddress,
+          inboundAmount: match.inboundAmount,
+          inboundRecipient: match.inboundRecipient ? unpadAddress(match.inboundRecipient) : undefined,
+          inboundRaw: match.inboundRaw,
+          matched: Boolean((rode.amountSentLD ?? rode.fare) && match.inboundAmount),
+        });
+      }
+    } else {
+      await context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
     }
-  } else {
-    await context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
   }
 });
 
-// Inbound
-StargatePool.OFTReceived.handler(async ({ event, context }) => {
-  const guid = event.params.guid;
-  const tmid = `layerzero:${guid}`;
-  // First try: taxi by its deterministic id
-  const taxiId = taxiPayloadId(guid);
-  const existingTaxi = await context.AppPayload.get(taxiId);
-  if (existingTaxi) {
-    await upsertPayloadInboundTaxi(context, guid, event);
-    return;
-  }
-
-  // Bus path
-  const lfg = await context.BusDrivenOftReceivedLfg.get(guid);
-  if (!lfg) return; // Not enough info yet; will be handled once BusDriven arrives
-  // Try to match by recipient address (normalize). Amount matching TBD.
-  const to = unpadAddress(event.params.toAddress);
-  for (const pid of lfg.passengerIds) {
-    const passenger = await context.BusRodeOftSentLfg.get(pid);
-    if (!passenger) continue;
-    if ((passenger.passengerReceiver && to && unpadAddress(passenger.passengerReceiver) === to)) {
+// Inbound using loader for getWhere
+StargatePool.OFTReceived.handlerWithLoader({
+  loader: async ({ event, context }) => {
+    const tmid = `layerzero:${event.params.guid}`;
+    const payloads = await context.AppPayload.getWhere.transportingMessageId.eq(tmid);
+    return { payloads };
+  },
+  handler: async ({ event, context, loaderReturn }) => {
+    const guid = event.params.guid;
+    const tmid = `layerzero:${guid}`;
+    // First try: taxi by deterministic id
+    const taxiId = taxiPayloadId(guid);
+    const existingTaxi = await context.AppPayload.get(taxiId);
+    if (existingTaxi) {
+      await upsertPayloadInboundTaxi(context, guid, event);
+      return;
+    }
+    const byTmid = loaderReturn?.payloads ?? [];
+    const taxiPayloads = byTmid.filter((p: any) => p.app === 'StargateV2-taxi');
+    if (taxiPayloads.length > 0) {
+      for (const _ of taxiPayloads) {
+        await upsertPayloadInboundTaxi(context, guid, event);
+      }
+      return;
+    }
+    // Log non-taxi hits but continue with bus matching
+    for (const p of byTmid) {
+      if (p.app !== 'StargateV2-taxi') {
+        console.error('Unexpected non-taxi AppPayload for OFTReceived.getWhere', p.id);
+      }
+    }
+    // Bus path: if BusDriven exists, match by address and fill; else create minimal buffer AppPayload
+    const lfg = await context.BusDrivenOftReceivedLfg.get(guid);
+    const to = unpadAddress(event.params.toAddress);
+    if (lfg) {
+      let matched = false;
+      for (const pid of lfg.passengerIds) {
+        const rode = await context.BusRodeOftSentLfg.get(pid);
+        if (!rode) continue;
+        const target = rode.passengerReceiver ? unpadAddress(rode.passengerReceiver) : undefined;
+        if (to && target && to === target) {
+          await context.AppPayload.set({
+            id: pid,
+            app: 'StargateV2-bus-passenger',
+            payloadType: 'transfer',
+            transportingProtocol: 'layerzero',
+            transportingMessageId: tmid,
+            crosschainMessage_id: tmid,
+            outboundAssetAddress: undefined,
+            outboundAmount: rode.amountSentLD ?? rode.fare,
+            outboundSender: rode.fromAddress ? unpadAddress(rode.fromAddress) : undefined,
+            outboundTargetAddress: rode.passengerReceiver ? unpadAddress(rode.passengerReceiver) : undefined,
+            outboundRaw: undefined,
+            inboundAssetAddress: undefined,
+            inboundAmount: event.params.amountReceivedLD,
+            inboundRecipient: to,
+            inboundRaw: undefined,
+            matched: Boolean(rode.amountSentLD ?? rode.fare),
+          });
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        console.error('Bus inbound address did not match any passenger', { guid, to });
+      }
+    } else {
+      // Create minimal AppPayload buffer for this inbound
+      const bufId = `stargatev2-bus-buffer:${guid}:${event.transaction.hash}:${event.params.amountReceivedLD}`;
       await context.AppPayload.set({
-        id: pid,
+        id: bufId,
         app: 'StargateV2-bus-passenger',
         payloadType: 'transfer',
         transportingProtocol: 'layerzero',
         transportingMessageId: tmid,
         crosschainMessage_id: tmid,
         outboundAssetAddress: undefined,
-        outboundAmount: passenger.amountSentLD ?? passenger.fare,
-        outboundSender: passenger.fromAddress ? unpadAddress(passenger.fromAddress) : undefined,
-        outboundTargetAddress: passenger.passengerReceiver ? unpadAddress(passenger.passengerReceiver) : undefined,
+        outboundAmount: undefined,
+        outboundSender: undefined,
+        outboundTargetAddress: undefined,
         outboundRaw: undefined,
         inboundAssetAddress: undefined,
         inboundAmount: event.params.amountReceivedLD,
         inboundRecipient: to,
         inboundRaw: undefined,
-        matched: Boolean(passenger.amountSentLD ?? passenger.fare),
+        matched: false,
       });
-      // Do not break; in rare cases multiple passengers may share addr — amounts would help disambiguate
     }
   }
 });
