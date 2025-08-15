@@ -95,7 +95,7 @@ TokenMessaging.BusRode.handler(async ({ event, context }) => {
     amountSentLD: undefined,
     amountReceivedLD: undefined,
   };
-  await context.BusRodeOftSentLfg.set(entity);
+  context.BusRodeOftSentLfg.set(entity);
 });
 
 // StargatePool.OFTSent — outbound
@@ -121,7 +121,7 @@ StargatePool.OFTSent.handler(async ({ event, context }) => {
       amountSentLD: event.params.amountSentLD,
       amountReceivedLD: event.params.amountReceivedLD,
     };
-    await context.BusRodeOftSentLfg.set(updated);
+    context.BusRodeOftSentLfg.set(updated);
     return;
   }
   // Taxi (non-zero guid)
@@ -173,7 +173,7 @@ TokenMessaging.BusDriven.handlerWithLoader({
         });
       }
     } else {
-      await context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
+      context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
     }
   }
 });
@@ -199,7 +199,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
         if (!rode) continue;
         const target = rode.passengerReceiver ? unpadNormalizeAddy(rode.passengerReceiver) : undefined;
         if (to && target && to === target) {
-          await context.AppPayload.set({
+          context.AppPayload.set({
             id: pid,
             app: 'StargateV2-bus-passenger',
             payloadType: 'transfer',
@@ -227,7 +227,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
     } else {
       // Create minimal AppPayload buffer for this inbound
       const bufId = `stargatev2-bus-buffer:${guid}:${event.transaction.hash}:${event.params.amountReceivedLD}`;
-      await context.AppPayload.set({
+      context.AppPayload.set({
         id: bufId,
         app: 'StargateV2-bus-passenger',
         payloadType: 'transfer',
