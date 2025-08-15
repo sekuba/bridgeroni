@@ -1,7 +1,7 @@
 import { isAddress, getAddress, keccak256, encodePacked, pad } from "viem";
 import { mapChainIdToChainInfo, mapEidToChainInfo } from "../../analyze/const";
 
-export function unpadAddress(paddedAddress: string | null | undefined): string | undefined {
+export function unpadNormalizeAddy(paddedAddress: string | null | undefined): string | undefined {
   if (!paddedAddress) return undefined;
   const with0x = paddedAddress.startsWith('0x') ? paddedAddress : '0x' + paddedAddress;
   const addr = '0x' + with0x.slice(-40);

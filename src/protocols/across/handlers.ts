@@ -1,5 +1,5 @@
 import { SpokePool } from "generated";
-import { getEidForChain, getSlugForChainId, unpadAddress } from "../../core/utils";
+import { getEidForChain, getSlugForChainId, unpadNormalizeAddy } from "../../core/utils";
 
 function acrossMessageKeyFromOutbound(chainId: number, depositId: bigint) {
   return `${chainId}-${depositId}`;
@@ -25,7 +25,7 @@ async function upsertEnvelopeOutbound(context: any, messageKey: string, event: a
     outboundTimestamp: BigInt(event.block.timestamp),
     outboundTxHash: event.transaction.hash,
     outboundChainId: BigInt(event.chainId),
-    outboundFrom: unpadAddress(from),
+    outboundFrom: unpadNormalizeAddy(from),
     inboundBlock: existing?.inboundBlock,
     inboundTimestamp: existing?.inboundTimestamp,
     inboundTxHash: existing?.inboundTxHash,
@@ -63,7 +63,7 @@ async function upsertEnvelopeInbound(context: any, messageKey: string, event: an
     inboundTimestamp: BigInt(event.block.timestamp),
     inboundTxHash: event.transaction.hash,
     inboundChainId: BigInt(event.chainId),
-    inboundTo: unpadAddress(to),
+    inboundTo: unpadNormalizeAddy(to),
     matched: Boolean(existing?.outboundBlock),
     latency: existing?.outboundTimestamp && BigInt(event.block.timestamp) ? (BigInt(event.block.timestamp) - existing.outboundTimestamp) : undefined,
     routeSrcSlug: srcSlug ?? existing?.routeSrcSlug,
@@ -92,9 +92,9 @@ async function upsertPayloadOutbound(context: any, payloadId: string, messageKey
     transportingProtocol: 'across',
     transportingMessageId: messageKey,
     crosschainMessage_id: `across:${messageKey}`,
-    outboundAssetAddress: unpadAddress(data.assetIn),
+    outboundAssetAddress: unpadNormalizeAddy(data.assetIn),
     outboundAmount: data.amountIn,
-    outboundSender: unpadAddress(data.sender),
+    outboundSender: unpadNormalizeAddy(data.sender),
     outboundTargetAddress: data.target,
     outboundRaw: data.raw,
     inboundAssetAddress: existing?.inboundAssetAddress,
@@ -126,9 +126,9 @@ async function upsertPayloadInbound(context: any, payloadId: string, messageKey:
     outboundSender: existing?.outboundSender,
     outboundTargetAddress: existing?.outboundTargetAddress,
     outboundRaw: existing?.outboundRaw,
-    inboundAssetAddress: unpadAddress(data.assetIn),
+    inboundAssetAddress: unpadNormalizeAddy(data.assetIn),
     inboundAmount: data.amountIn,
-    inboundRecipient: unpadAddress(data.recipient),
+    inboundRecipient: unpadNormalizeAddy(data.recipient),
     inboundRaw: data.raw,
     matched: Boolean(existing?.outboundAmount),
   };

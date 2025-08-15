@@ -1,5 +1,5 @@
 import { EndpointV2 } from "generated";
-import { calculateLayerZeroGUID, getEidForChain, getSlugForEid, unpadAddress } from "../../core/utils";
+import { calculateLayerZeroGUID, getEidForChain, getSlugForEid, unpadNormalizeAddy } from "../../core/utils";
 
 // Decode PacketSent payload header per LZ V2 format
 function decodeLayerZeroPacket(encodedPayload: string) {
@@ -17,9 +17,9 @@ function decodeLayerZeroPacket(encodedPayload: string) {
     version,
     nonce,
     srcEid,
-    sender: unpadAddress(sender)!,
+    sender: unpadNormalizeAddy(sender)!,
     dstEid,
-    receiver: unpadAddress(receiver)!,
+    receiver: unpadNormalizeAddy(receiver)!,
     payload: appPayload,
     guid,
   };
@@ -40,7 +40,7 @@ async function upsertEnvelopeOutbound(context: any, guid: string, meta: any, fro
     outboundTimestamp: BigInt(meta.block.timestamp),
     outboundTxHash: meta.transaction.hash,
     outboundChainId: BigInt(meta.chainId),
-    outboundFrom: unpadAddress(from),
+    outboundFrom: unpadNormalizeAddy(from),
     inboundBlock: existing?.inboundBlock,
     inboundTimestamp: existing?.inboundTimestamp,
     inboundTxHash: existing?.inboundTxHash,
@@ -76,7 +76,7 @@ async function upsertEnvelopeInbound(context: any, guid: string, meta: any, to: 
     inboundTimestamp: BigInt(meta.block.timestamp),
     inboundTxHash: meta.transaction.hash,
     inboundChainId: BigInt(meta.chainId),
-    inboundTo: unpadAddress(to),
+    inboundTo: unpadNormalizeAddy(to),
     matched: Boolean(existing?.outboundBlock),
     latency: existing?.outboundTimestamp && BigInt(meta.block.timestamp) ? (BigInt(meta.block.timestamp) - existing.outboundTimestamp) : undefined,
     routeSrcEid,
