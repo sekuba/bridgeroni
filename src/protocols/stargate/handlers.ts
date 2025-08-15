@@ -171,11 +171,9 @@ TokenMessaging.BusDriven.handlerWithLoader({
           inboundRaw: match.inboundRaw,
           matched: true,
         });
-        context.log.info('StargateV2-bus-passenger: INBOUND FIRST: matched')
       }
     } else {
       context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
-      context.log.info('StargateV2-bus-passenger: OUTBOUND FIRST: buffered')
     }
   }
 });
@@ -219,7 +217,6 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
             inboundRaw: undefined,
             matched: Boolean(rode.amountSentLD ?? rode.fare),
           });
-          context.log.info('StargateV2-bus-passenger: OUTBOUND FIRST: matched')
           matched = true;
           break;
         }
@@ -248,7 +245,6 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
         inboundRaw: undefined,
         matched: false,
       });
-      context.log.info('StargateV2-bus-passenger: INBOUND FIRST: buffered')
     }
   }
 );
