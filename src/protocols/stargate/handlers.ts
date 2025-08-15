@@ -154,14 +154,14 @@ TokenMessaging.BusDriven.handlerWithLoader({
         const match = existingForGuid.find((p: any) => p.app === 'StargateV2-bus-passenger' && p.inboundRecipient && target && unpadNormalizeAddy(p.inboundRecipient) === target);
         if (!match) continue;
         context.AppPayload.set({
-          id: match.id, // keep buffer id
+          id: match.id, // update the matched inbound-created AppPayload
           app: 'StargateV2-bus-passenger',
           payloadType: 'transfer',
           transportingProtocol: 'layerzero',
           transportingMessageId: tmid,
           crosschainMessage_id: tmid,
           outboundAssetAddress: undefined,
-          outboundAmount: rode.amountSentLD ?? rode.fare,
+          outboundAmount: rode.amountSentLD ?? rode.fare, // TODO: pick one bruh
           outboundSender: rode.fromAddress ? unpadNormalizeAddy(rode.fromAddress) : undefined,
           outboundTargetAddress: rode.passengerReceiver ? unpadNormalizeAddy(rode.passengerReceiver) : undefined,
           outboundRaw: undefined,
@@ -169,11 +169,13 @@ TokenMessaging.BusDriven.handlerWithLoader({
           inboundAmount: match.inboundAmount,
           inboundRecipient: match.inboundRecipient ? unpadNormalizeAddy(match.inboundRecipient) : undefined,
           inboundRaw: match.inboundRaw,
-          matched: Boolean((rode.amountSentLD ?? rode.fare) && match.inboundAmount),
+          matched: true,
         });
+        context.log.info('StargateV2-bus-passenger: INBOUND FIRST: matched')
       }
     } else {
       context.BusDrivenOftReceivedLfg.set({ id: guid, passengerIds });
+      context.log.info('StargateV2-bus-passenger: OUTBOUND FIRST: buffered')
     }
   }
 });
@@ -217,15 +219,16 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
             inboundRaw: undefined,
             matched: Boolean(rode.amountSentLD ?? rode.fare),
           });
+          context.log.info('StargateV2-bus-passenger: OUTBOUND FIRST: matched')
           matched = true;
           break;
         }
       }
       if (!matched) {
-        console.error('Bus inbound address did not match any passenger', { guid, to });
+        context.log.error('Bus inbound address did not match any passenger', { guid, to });
       }
     } else {
-      // Create minimal AppPayload buffer for this inbound
+      // No taxi or bus found, inbound indexed first, create buffer for outbound taxi/bus handler consumption
       const bufId = `stargatev2-bus-buffer:${guid}:${event.transaction.hash}:${event.params.amountReceivedLD}`;
       context.AppPayload.set({
         id: bufId,
@@ -245,6 +248,7 @@ StargatePool.OFTReceived.handler(async ({ event, context }) => {
         inboundRaw: undefined,
         matched: false,
       });
+      context.log.info('StargateV2-bus-passenger: INBOUND FIRST: buffered')
     }
   }
 );
