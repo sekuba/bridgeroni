@@ -2,23 +2,23 @@
 name: envio-indexer
 contracts:
 - name: SpokePool
-  handler: src/EventHandlers.ts
+  handler: src/protocols/across/handlers.ts
   events:
   - event: FilledRelay(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint256 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 exclusiveRelayer, bytes32 indexed relayer, bytes32 depositor, bytes32 recipient, bytes32 messageHash, (bytes32,bytes32,uint256,uint8) relayExecutionInfo)
   - event: FilledV3Relay(address inputToken, address outputToken, uint256 inputAmount, uint256 outputAmount, uint256 repaymentChainId, uint256 indexed originChainId, uint32 indexed depositId, uint32 fillDeadline, uint32 exclusivityDeadline, address exclusiveRelayer, address indexed relayer, address depositor, address recipient, bytes message, (address,bytes,uint256,uint8) relayExecutionInfo)
   - event: FundsDeposited(bytes32 inputToken, bytes32 outputToken, uint256 inputAmount, uint256 outputAmount, uint256 indexed destinationChainId, uint256 indexed depositId, uint32 quoteTimestamp, uint32 fillDeadline, uint32 exclusivityDeadline, bytes32 indexed depositor, bytes32 recipient, bytes32 exclusiveRelayer, bytes message)
 - name: EndpointV2
-  handler: src/EventHandlers.ts
+  handler: src/protocols/layerzero/handlers.ts
   events:
   - event: PacketSent(bytes encodedPayload, bytes options, address sendLibrary)
   - event: PacketDelivered((uint32,bytes32,uint64) origin, address receiver)
 - name: StargatePool
-  handler: src/EventHandlers.ts
+  handler: src/protocols/stargate/handlers.ts
   events:
   - event: OFTSent(bytes32 indexed guid, uint32 dstEid, address indexed fromAddress, uint256 amountSentLD, uint256 amountReceivedLD)
   - event: OFTReceived(bytes32 indexed guid, uint32 srcEid, address indexed toAddress, uint256 amountReceivedLD)
 - name: TokenMessaging
-  handler: src/EventHandlers.ts
+  handler: src/protocols/stargate/handlers.ts
   events:
   - event: BusRode(uint32 dstEid, uint72 ticketId, uint80 fare, bytes passenger)
   - event: BusDriven(uint32 dstEid, uint72 startTicketId, uint8 numPassengers, bytes32 guid)

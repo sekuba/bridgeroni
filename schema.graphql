@@ -1,220 +1,74 @@
-type SpokePool_FilledRelay {
-  id: ID!
-  inputToken: String!
-  outputToken: String!
-  inputAmount: BigInt!
-  outputAmount: BigInt!
-  repaymentChainId: BigInt!
-  originChainId: BigInt!
-  depositId: BigInt!
-  fillDeadline: BigInt!
-  exclusivityDeadline: BigInt!
-  exclusiveRelayer: String!
-  relayer: String!
-  depositor: String!
-  recipient: String!
-  messageHash: String!
-  relayExecutionInfo_0: String!
-  relayExecutionInfo_1: String!
-  relayExecutionInfo_2: BigInt!
-  relayExecutionInfo_3: BigInt!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
-
-type SpokePool_FilledV3Relay {
-  id: ID!
-  inputToken: String!
-  outputToken: String!
-  inputAmount: BigInt!
-  outputAmount: BigInt!
-  repaymentChainId: BigInt!
-  originChainId: BigInt!
-  depositId: BigInt!
-  fillDeadline: BigInt!
-  exclusivityDeadline: BigInt!
-  exclusiveRelayer: String!
-  relayer: String!
-  depositor: String!
-  recipient: String!
-  message: String!
-  relayExecutionInfo_0: String!
-  relayExecutionInfo_1: String!
-  relayExecutionInfo_2: BigInt!
-  relayExecutionInfo_3: BigInt!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
-
-type SpokePool_FundsDeposited {
-  id: ID!
-  inputToken: String!
-  outputToken: String!
-  inputAmount: BigInt!
-  outputAmount: BigInt!
-  destinationChainId: BigInt!
-  depositId: BigInt!
-  quoteTimestamp: BigInt!
-  fillDeadline: BigInt!
-  exclusivityDeadline: BigInt!
-  depositor: String!
-  recipient: String!
-  exclusiveRelayer: String!
-  message: String!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
-
 type CrosschainMessage {
-  id: ID! # Format: "acrossV3:{originChainId}-{depositId}"
-  protocol: String! # "acrossV3"
-  idMatching: String! # "{originChainId}-{depositId}"
-  
-  # Outbound message data
-  blockOutbound: BigInt
-  timestampOutbound: BigInt
-  txHashOutbound: String
-  chainIdOutbound: BigInt
-  fromOutbound: String # depositor address
-  
-  # Inbound message data  
-  blockInbound: BigInt
-  timestampInbound: BigInt
-  txHashInbound: String
-  chainIdInbound: BigInt
-  toInbound: String # recipient address
-  
-  # Status tracking
-  matched: Boolean! # true when both outbound and inbound are recorded
-  latency: BigInt # timestamp difference (inbound - outbound) in seconds, only set when matched
+  id: ID!
+  transport: String!
+  messageKey: String!
+  # Outbound
+  outboundBlock: BigInt
+  outboundTimestamp: BigInt
+  outboundTxHash: String
+  outboundChainId: BigInt
+  outboundFrom: String
+  # Inbound
+  inboundBlock: BigInt
+  inboundTimestamp: BigInt
+  inboundTxHash: String
+  inboundChainId: BigInt
+  inboundTo: String
+  # Status
+  matched: Boolean!
+  latency: BigInt
+  # Route info
+  routeSrcSlug: String
+  routeDstSlug: String
+  routeSrcEid: BigInt
+  routeDstEid: BigInt
 }
 
 type AppPayload {
-  id: ID! # Format: "{transportingMsgProtocol}:{transportingMsgId}:{counter}"
-  appName: String! # "AcrossV3", "StargateV2"
-  
-  # Associated message info
-  transportingMsgProtocol: String! # "acrossV3", "layerzero"
-  transportingMsgId: String! # "{originChainId}-{depositId}" for Across, GUID for LayerZero
-  idMatching: String! # For Across, same as transportingMsgId since layers are fused
-  
-  # Asset information
-  assetAddressOutbound: String # inputToken address
-  assetAddressInbound: String # outputToken address  
-  amountOutbound: BigInt # inputAmount
-  amountInbound: BigInt # outputAmount
-  
-  # Addresses
-  sender: String # depositor
-  recipient: String # recipient
-  targetAddress: String # For Across, this would be the SpokePool address on destination
-  
-  # References
-  crosschainMessage: CrosschainMessage!
-
-  # Status tracking
-  matched: Boolean! # true when both outbound and inbound are recorded
-}
-
-type EndpointV2_PacketSent {
   id: ID!
-  encodedPayload: String!
-  options: String!
-  sendLibrary: String!
-  # Decoded packet header fields
-  packetVersion: BigInt
-  nonce: BigInt
-  srcEid: BigInt
-  sender: String
-  dstEid: BigInt
-  receiver: String
-  payload: String
-  guid: String! # Calculated GUID for matching
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
+  app: String!
+  payloadType: String!
+  # Transport association (relinkable)
+  transportingProtocol: String
+  transportingMessageId: String @index
+  crosschainMessage: CrosschainMessage
+  # Outbound fields
+  outboundAssetAddress: String
+  outboundAmount: BigInt
+  outboundSender: String
+  outboundTargetAddress: String
+  outboundRaw: String
+  # Inbound fields
+  inboundAssetAddress: String
+  inboundAmount: BigInt
+  inboundRecipient: String
+  inboundRaw: String
+  # Status
+  matched: Boolean!
 }
 
-type EndpointV2_PacketDelivered {
-  id: ID!
-  originSrcEid: BigInt!
-  originSender: String!
-  originNonce: BigInt!
-  receiver: String!
-  guid: String! # Calculated GUID for matching
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
+"""
+Stargate V2 Bus mode support entities.
 
-type StargatePool_OFTSent {
-  id: ID!
-  guid: String!
-  dstEid: BigInt!
-  fromAddress: String!
-  amountSentLD: BigInt!
-  amountReceivedLD: BigInt!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
+We avoid sequence buffering and instead link bus passengers via their GUID and ticket IDs.
+"""
 
-type StargatePool_OFTReceived {
-  id: ID!
-  guid: String!
-  srcEid: BigInt!
-  toAddress: String!
-  amountReceivedLD: BigInt!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
-}
-
-type TokenMessaging_BusRode {
+type BusRodeOftSentLfg {
   id: ID!
   dstEid: BigInt!
-  ticketId: BigInt!
+  ticketId: BigInt! @index
   fare: BigInt!
-  passenger: String!
-  # Decoded passenger fields
-  passengerAssetId: BigInt!
+  passengerAssetId: String!
   passengerReceiver: String!
   passengerAmountSD: BigInt!
-  passengerNativeDrop: Boolean!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
+  passengerNativeDrop: String!
+  # Filled by OFTSent (same tx):
+  fromAddress: String
+  amountSentLD: BigInt
+  amountReceivedLD: BigInt
 }
 
-type TokenMessaging_BusDriven {
-  id: ID!
-  dstEid: BigInt!
-  startTicketId: BigInt!
-  numPassengers: BigInt!
-  guid: String!
-  # Metadata fields
-  chainId: BigInt!
-  txHash: String!
-  from: String
-  to: String
+type BusDrivenOftReceivedLfg {
+  id: ID! # guid
+  passengerIds: [String!]!
 }
-

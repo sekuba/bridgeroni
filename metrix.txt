@@ -1,0 +1,2268 @@
+Using Hasura: http://localhost:8080/v1/graphql
+
+== CrosschainMessage: Match Rate per Protocol per Route (sorted by % matched) ==
+- layerzero:base->optimism: total=5493, matched=5493 (100.00%)
+- layerzero:optimism->base: total=6192, matched=6192 (100.00%)
+- across:linea->base: total=3092, matched=3092 (100.00%)
+- layerzero:ethereum->optimism: total=429, matched=429 (100.00%)
+- layerzero:optimism->ethereum: total=989, matched=989 (100.00%)
+- across:base->arbitrum: total=9194, matched=9194 (100.00%)
+- layerzero:ethereum->arbitrum: total=2392, matched=2392 (100.00%)
+- across:optimism->ethereum: total=1091, matched=1091 (100.00%)
+- across:ethereum->linea: total=1099, matched=1099 (100.00%)
+- layerzero:arbitrum->ethereum: total=1875, matched=1875 (100.00%)
+- layerzero:linea->base: total=2566, matched=2566 (100.00%)
+- across:optimism->linea: total=856, matched=856 (100.00%)
+- across:linea->optimism: total=623, matched=623 (100.00%)
+- layerzero:optimism->linea: total=802, matched=802 (100.00%)
+- layerzero:scroll->ethereum: total=217, matched=217 (100.00%)
+- across:optimism->base: total=6180, matched=6180 (100.00%)
+- layerzero:scroll->optimism: total=193, matched=193 (100.00%)
+- layerzero:linea->ethereum: total=258, matched=258 (100.00%)
+- layerzero:linea->optimism: total=298, matched=298 (100.00%)
+- across:linea->ethereum: total=759, matched=759 (100.00%)
+- across:optimism->zksync: total=196, matched=196 (100.00%)
+- across:zksync->optimism: total=330, matched=330 (100.00%)
+- layerzero:scroll->base: total=818, matched=818 (100.00%)
+- across:zksync->arbitrum: total=919, matched=919 (100.00%)
+- across:arbitrum->zksync: total=224, matched=224 (100.00%)
+- across:zksync->ethereum: total=690, matched=690 (100.00%)
+- across:ethereum->zksync: total=277, matched=277 (100.00%)
+- across:zksync->base: total=1278, matched=1278 (100.00%)
+- layerzero:ethereum->zksync: total=30, matched=30 (100.00%)
+- layerzero:zksync->base: total=315, matched=315 (100.00%)
+- across:scroll->zksync: total=16, matched=16 (100.00%)
+- across:zksync->scroll: total=21, matched=21 (100.00%)
+- across:base->zksync: total=228, matched=228 (100.00%)
+- across:base->linea: total=2214, matched=2214 (100.00%)
+- across:zksync->linea: total=409, matched=409 (100.00%)
+- across:linea->zksync: total=176, matched=176 (100.00%)
+- layerzero:zksync->ethereum: total=22, matched=22 (100.00%)
+- layerzero:ink->base: total=274, matched=274 (100.00%)
+- layerzero:ethereum->scroll: total=85, matched=85 (100.00%)
+- layerzero:base->scroll: total=276, matched=276 (100.00%)
+- layerzero:base->zksync: total=45, matched=45 (100.00%)
+- layerzero:optimism->ink: total=215, matched=215 (100.00%)
+- across:optimism->scroll: total=270, matched=270 (100.00%)
+- across:scroll->optimism: total=227, matched=227 (100.00%)
+- layerzero:ink->ethereum: total=207, matched=207 (100.00%)
+- layerzero:base->ink: total=203, matched=203 (100.00%)
+- across:ink->base: total=751, matched=751 (100.00%)
+- across:ink->arbitrum: total=157, matched=157 (100.00%)
+- across:ethereum->ink: total=105, matched=105 (100.00%)
+- across:ink->zksync: total=6, matched=6 (100.00%)
+- layerzero:arbitrum->ink: total=271, matched=271 (100.00%)
+- across:base->ink: total=483, matched=483 (100.00%)
+- layerzero:ink->arbitrum: total=309, matched=309 (100.00%)
+- layerzero:ethereum->ink: total=101, matched=101 (100.00%)
+- layerzero:linea->arbitrum: total=958, matched=958 (100.00%)
+- across:ink->ethereum: total=100, matched=100 (100.00%)
+- across:arbitrum->ink: total=76, matched=76 (100.00%)
+- across:scroll->ink: total=1, matched=1 (100.00%)
+- layerzero:optimism->scroll: total=53, matched=53 (100.00%)
+- layerzero:scroll->linea: total=240, matched=240 (100.00%)
+- across:linea->scroll: total=102, matched=102 (100.00%)
+- across:scroll->linea: total=246, matched=246 (100.00%)
+- across:ink->linea: total=74, matched=74 (100.00%)
+- across:linea->ink: total=68, matched=68 (100.00%)
+- layerzero:linea->scroll: total=46, matched=46 (100.00%)
+- layerzero:scroll->arbitrum: total=317, matched=317 (100.00%)
+- across:arbitrum->scroll: total=176, matched=176 (100.00%)
+- across:scroll->arbitrum: total=448, matched=448 (100.00%)
+- across:base->scroll: total=167, matched=167 (100.00%)
+- layerzero:arbitrum->scroll: total=111, matched=111 (100.00%)
+- across:zksync->ink: total=6, matched=6 (100.00%)
+- across:ethereum->scroll: total=29, matched=29 (100.00%)
+- layerzero:optimism->optimism: total=8, matched=8 (100.00%)
+- layerzero:ink->scroll: total=1, matched=1 (100.00%)
+- across:ink->scroll: total=1, matched=1 (100.00%)
+- layerzero:zksync->linea: total=1, matched=1 (100.00%)
+- layerzero:base->base: total=4, matched=4 (100.00%)
+- layerzero:arbitrum->base: total=10409, matched=10408 (99.99%)
+- across:ethereum->arbitrum: total=5691, matched=5690 (99.98%)
+- across:ethereum->base: total=24631, matched=24626 (99.98%)
+- layerzero:base->linea: total=3539, matched=3538 (99.97%)
+- across:base->optimism: total=3498, matched=3497 (99.97%)
+- across:arbitrum->base: total=8954, matched=8951 (99.97%)
+- layerzero:optimism->arbitrum: total=2720, matched=2719 (99.96%)
+- across:base->ethereum: total=20502, matched=20494 (99.96%)
+- layerzero:base->arbitrum: total=7529, matched=7526 (99.96%)
+- layerzero:base->ethereum: total=2357, matched=2356 (99.96%)
+- across:optimism->arbitrum: total=2066, matched=2065 (99.95%)
+- across:linea->arbitrum: total=1541, matched=1540 (99.94%)
+- layerzero:ethereum->base: total=2826, matched=2824 (99.93%)
+- across:scroll->base: total=916, matched=915 (99.89%)
+- across:arbitrum->linea: total=1532, matched=1530 (99.87%)
+- across:ink->optimism: total=706, matched=705 (99.86%)
+- layerzero:arbitrum->optimism: total=2115, matched=2112 (99.86%)
+- across:ethereum->optimism: total=657, matched=656 (99.85%)
+- across:optimism->ink: total=532, matched=531 (99.81%)
+- across:arbitrum->ethereum: total=4759, matched=4747 (99.75%)
+- across:arbitrum->optimism: total=1802, matched=1797 (99.72%)
+- layerzero:ethereum->linea: total=310, matched=309 (99.68%)
+- layerzero:ink->optimism: total=263, matched=262 (99.62%)
+- across:scroll->ethereum: total=132, matched=131 (99.24%)
+- layerzero:arbitrum->linea: total=910, matched=903 (99.23%)
+- layerzero:arbitrum->arbitrum: total=5, matched=3 (60.00%)
+- across:polygon->ethereum: total=3439, matched=0 (0.00%)
+- across:zora->ethereum: total=65, matched=0 (0.00%)
+- layerzero:mantle->ethereum: total=914, matched=0 (0.00%)
+- across:bsc->ethereum: total=5033, matched=0 (0.00%)
+- layerzero:ethereum->tac: total=203, matched=0 (0.00%)
+- layerzero:ethereum->gravity: total=399, matched=0 (0.00%)
+- layerzero:ethereum->fraxtal: total=193, matched=0 (0.00%)
+- layerzero:plume->ethereum: total=642, matched=0 (0.00%)
+- layerzero:sei->ethereum: total=421, matched=0 (0.00%)
+- across:ethereum->polygon: total=2339, matched=0 (0.00%)
+- layerzero:ethereum->mantle: total=145, matched=0 (0.00%)
+- layerzero:berachain->ethereum: total=1052, matched=0 (0.00%)
+- layerzero:hyperevm->ethereum: total=364, matched=0 (0.00%)
+- layerzero:optimism->unichain: total=638, matched=0 (0.00%)
+- across:optimism->unichain: total=3303, matched=0 (0.00%)
+- layerzero:tac->ethereum: total=204, matched=0 (0.00%)
+- layerzero:ethereum->hyperevm: total=922, matched=0 (0.00%)
+- across:mode->optimism: total=310, matched=0 (0.00%)
+- across:optimism->mode: total=952, matched=0 (0.00%)
+- across:ethereum->bsc: total=1229, matched=0 (0.00%)
+- layerzero:sei->arbitrum: total=601, matched=0 (0.00%)
+- across:optimism->worldchain: total=378, matched=0 (0.00%)
+- layerzero:optimism->bsc: total=358, matched=0 (0.00%)
+- layerzero:polygon->optimism: total=152, matched=0 (0.00%)
+- layerzero:optimism->gravity: total=167, matched=0 (0.00%)
+- across:unichain->optimism: total=3693, matched=0 (0.00%)
+- across:ethereum->worldchain: total=102, matched=0 (0.00%)
+- layerzero:hemi->ethereum: total=156, matched=0 (0.00%)
+- across:unichain->ethereum: total=1058, matched=0 (0.00%)
+- layerzero:fraxtal->ethereum: total=144, matched=0 (0.00%)
+- across:worldchain->optimism: total=398, matched=0 (0.00%)
+- layerzero:aptos->ethereum: total=78, matched=0 (0.00%)
+- layerzero:optimism->abstract: total=294, matched=0 (0.00%)
+- layerzero:bsc->ethereum: total=2668, matched=0 (0.00%)
+- layerzero:ethereum->solana: total=538, matched=0 (0.00%)
+- layerzero:sonic->ethereum: total=553, matched=0 (0.00%)
+- layerzero:abstract->optimism: total=662, matched=0 (0.00%)
+- layerzero:plume->optimism: total=291, matched=0 (0.00%)
+- layerzero:optimism->soneium: total=374, matched=0 (0.00%)
+- layerzero:unichain->ethereum: total=781, matched=0 (0.00%)
+- across:unknown->ink: total=7, matched=0 (0.00%)
+- layerzero:unichain->optimism: total=623, matched=0 (0.00%)
+- layerzero:mode->optimism: total=38, matched=0 (0.00%)
+- layerzero:optimism->berachain: total=178, matched=0 (0.00%)
+- across:polygon->optimism: total=539, matched=0 (0.00%)
+- across:worldchain->base: total=713, matched=0 (0.00%)
+- layerzero:ethereum->berachain: total=579, matched=0 (0.00%)
+- across:ethereum->unichain: total=1002, matched=0 (0.00%)
+- layerzero:optimism->plume: total=346, matched=0 (0.00%)
+- across:bsc->base: total=2654, matched=0 (0.00%)
+- layerzero:ethereum->abstract: total=428, matched=0 (0.00%)
+- layerzero:optimism->superposition: total=10, matched=0 (0.00%)
+- across:base->bsc: total=1034, matched=0 (0.00%)
+- layerzero:unknown->ethereum: total=66, matched=0 (0.00%)
+- across:worldchain->ethereum: total=154, matched=0 (0.00%)
+- layerzero:ethereum->unichain: total=648, matched=0 (0.00%)
+- layerzero:rootstock->ethereum: total=145, matched=0 (0.00%)
+- layerzero:ethereum->aptos: total=47, matched=0 (0.00%)
+- across:ethereum->lisk: total=18, matched=0 (0.00%)
+- layerzero:avalanche->ethereum: total=991, matched=0 (0.00%)
+- layerzero:mantle->optimism: total=195, matched=0 (0.00%)
+- layerzero:ethereum->bsc: total=2432, matched=0 (0.00%)
+- layerzero:optimism->orderly: total=84, matched=0 (0.00%)
+- layerzero:orderly->optimism: total=44, matched=0 (0.00%)
+- layerzero:sonic->base: total=859, matched=0 (0.00%)
+- layerzero:optimism->coredao: total=52, matched=0 (0.00%)
+- layerzero:optimism->polygon: total=210, matched=0 (0.00%)
+- layerzero:gravity->ethereum: total=134, matched=0 (0.00%)
+- layerzero:telos->ethereum: total=133, matched=0 (0.00%)
+- layerzero:nibiru->ethereum: total=125, matched=0 (0.00%)
+- layerzero:plume->base: total=1424, matched=0 (0.00%)
+- layerzero:kaia->ethereum: total=141, matched=0 (0.00%)
+- layerzero:cronos->ethereum: total=113, matched=0 (0.00%)
+- layerzero:goat->ethereum: total=126, matched=0 (0.00%)
+- layerzero:story->ethereum: total=175, matched=0 (0.00%)
+- layerzero:evmonflow->ethereum: total=200, matched=0 (0.00%)
+- layerzero:lightlink->ethereum: total=168, matched=0 (0.00%)
+- layerzero:ape->ethereum: total=318, matched=0 (0.00%)
+- layerzero:abstract->ethereum: total=346, matched=0 (0.00%)
+- layerzero:iota->ethereum: total=155, matched=0 (0.00%)
+- layerzero:fuse->ethereum: total=152, matched=0 (0.00%)
+- layerzero:gnosis->ethereum: total=175, matched=0 (0.00%)
+- layerzero:mantapacific->ethereum: total=85, matched=0 (0.00%)
+- layerzero:metis->ethereum: total=99, matched=0 (0.00%)
+- layerzero:flare->ethereum: total=215, matched=0 (0.00%)
+- layerzero:cronoszkevm->ethereum: total=123, matched=0 (0.00%)
+- layerzero:soneium->ethereum: total=164, matched=0 (0.00%)
+- layerzero:peaq->ethereum: total=141, matched=0 (0.00%)
+- layerzero:xdc->ethereum: total=137, matched=0 (0.00%)
+- layerzero:vana->ethereum: total=124, matched=0 (0.00%)
+- layerzero:glue->ethereum: total=142, matched=0 (0.00%)
+- layerzero:botanix->ethereum: total=100, matched=0 (0.00%)
+- layerzero:base->bsc: total=2735, matched=0 (0.00%)
+- layerzero:bsc->optimism: total=264, matched=0 (0.00%)
+- layerzero:degen->ethereum: total=84, matched=0 (0.00%)
+- layerzero:soneium->optimism: total=447, matched=0 (0.00%)
+- layerzero:ethereum->plume: total=405, matched=0 (0.00%)
+- layerzero:optimism->swell: total=5, matched=0 (0.00%)
+- across:bsc->optimism: total=292, matched=0 (0.00%)
+- across:optimism->soneium: total=209, matched=0 (0.00%)
+- layerzero:etherlink->ethereum: total=8, matched=0 (0.00%)
+- layerzero:bsc->base: total=2956, matched=0 (0.00%)
+- layerzero:ethereum->avalanche: total=732, matched=0 (0.00%)
+- layerzero:ethereum->sei: total=279, matched=0 (0.00%)
+- across:lisk->ethereum: total=67, matched=0 (0.00%)
+- layerzero:ethereum->movement: total=113, matched=0 (0.00%)
+- layerzero:base->gravity: total=4198, matched=0 (0.00%)
+- layerzero:solana->ethereum: total=636, matched=0 (0.00%)
+- layerzero:base->polygon: total=519, matched=0 (0.00%)
+- layerzero:sei->optimism: total=185, matched=0 (0.00%)
+- layerzero:lightlink->optimism: total=101, matched=0 (0.00%)
+- layerzero:evmonflow->optimism: total=31, matched=0 (0.00%)
+- across:base->unichain: total=1727, matched=0 (0.00%)
+- layerzero:iota->optimism: total=52, matched=0 (0.00%)
+- layerzero:base->solana: total=718, matched=0 (0.00%)
+- layerzero:gnosis->optimism: total=56, matched=0 (0.00%)
+- layerzero:flare->optimism: total=110, matched=0 (0.00%)
+- layerzero:berachain->optimism: total=117, matched=0 (0.00%)
+- layerzero:cronoszkevm->optimism: total=12, matched=0 (0.00%)
+- layerzero:mantapacific->optimism: total=27, matched=0 (0.00%)
+- layerzero:optimism->hyperevm: total=212, matched=0 (0.00%)
+- across:soneium->base: total=729, matched=0 (0.00%)
+- layerzero:kava->ethereum: total=52, matched=0 (0.00%)
+- layerzero:ethereum->sonic: total=245, matched=0 (0.00%)
+- layerzero:hyperevm->optimism: total=108, matched=0 (0.00%)
+- layerzero:coredao->ethereum: total=73, matched=0 (0.00%)
+- layerzero:rari->ethereum: total=68, matched=0 (0.00%)
+- layerzero:rootstock->optimism: total=39, matched=0 (0.00%)
+- layerzero:base->unichain: total=1002, matched=0 (0.00%)
+- across:unichain->base: total=2460, matched=0 (0.00%)
+- layerzero:etherlink->base: total=187, matched=0 (0.00%)
+- layerzero:ethereum->evmonflow: total=74, matched=0 (0.00%)
+- across:blast->ethereum: total=557, matched=0 (0.00%)
+- across:optimism->polygon: total=609, matched=0 (0.00%)
+- layerzero:polygon->ethereum: total=150, matched=0 (0.00%)
+- layerzero:base->dexalot: total=196, matched=0 (0.00%)
+- across:ethereum->soneium: total=52, matched=0 (0.00%)
+- layerzero:zircuit->ethereum: total=14, matched=0 (0.00%)
+- layerzero:ethereum->orderly: total=304, matched=0 (0.00%)
+- layerzero:ethereum->fuse: total=69, matched=0 (0.00%)
+- layerzero:unichain->base: total=1189, matched=0 (0.00%)
+- layerzero:ethereum->hemi: total=84, matched=0 (0.00%)
+- across:ethereum->blast: total=36, matched=0 (0.00%)
+- layerzero:base->kaia: total=96, matched=0 (0.00%)
+- across:lens->ethereum: total=29, matched=0 (0.00%)
+- layerzero:ethereum->polygon: total=102, matched=0 (0.00%)
+- layerzero:blast->ethereum: total=44, matched=0 (0.00%)
+- across:lisk->optimism: total=538, matched=0 (0.00%)
+- across:optimism->lisk: total=101, matched=0 (0.00%)
+- layerzero:rootstock->base: total=45, matched=0 (0.00%)
+- layerzero:lisk->optimism: total=181, matched=0 (0.00%)
+- layerzero:ethereum->story: total=86, matched=0 (0.00%)
+- across:soneium->optimism: total=479, matched=0 (0.00%)
+- layerzero:ethereum->mantapacific: total=16, matched=0 (0.00%)
+- layerzero:ethereum->flare: total=161, matched=0 (0.00%)
+- layerzero:orderly->ethereum: total=40, matched=0 (0.00%)
+- layerzero:optimism->rootstock: total=14, matched=0 (0.00%)
+- layerzero:cyber->ethereum: total=239, matched=0 (0.00%)
+- layerzero:optimism->gnosis: total=17, matched=0 (0.00%)
+- layerzero:optimism->fuse: total=16, matched=0 (0.00%)
+- layerzero:optimism->beam: total=4, matched=0 (0.00%)
+- layerzero:optimism->kaia: total=35, matched=0 (0.00%)
+- layerzero:optimism->celo: total=1, matched=0 (0.00%)
+- layerzero:blast->optimism: total=27, matched=0 (0.00%)
+- layerzero:worldchain->optimism: total=12, matched=0 (0.00%)
+- layerzero:aurora->ethereum: total=53, matched=0 (0.00%)
+- layerzero:movement->ethereum: total=108, matched=0 (0.00%)
+- layerzero:taiko->ethereum: total=62, matched=0 (0.00%)
+- layerzero:base->abstract: total=979, matched=0 (0.00%)
+- layerzero:ethereum->kava: total=39, matched=0 (0.00%)
+- layerzero:ethereum->taiko: total=31, matched=0 (0.00%)
+- layerzero:ethereum->coredao: total=34, matched=0 (0.00%)
+- layerzero:ethereum->telos: total=52, matched=0 (0.00%)
+- layerzero:ethereum->lightlink: total=45, matched=0 (0.00%)
+- layerzero:ethereum->xdc: total=54, matched=0 (0.00%)
+- across:base->polygon: total=1918, matched=0 (0.00%)
+- layerzero:unknown->optimism: total=22, matched=0 (0.00%)
+- layerzero:bouncebit->ethereum: total=14, matched=0 (0.00%)
+- across:blast->optimism: total=169, matched=0 (0.00%)
+- layerzero:ethereum->bouncebit: total=6, matched=0 (0.00%)
+- across:optimism->bsc: total=44, matched=0 (0.00%)
+- layerzero:superposition->ethereum: total=42, matched=0 (0.00%)
+- layerzero:base->orderly: total=1056, matched=0 (0.00%)
+- layerzero:orderly->base: total=213, matched=0 (0.00%)
+- layerzero:ethereum->tron: total=259, matched=0 (0.00%)
+- layerzero:ethereum->glue: total=70, matched=0 (0.00%)
+- layerzero:sei->base: total=200, matched=0 (0.00%)
+- layerzero:ethereum->kaia: total=61, matched=0 (0.00%)
+- layerzero:hemi->optimism: total=127, matched=0 (0.00%)
+- across:blast->base: total=723, matched=0 (0.00%)
+- across:zksync->unichain: total=104, matched=0 (0.00%)
+- across:zksync->polygon: total=106, matched=0 (0.00%)
+- across:polygon->zksync: total=49, matched=0 (0.00%)
+- across:zksync->bsc: total=223, matched=0 (0.00%)
+- across:zksync->mode: total=7, matched=0 (0.00%)
+- across:mode->zksync: total=9, matched=0 (0.00%)
+- across:unichain->zksync: total=39, matched=0 (0.00%)
+- across:lens->zksync: total=5, matched=0 (0.00%)
+- across:ethereum->lens: total=28, matched=0 (0.00%)
+- across:zksync->soneium: total=20, matched=0 (0.00%)
+- layerzero:zksync->berachain: total=253, matched=0 (0.00%)
+- layerzero:zksync->blast: total=2, matched=0 (0.00%)
+- across:unknown->zksync: total=2, matched=0 (0.00%)
+- layerzero:gravity->optimism: total=85, matched=0 (0.00%)
+- across:blast->zksync: total=45, matched=0 (0.00%)
+- layerzero:nibiru->optimism: total=30, matched=0 (0.00%)
+- across:bsc->zksync: total=139, matched=0 (0.00%)
+- layerzero:zksync->sonic: total=5, matched=0 (0.00%)
+- layerzero:xdc->optimism: total=42, matched=0 (0.00%)
+- layerzero:beam->ethereum: total=69, matched=0 (0.00%)
+- layerzero:peaq->optimism: total=29, matched=0 (0.00%)
+- across:zora->zksync: total=13, matched=0 (0.00%)
+- layerzero:degen->optimism: total=14, matched=0 (0.00%)
+- across:zksync->zora: total=11, matched=0 (0.00%)
+- layerzero:base->glue: total=172, matched=0 (0.00%)
+- across:lisk->zksync: total=6, matched=0 (0.00%)
+- across:zksync->lens: total=3, matched=0 (0.00%)
+- layerzero:gnosis->base: total=247, matched=0 (0.00%)
+- layerzero:polygon->base: total=390, matched=0 (0.00%)
+- across:zksync->lisk: total=3, matched=0 (0.00%)
+- layerzero:solana->base: total=492, matched=0 (0.00%)
+- layerzero:base->ape: total=55, matched=0 (0.00%)
+- layerzero:optimism->sei: total=116, matched=0 (0.00%)
+- layerzero:solana->optimism: total=35, matched=0 (0.00%)
+- layerzero:base->hyperevm: total=800, matched=0 (0.00%)
+- layerzero:base->cyber: total=3240, matched=0 (0.00%)
+- layerzero:soneium->base: total=727, matched=0 (0.00%)
+- layerzero:hyperevm->base: total=574, matched=0 (0.00%)
+- layerzero:avalanche->optimism: total=157, matched=0 (0.00%)
+- layerzero:base->etherlink: total=168, matched=0 (0.00%)
+- across:base->unknown: total=136, matched=0 (0.00%)
+- across:polygon->base: total=2841, matched=0 (0.00%)
+- layerzero:optimism->lisk: total=136, matched=0 (0.00%)
+- layerzero:ethereum->gnosis: total=73, matched=0 (0.00%)
+- layerzero:base->fuse: total=74, matched=0 (0.00%)
+- across:soneium->zksync: total=23, matched=0 (0.00%)
+- layerzero:base->sonic: total=896, matched=0 (0.00%)
+- across:base->soneium: total=338, matched=0 (0.00%)
+- layerzero:ethereum->rootstock: total=76, matched=0 (0.00%)
+- across:zksync->worldchain: total=4, matched=0 (0.00%)
+- across:worldchain->zksync: total=14, matched=0 (0.00%)
+- layerzero:base->lyra: total=83, matched=0 (0.00%)
+- across:zksync->blast: total=10, matched=0 (0.00%)
+- layerzero:base->berachain: total=392, matched=0 (0.00%)
+- layerzero:base->hemi: total=72, matched=0 (0.00%)
+- layerzero:base->avalanche: total=480, matched=0 (0.00%)
+- layerzero:base->sei: total=143, matched=0 (0.00%)
+- layerzero:ape->base: total=58, matched=0 (0.00%)
+- layerzero:tron->ethereum: total=84, matched=0 (0.00%)
+- layerzero:abstract->base: total=706, matched=0 (0.00%)
+- layerzero:base->rari: total=45, matched=0 (0.00%)
+- layerzero:blast->base: total=49, matched=0 (0.00%)
+- layerzero:ethereum->vana: total=49, matched=0 (0.00%)
+- layerzero:optimism->sonic: total=36, matched=0 (0.00%)
+- layerzero:taiko->base: total=44, matched=0 (0.00%)
+- layerzero:base->mantapacific: total=20, matched=0 (0.00%)
+- layerzero:swell->ethereum: total=125, matched=0 (0.00%)
+- layerzero:ton->ethereum: total=64, matched=0 (0.00%)
+- layerzero:story->optimism: total=32, matched=0 (0.00%)
+- layerzero:sonic->optimism: total=46, matched=0 (0.00%)
+- layerzero:taiko->optimism: total=25, matched=0 (0.00%)
+- layerzero:superposition->optimism: total=23, matched=0 (0.00%)
+- layerzero:optimism->solana: total=85, matched=0 (0.00%)
+- layerzero:optimism->avalanche: total=141, matched=0 (0.00%)
+- layerzero:optimism->fraxtal: total=19, matched=0 (0.00%)
+- layerzero:optimism->iota: total=16, matched=0 (0.00%)
+- layerzero:optimism->hemi: total=136, matched=0 (0.00%)
+- layerzero:metis->optimism: total=47, matched=0 (0.00%)
+- layerzero:cronos->optimism: total=11, matched=0 (0.00%)
+- layerzero:ape->optimism: total=17, matched=0 (0.00%)
+- layerzero:base->plume: total=1429, matched=0 (0.00%)
+- layerzero:telos->optimism: total=15, matched=0 (0.00%)
+- layerzero:kaia->optimism: total=22, matched=0 (0.00%)
+- layerzero:fuse->optimism: total=37, matched=0 (0.00%)
+- layerzero:vana->optimism: total=19, matched=0 (0.00%)
+- layerzero:optimism->lyra: total=6, matched=0 (0.00%)
+- layerzero:aurora->optimism: total=10, matched=0 (0.00%)
+- across:optimism->lens: total=37, matched=0 (0.00%)
+- layerzero:coredao->optimism: total=46, matched=0 (0.00%)
+- layerzero:botanix->optimism: total=9, matched=0 (0.00%)
+- layerzero:lyra->optimism: total=3, matched=0 (0.00%)
+- layerzero:kava->optimism: total=26, matched=0 (0.00%)
+- across:zora->optimism: total=21, matched=0 (0.00%)
+- across:optimism->blast: total=16, matched=0 (0.00%)
+- layerzero:cyber->optimism: total=213, matched=0 (0.00%)
+- layerzero:optimism->flare: total=60, matched=0 (0.00%)
+- layerzero:optimism->lightlink: total=46, matched=0 (0.00%)
+- layerzero:optimism->evmonflow: total=13, matched=0 (0.00%)
+- layerzero:optimism->nibiru: total=22, matched=0 (0.00%)
+- layerzero:optimism->xdc: total=46, matched=0 (0.00%)
+- layerzero:optimism->metis: total=17, matched=0 (0.00%)
+- layerzero:glue->optimism: total=11, matched=0 (0.00%)
+- layerzero:optimism->story: total=27, matched=0 (0.00%)
+- across:unknown->optimism: total=13, matched=0 (0.00%)
+- layerzero:optimism->glue: total=14, matched=0 (0.00%)
+- layerzero:optimism->unknown: total=23, matched=0 (0.00%)
+- layerzero:optimism->cyber: total=91, matched=0 (0.00%)
+- layerzero:soneium->ink: total=64, matched=0 (0.00%)
+- across:unichain->ink: total=6085, matched=0 (0.00%)
+- across:ink->unichain: total=5856, matched=0 (0.00%)
+- layerzero:ink->plume: total=24, matched=0 (0.00%)
+- layerzero:hyperevm->ink: total=84, matched=0 (0.00%)
+- layerzero:ink->sei: total=3, matched=0 (0.00%)
+- layerzero:avalanche->arbitrum: total=377, matched=0 (0.00%)
+- layerzero:flare->ink: total=11, matched=0 (0.00%)
+- layerzero:sonic->arbitrum: total=846, matched=0 (0.00%)
+- across:bsc->arbitrum: total=1008, matched=0 (0.00%)
+- layerzero:mantle->ink: total=9, matched=0 (0.00%)
+- layerzero:degen->base: total=36, matched=0 (0.00%)
+- layerzero:lyra->arbitrum: total=35, matched=0 (0.00%)
+- across:ink->soneium: total=173, matched=0 (0.00%)
+- layerzero:ink->berachain: total=73, matched=0 (0.00%)
+- layerzero:unichain->ink: total=180, matched=0 (0.00%)
+- layerzero:berachain->ink: total=18, matched=0 (0.00%)
+- layerzero:ink->unichain: total=220, matched=0 (0.00%)
+- layerzero:superposition->ink: total=11, matched=0 (0.00%)
+- layerzero:mantle->base: total=577, matched=0 (0.00%)
+- layerzero:fuse->base: total=38, matched=0 (0.00%)
+- layerzero:ink->hyperevm: total=155, matched=0 (0.00%)
+- across:soneium->ink: total=118, matched=0 (0.00%)
+- layerzero:ink->rari: total=11, matched=0 (0.00%)
+- layerzero:rari->ink: total=6, matched=0 (0.00%)
+- layerzero:ink->avalanche: total=11, matched=0 (0.00%)
+- layerzero:avalanche->ink: total=30, matched=0 (0.00%)
+- across:unichain->arbitrum: total=1064, matched=0 (0.00%)
+- layerzero:ink->mantle: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->sonic: total=460, matched=0 (0.00%)
+- layerzero:bsc->arbitrum: total=1460, matched=0 (0.00%)
+- layerzero:arbitrum->dexalot: total=397, matched=0 (0.00%)
+- layerzero:arbitrum->abstract: total=504, matched=0 (0.00%)
+- layerzero:gravity->ink: total=6, matched=0 (0.00%)
+- layerzero:arbitrum->sei: total=361, matched=0 (0.00%)
+- layerzero:arbitrum->hyperevm: total=1111, matched=0 (0.00%)
+- layerzero:mantle->arbitrum: total=487, matched=0 (0.00%)
+- layerzero:sonic->ink: total=5, matched=0 (0.00%)
+- across:worldchain->ink: total=38, matched=0 (0.00%)
+- layerzero:arbitrum->gravity: total=2117, matched=0 (0.00%)
+- layerzero:flare->arbitrum: total=251, matched=0 (0.00%)
+- across:ink->polygon: total=12, matched=0 (0.00%)
+- across:lens->ink: total=10, matched=0 (0.00%)
+- layerzero:celo->ethereum: total=25, matched=0 (0.00%)
+- across:arbitrum->worldchain: total=124, matched=0 (0.00%)
+- layerzero:arbitrum->story: total=87, matched=0 (0.00%)
+- layerzero:arbitrum->unichain: total=516, matched=0 (0.00%)
+- layerzero:plume->ink: total=18, matched=0 (0.00%)
+- across:mode->ink: total=18, matched=0 (0.00%)
+- across:ink->lisk: total=71, matched=0 (0.00%)
+- across:lisk->ink: total=90, matched=0 (0.00%)
+- across:ink->worldchain: total=27, matched=0 (0.00%)
+- layerzero:ink->bsc: total=17, matched=0 (0.00%)
+- layerzero:story->arbitrum: total=159, matched=0 (0.00%)
+- across:polygon->arbitrum: total=1178, matched=0 (0.00%)
+- layerzero:arbitrum->orderly: total=1589, matched=0 (0.00%)
+- layerzero:ink->abstract: total=14, matched=0 (0.00%)
+- across:arbitrum->unichain: total=560, matched=0 (0.00%)
+- layerzero:ink->rootstock: total=8, matched=0 (0.00%)
+- layerzero:arbitrum->solana: total=62, matched=0 (0.00%)
+- layerzero:sei->ink: total=6, matched=0 (0.00%)
+- layerzero:bsc->ink: total=4, matched=0 (0.00%)
+- across:mode->arbitrum: total=155, matched=0 (0.00%)
+- layerzero:plume->arbitrum: total=436, matched=0 (0.00%)
+- layerzero:fraxtal->ink: total=4, matched=0 (0.00%)
+- layerzero:ink->fraxtal: total=4, matched=0 (0.00%)
+- layerzero:ink->soneium: total=27, matched=0 (0.00%)
+- across:arbitrum->mode: total=14, matched=0 (0.00%)
+- layerzero:kaia->ink: total=3, matched=0 (0.00%)
+- layerzero:arbitrum->polygon: total=303, matched=0 (0.00%)
+- layerzero:arbitrum->bsc: total=1132, matched=0 (0.00%)
+- across:ink->mode: total=26, matched=0 (0.00%)
+- layerzero:hyperevm->arbitrum: total=602, matched=0 (0.00%)
+- layerzero:polygon->ink: total=4, matched=0 (0.00%)
+- layerzero:arbitrum->avalanche: total=306, matched=0 (0.00%)
+- across:ink->bsc: total=11, matched=0 (0.00%)
+- layerzero:ink->flare: total=11, matched=0 (0.00%)
+- layerzero:ink->sonic: total=4, matched=0 (0.00%)
+- layerzero:rootstock->arbitrum: total=169, matched=0 (0.00%)
+- across:arbitrum->polygon: total=718, matched=0 (0.00%)
+- layerzero:unichain->arbitrum: total=519, matched=0 (0.00%)
+- layerzero:arbitrum->plume: total=355, matched=0 (0.00%)
+- layerzero:lyra->ethereum: total=34, matched=0 (0.00%)
+- layerzero:arbitrum->flare: total=171, matched=0 (0.00%)
+- layerzero:berachain->arbitrum: total=586, matched=0 (0.00%)
+- across:bsc->ink: total=8, matched=0 (0.00%)
+- layerzero:ink->peaq: total=4, matched=0 (0.00%)
+- layerzero:metis->arbitrum: total=88, matched=0 (0.00%)
+- layerzero:hemi->arbitrum: total=106, matched=0 (0.00%)
+- layerzero:arbitrum->hemi: total=97, matched=0 (0.00%)
+- layerzero:soneium->arbitrum: total=353, matched=0 (0.00%)
+- across:ink->lens: total=3, matched=0 (0.00%)
+- across:lens->base: total=209, matched=0 (0.00%)
+- layerzero:ethereum->corn: total=37, matched=0 (0.00%)
+- layerzero:flare->base: total=136, matched=0 (0.00%)
+- layerzero:tac->base: total=30, matched=0 (0.00%)
+- layerzero:ethereum->celo: total=21, matched=0 (0.00%)
+- layerzero:ethereum->ton: total=64, matched=0 (0.00%)
+- layerzero:base->flare: total=79, matched=0 (0.00%)
+- layerzero:ethereum->lyra: total=8, matched=0 (0.00%)
+- layerzero:ethereum->unknown: total=82, matched=0 (0.00%)
+- layerzero:base->nibiru: total=21, matched=0 (0.00%)
+- across:mode->ethereum: total=76, matched=0 (0.00%)
+- layerzero:base->unknown: total=12, matched=0 (0.00%)
+- across:ethereum->zora: total=7, matched=0 (0.00%)
+- layerzero:base->fraxtal: total=88, matched=0 (0.00%)
+- layerzero:base->xdc: total=12, matched=0 (0.00%)
+- layerzero:unknown->base: total=19, matched=0 (0.00%)
+- layerzero:mantapacific->base: total=150, matched=0 (0.00%)
+- layerzero:ethereum->iota: total=41, matched=0 (0.00%)
+- layerzero:ethereum->viction: total=4, matched=0 (0.00%)
+- layerzero:base->tac: total=44, matched=0 (0.00%)
+- layerzero:ethereum->ape: total=263, matched=0 (0.00%)
+- layerzero:ethereum->metis: total=24, matched=0 (0.00%)
+- layerzero:base->mantle: total=117, matched=0 (0.00%)
+- layerzero:mode->ethereum: total=10, matched=0 (0.00%)
+- layerzero:opbnb->base: total=8, matched=0 (0.00%)
+- layerzero:hemi->base: total=121, matched=0 (0.00%)
+- layerzero:ethereum->swell: total=68, matched=0 (0.00%)
+- layerzero:ethereum->rari: total=36, matched=0 (0.00%)
+- across:base->worldchain: total=373, matched=0 (0.00%)
+- layerzero:base->coredao: total=133, matched=0 (0.00%)
+- layerzero:base->telos: total=38, matched=0 (0.00%)
+- layerzero:fraxtal->optimism: total=11, matched=0 (0.00%)
+- across:mode->base: total=306, matched=0 (0.00%)
+- layerzero:optimism->mode: total=26, matched=0 (0.00%)
+- layerzero:ethereum->peaq: total=66, matched=0 (0.00%)
+- layerzero:ink->gravity: total=10, matched=0 (0.00%)
+- layerzero:abstract->ink: total=4, matched=0 (0.00%)
+- layerzero:ethereum->goat: total=47, matched=0 (0.00%)
+- layerzero:lens->base: total=8, matched=0 (0.00%)
+- across:blast->ink: total=12, matched=0 (0.00%)
+- layerzero:base->bob: total=72, matched=0 (0.00%)
+- layerzero:ink->botanix: total=2, matched=0 (0.00%)
+- across:lisk->base: total=238, matched=0 (0.00%)
+- layerzero:ethereum->degen: total=48, matched=0 (0.00%)
+- layerzero:berachain->base: total=456, matched=0 (0.00%)
+- layerzero:ethereum->nibiru: total=52, matched=0 (0.00%)
+- layerzero:ethereum->cronos: total=37, matched=0 (0.00%)
+- across:base->lens: total=254, matched=0 (0.00%)
+- layerzero:ink->superposition: total=8, matched=0 (0.00%)
+- layerzero:hemi->ink: total=5, matched=0 (0.00%)
+- across:polygon->ink: total=11, matched=0 (0.00%)
+- layerzero:ink->glue: total=9, matched=0 (0.00%)
+- across:lens->optimism: total=27, matched=0 (0.00%)
+- layerzero:orderly->arbitrum: total=544, matched=0 (0.00%)
+- layerzero:arbitrum->ape: total=186, matched=0 (0.00%)
+- layerzero:abstract->arbitrum: total=454, matched=0 (0.00%)
+- layerzero:optimism->mantle: total=48, matched=0 (0.00%)
+- layerzero:optimism->worldchain: total=6, matched=0 (0.00%)
+- layerzero:bob->optimism: total=5, matched=0 (0.00%)
+- layerzero:mantapacific->arbitrum: total=58, matched=0 (0.00%)
+- layerzero:optimism->goat: total=12, matched=0 (0.00%)
+- layerzero:goat->optimism: total=32, matched=0 (0.00%)
+- layerzero:rari->optimism: total=35, matched=0 (0.00%)
+- across:base->blast: total=85, matched=0 (0.00%)
+- across:arbitrum->bsc: total=359, matched=0 (0.00%)
+- layerzero:avalanche->base: total=634, matched=0 (0.00%)
+- layerzero:gnosis->arbitrum: total=144, matched=0 (0.00%)
+- across:optimism->zora: total=5, matched=0 (0.00%)
+- layerzero:cyber->base: total=445, matched=0 (0.00%)
+- layerzero:bob->ethereum: total=20, matched=0 (0.00%)
+- layerzero:gravity->base: total=293, matched=0 (0.00%)
+- layerzero:story->base: total=108, matched=0 (0.00%)
+- layerzero:arbitrum->rootstock: total=137, matched=0 (0.00%)
+- across:linea->soneium: total=25, matched=0 (0.00%)
+- across:polygon->linea: total=250, matched=0 (0.00%)
+- across:bsc->linea: total=388, matched=0 (0.00%)
+- layerzero:arbitrum->berachain: total=327, matched=0 (0.00%)
+- layerzero:linea->fraxtal: total=84, matched=0 (0.00%)
+- layerzero:linea->bsc: total=172, matched=0 (0.00%)
+- layerzero:lightlink->linea: total=7, matched=0 (0.00%)
+- across:unichain->linea: total=209, matched=0 (0.00%)
+- across:linea->polygon: total=119, matched=0 (0.00%)
+- layerzero:lightlink->base: total=71, matched=0 (0.00%)
+- layerzero:mantapacific->linea: total=23, matched=0 (0.00%)
+- across:linea->unichain: total=117, matched=0 (0.00%)
+- layerzero:unichain->linea: total=235, matched=0 (0.00%)
+- layerzero:linea->hemi: total=5, matched=0 (0.00%)
+- layerzero:linea->unichain: total=138, matched=0 (0.00%)
+- layerzero:abstract->linea: total=57, matched=0 (0.00%)
+- across:lens->linea: total=31, matched=0 (0.00%)
+- layerzero:berachain->linea: total=13, matched=0 (0.00%)
+- layerzero:fraxtal->linea: total=122, matched=0 (0.00%)
+- layerzero:linea->metis: total=7, matched=0 (0.00%)
+- across:blast->linea: total=106, matched=0 (0.00%)
+- layerzero:sei->linea: total=15, matched=0 (0.00%)
+- across:linea->bsc: total=87, matched=0 (0.00%)
+- across:mode->linea: total=59, matched=0 (0.00%)
+- across:soneium->linea: total=38, matched=0 (0.00%)
+- layerzero:linea->sei: total=16, matched=0 (0.00%)
+- layerzero:metis->linea: total=5, matched=0 (0.00%)
+- layerzero:rari->base: total=63, matched=0 (0.00%)
+- layerzero:linea->mode: total=6, matched=0 (0.00%)
+- layerzero:linea->soneium: total=82, matched=0 (0.00%)
+- layerzero:linea->mantapacific: total=9, matched=0 (0.00%)
+- layerzero:blast->linea: total=19, matched=0 (0.00%)
+- across:worldchain->linea: total=24, matched=0 (0.00%)
+- layerzero:linea->evmonflow: total=2, matched=0 (0.00%)
+- layerzero:plume->linea: total=40, matched=0 (0.00%)
+- layerzero:ape->linea: total=4, matched=0 (0.00%)
+- layerzero:linea->mantle: total=11, matched=0 (0.00%)
+- layerzero:soneium->linea: total=98, matched=0 (0.00%)
+- layerzero:mantle->linea: total=43, matched=0 (0.00%)
+- layerzero:linea->plume: total=49, matched=0 (0.00%)
+- layerzero:flare->linea: total=4, matched=0 (0.00%)
+- layerzero:linea->berachain: total=11, matched=0 (0.00%)
+- across:unknown->linea: total=7, matched=0 (0.00%)
+- layerzero:base->superposition: total=51, matched=0 (0.00%)
+- layerzero:linea->abstract: total=68, matched=0 (0.00%)
+- layerzero:gravity->linea: total=8, matched=0 (0.00%)
+- across:linea->lens: total=15, matched=0 (0.00%)
+- layerzero:gravity->arbitrum: total=288, matched=0 (0.00%)
+- layerzero:solana->linea: total=13, matched=0 (0.00%)
+- layerzero:tron->arbitrum: total=43, matched=0 (0.00%)
+- layerzero:arbitrum->evmonflow: total=62, matched=0 (0.00%)
+- across:base->mode: total=77, matched=0 (0.00%)
+- layerzero:base->initia: total=21, matched=0 (0.00%)
+- layerzero:arbitrum->peaq: total=25, matched=0 (0.00%)
+- across:lisk->linea: total=18, matched=0 (0.00%)
+- layerzero:base->soneium: total=443, matched=0 (0.00%)
+- layerzero:mode->linea: total=22, matched=0 (0.00%)
+- layerzero:ape->arbitrum: total=187, matched=0 (0.00%)
+- layerzero:ton->arbitrum: total=42, matched=0 (0.00%)
+- layerzero:base->peaq: total=93, matched=0 (0.00%)
+- layerzero:linea->kaia: total=3, matched=0 (0.00%)
+- layerzero:story->linea: total=3, matched=0 (0.00%)
+- layerzero:glue->base: total=134, matched=0 (0.00%)
+- layerzero:linea->fantom: total=4, matched=0 (0.00%)
+- layerzero:linea->solana: total=6, matched=0 (0.00%)
+- layerzero:base->taiko: total=12, matched=0 (0.00%)
+- layerzero:arbitrum->ton: total=47, matched=0 (0.00%)
+- layerzero:linea->avalanche: total=1, matched=0 (0.00%)
+- layerzero:orderly->linea: total=1, matched=0 (0.00%)
+- across:linea->mode: total=2, matched=0 (0.00%)
+- layerzero:linea->gravity: total=23, matched=0 (0.00%)
+- layerzero:gnosis->linea: total=19, matched=0 (0.00%)
+- layerzero:linea->kava: total=1, matched=0 (0.00%)
+- layerzero:nibiru->base: total=105, matched=0 (0.00%)
+- layerzero:base->celo: total=266, matched=0 (0.00%)
+- layerzero:linea->moonbeam: total=1, matched=0 (0.00%)
+- layerzero:telos->base: total=53, matched=0 (0.00%)
+- layerzero:kaia->base: total=73, matched=0 (0.00%)
+- layerzero:hemi->linea: total=10, matched=0 (0.00%)
+- layerzero:cronos->base: total=92, matched=0 (0.00%)
+- layerzero:evmonflow->base: total=138, matched=0 (0.00%)
+- layerzero:peaq->base: total=80, matched=0 (0.00%)
+- layerzero:xdc->base: total=24, matched=0 (0.00%)
+- layerzero:nibiru->linea: total=1, matched=0 (0.00%)
+- layerzero:cronoszkevm->base: total=27, matched=0 (0.00%)
+- layerzero:iota->base: total=43, matched=0 (0.00%)
+- layerzero:metis->base: total=28, matched=0 (0.00%)
+- layerzero:base->xpla: total=4, matched=0 (0.00%)
+- layerzero:base->viction: total=14, matched=0 (0.00%)
+- layerzero:base->gnosis: total=115, matched=0 (0.00%)
+- layerzero:base->fantom: total=18, matched=0 (0.00%)
+- layerzero:base->polygonzkevm: total=1, matched=0 (0.00%)
+- layerzero:base->zora: total=3, matched=0 (0.00%)
+- layerzero:vana->base: total=67, matched=0 (0.00%)
+- layerzero:botanix->base: total=33, matched=0 (0.00%)
+- layerzero:zora->linea: total=2, matched=0 (0.00%)
+- layerzero:mode->base: total=112, matched=0 (0.00%)
+- layerzero:base->lisk: total=23, matched=0 (0.00%)
+- layerzero:base->evmonflow: total=134, matched=0 (0.00%)
+- layerzero:zircuit->linea: total=4, matched=0 (0.00%)
+- layerzero:aurora->base: total=26, matched=0 (0.00%)
+- layerzero:coredao->base: total=43, matched=0 (0.00%)
+- layerzero:linea->rootstock: total=4, matched=0 (0.00%)
+- layerzero:optimism->ape: total=13, matched=0 (0.00%)
+- layerzero:fraxtal->base: total=64, matched=0 (0.00%)
+- layerzero:base->degen: total=15, matched=0 (0.00%)
+- across:ethereum->mode: total=20, matched=0 (0.00%)
+- layerzero:morph->optimism: total=1, matched=0 (0.00%)
+- across:blast->arbitrum: total=431, matched=0 (0.00%)
+- layerzero:arbitrum->swell: total=15, matched=0 (0.00%)
+- layerzero:optimism->xchain: total=3, matched=0 (0.00%)
+- layerzero:optimism->degen: total=9, matched=0 (0.00%)
+- layerzero:optimism->kava: total=8, matched=0 (0.00%)
+- layerzero:corn->optimism: total=1, matched=0 (0.00%)
+- layerzero:optimism->telos: total=16, matched=0 (0.00%)
+- across:arbitrum->soneium: total=84, matched=0 (0.00%)
+- layerzero:zora->optimism: total=1, matched=0 (0.00%)
+- across:arbitrum->blast: total=136, matched=0 (0.00%)
+- layerzero:base->mode: total=86, matched=0 (0.00%)
+- layerzero:polygon->arbitrum: total=253, matched=0 (0.00%)
+- layerzero:arbitrum->bob: total=39, matched=0 (0.00%)
+- layerzero:vana->arbitrum: total=54, matched=0 (0.00%)
+- layerzero:arbitrum->vana: total=25, matched=0 (0.00%)
+- layerzero:swell->optimism: total=8, matched=0 (0.00%)
+- layerzero:optimism->rari: total=9, matched=0 (0.00%)
+- layerzero:optimism->taiko: total=10, matched=0 (0.00%)
+- layerzero:arbitrum->gnosis: total=101, matched=0 (0.00%)
+- layerzero:solana->arbitrum: total=84, matched=0 (0.00%)
+- across:zora->base: total=212, matched=0 (0.00%)
+- layerzero:initia->ethereum: total=10, matched=0 (0.00%)
+- layerzero:ethereum->soneium: total=100, matched=0 (0.00%)
+- layerzero:lyra->base: total=75, matched=0 (0.00%)
+- layerzero:ethereum->botanix: total=27, matched=0 (0.00%)
+- layerzero:ethereum->cronoszkevm: total=25, matched=0 (0.00%)
+- across:soneium->ethereum: total=41, matched=0 (0.00%)
+- layerzero:japanopenchain->ethereum: total=9, matched=0 (0.00%)
+- layerzero:superposition->base: total=76, matched=0 (0.00%)
+- layerzero:evmonflow->arbitrum: total=73, matched=0 (0.00%)
+- across:worldchain->arbitrum: total=135, matched=0 (0.00%)
+- layerzero:coredao->arbitrum: total=102, matched=0 (0.00%)
+- layerzero:dexalot->arbitrum: total=170, matched=0 (0.00%)
+- layerzero:superposition->arbitrum: total=68, matched=0 (0.00%)
+- layerzero:base->lens: total=11, matched=0 (0.00%)
+- layerzero:kava->arbitrum: total=49, matched=0 (0.00%)
+- across:soneium->arbitrum: total=292, matched=0 (0.00%)
+- layerzero:sophon->ethereum: total=6, matched=0 (0.00%)
+- layerzero:base->worldchain: total=3, matched=0 (0.00%)
+- layerzero:codex->base: total=15, matched=0 (0.00%)
+- layerzero:ethereum->cyber: total=4, matched=0 (0.00%)
+- layerzero:swell->base: total=79, matched=0 (0.00%)
+- layerzero:ethereum->aurora: total=35, matched=0 (0.00%)
+- layerzero:ethereum->xchain: total=16, matched=0 (0.00%)
+- layerzero:ethereum->codex: total=16, matched=0 (0.00%)
+- layerzero:codex->ethereum: total=40, matched=0 (0.00%)
+- layerzero:xchain->ethereum: total=26, matched=0 (0.00%)
+- layerzero:base->story: total=63, matched=0 (0.00%)
+- layerzero:base->swell: total=25, matched=0 (0.00%)
+- layerzero:base->botanix: total=15, matched=0 (0.00%)
+- layerzero:ethereum->initia: total=13, matched=0 (0.00%)
+- layerzero:arbitrumnova->base: total=8, matched=0 (0.00%)
+- layerzero:ethereum->morph: total=16, matched=0 (0.00%)
+- layerzero:base->iota: total=16, matched=0 (0.00%)
+- layerzero:base->cronos: total=11, matched=0 (0.00%)
+- layerzero:base->blast: total=16, matched=0 (0.00%)
+- layerzero:base->kava: total=7, matched=0 (0.00%)
+- layerzero:lisk->base: total=31, matched=0 (0.00%)
+- across:base->zora: total=35, matched=0 (0.00%)
+- across:base->lisk: total=44, matched=0 (0.00%)
+- layerzero:arbitrum->mantle: total=138, matched=0 (0.00%)
+- layerzero:arbitrum->superposition: total=97, matched=0 (0.00%)
+- layerzero:arbitrum->xdc: total=46, matched=0 (0.00%)
+- layerzero:arbitrum->unknown: total=35, matched=0 (0.00%)
+- layerzero:arbitrum->soneium: total=201, matched=0 (0.00%)
+- layerzero:arbitrum->cronos: total=20, matched=0 (0.00%)
+- layerzero:arbitrum->lightlink: total=32, matched=0 (0.00%)
+- layerzero:arbitrum->aurora: total=16, matched=0 (0.00%)
+- layerzero:arbitrum->goat: total=18, matched=0 (0.00%)
+- layerzero:arbitrum->coredao: total=44, matched=0 (0.00%)
+- layerzero:arbitrum->glue: total=133, matched=0 (0.00%)
+- layerzero:arbitrum->telos: total=25, matched=0 (0.00%)
+- layerzero:arbitrum->nibiru: total=22, matched=0 (0.00%)
+- layerzero:arbitrum->kaia: total=53, matched=0 (0.00%)
+- layerzero:arbitrum->iota: total=51, matched=0 (0.00%)
+- layerzero:corn->ethereum: total=34, matched=0 (0.00%)
+- layerzero:harmony->optimism: total=8, matched=0 (0.00%)
+- layerzero:optimism->cronoszkevm: total=7, matched=0 (0.00%)
+- layerzero:optimism->botanix: total=5, matched=0 (0.00%)
+- layerzero:optimism->cronos: total=2, matched=0 (0.00%)
+- layerzero:optimism->codex: total=3, matched=0 (0.00%)
+- layerzero:optimism->peaq: total=3, matched=0 (0.00%)
+- across:optimism->unknown: total=1, matched=0 (0.00%)
+- layerzero:base->beam: total=21, matched=0 (0.00%)
+- layerzero:arbitrum->tron: total=24, matched=0 (0.00%)
+- layerzero:celo->arbitrum: total=22, matched=0 (0.00%)
+- layerzero:unknown->arbitrum: total=30, matched=0 (0.00%)
+- across:lisk->arbitrum: total=84, matched=0 (0.00%)
+- layerzero:arbitrum->sophon: total=8, matched=0 (0.00%)
+- layerzero:kaia->arbitrum: total=71, matched=0 (0.00%)
+- layerzero:fraxtal->arbitrum: total=69, matched=0 (0.00%)
+- layerzero:initia->arbitrum: total=4, matched=0 (0.00%)
+- across:unknown->base: total=40, matched=0 (0.00%)
+- layerzero:arbitrum->fraxtal: total=83, matched=0 (0.00%)
+- across:zora->arbitrum: total=110, matched=0 (0.00%)
+- layerzero:arbitrum->kava: total=31, matched=0 (0.00%)
+- layerzero:arbitrum->degen: total=40, matched=0 (0.00%)
+- layerzero:arbitrum->rari: total=23, matched=0 (0.00%)
+- layerzero:arbitrum->taiko: total=20, matched=0 (0.00%)
+- layerzero:telos->arbitrum: total=53, matched=0 (0.00%)
+- layerzero:lightlink->arbitrum: total=70, matched=0 (0.00%)
+- layerzero:goat->arbitrum: total=36, matched=0 (0.00%)
+- layerzero:fuse->arbitrum: total=53, matched=0 (0.00%)
+- layerzero:iota->arbitrum: total=102, matched=0 (0.00%)
+- layerzero:degen->arbitrum: total=28, matched=0 (0.00%)
+- layerzero:peaq->arbitrum: total=44, matched=0 (0.00%)
+- layerzero:rari->arbitrum: total=50, matched=0 (0.00%)
+- layerzero:arbitrum->fuse: total=28, matched=0 (0.00%)
+- layerzero:arbitrum->metis: total=39, matched=0 (0.00%)
+- layerzero:nibiru->arbitrum: total=49, matched=0 (0.00%)
+- layerzero:taiko->arbitrum: total=34, matched=0 (0.00%)
+- layerzero:xdc->arbitrum: total=44, matched=0 (0.00%)
+- layerzero:glue->arbitrum: total=126, matched=0 (0.00%)
+- across:lens->arbitrum: total=28, matched=0 (0.00%)
+- layerzero:arbitrum->botanix: total=18, matched=0 (0.00%)
+- layerzero:arbitrum->cronoszkevm: total=28, matched=0 (0.00%)
+- layerzero:arbitrum->codex: total=11, matched=0 (0.00%)
+- layerzero:arbitrum->xchain: total=13, matched=0 (0.00%)
+- layerzero:arbitrum->tac: total=7, matched=0 (0.00%)
+- layerzero:arbitrum->mode: total=34, matched=0 (0.00%)
+- layerzero:mode->arbitrum: total=40, matched=0 (0.00%)
+- layerzero:aptos->arbitrum: total=7, matched=0 (0.00%)
+- layerzero:base->aptos: total=15, matched=0 (0.00%)
+- layerzero:dexalot->base: total=61, matched=0 (0.00%)
+- layerzero:base->zircuit: total=5, matched=0 (0.00%)
+- layerzero:bob->base: total=44, matched=0 (0.00%)
+- layerzero:worldchain->base: total=6, matched=0 (0.00%)
+- layerzero:corn->base: total=2, matched=0 (0.00%)
+- layerzero:skale->ethereum: total=3, matched=0 (0.00%)
+- layerzero:base->canto: total=3, matched=0 (0.00%)
+- layerzero:abstract->scroll: total=8, matched=0 (0.00%)
+- layerzero:mantapacific->scroll: total=4, matched=0 (0.00%)
+- layerzero:bsc->scroll: total=10, matched=0 (0.00%)
+- across:unichain->scroll: total=11, matched=0 (0.00%)
+- layerzero:linea->vana: total=5, matched=0 (0.00%)
+- layerzero:bitlayer->ethereum: total=5, matched=0 (0.00%)
+- layerzero:base->rootstock: total=20, matched=0 (0.00%)
+- layerzero:morph->ethereum: total=6, matched=0 (0.00%)
+- layerzero:arbitrum->beam: total=7, matched=0 (0.00%)
+- layerzero:arbitrum->harmony: total=3, matched=0 (0.00%)
+- across:arbitrum->lens: total=30, matched=0 (0.00%)
+- layerzero:arbitrum->celo: total=53, matched=0 (0.00%)
+- layerzero:aptos->base: total=38, matched=0 (0.00%)
+- layerzero:etherlink->arbitrum: total=6, matched=0 (0.00%)
+- layerzero:arbitrum->arbitrumnova: total=11, matched=0 (0.00%)
+- layerzero:tac->arbitrum: total=1, matched=0 (0.00%)
+- layerzero:bob->arbitrum: total=11, matched=0 (0.00%)
+- layerzero:optimism->vana: total=9, matched=0 (0.00%)
+- layerzero:base->metis: total=17, matched=0 (0.00%)
+- layerzero:swell->arbitrum: total=12, matched=0 (0.00%)
+- layerzero:ethereum->superposition: total=19, matched=0 (0.00%)
+- layerzero:ethereum->beam: total=16, matched=0 (0.00%)
+- layerzero:arbitrum->etherlink: total=6, matched=0 (0.00%)
+- layerzero:botanix->arbitrum: total=35, matched=0 (0.00%)
+- layerzero:arbitrum->zircuit: total=51, matched=0 (0.00%)
+- layerzero:aurora->arbitrum: total=28, matched=0 (0.00%)
+- layerzero:arbitrum->mantapacific: total=15, matched=0 (0.00%)
+- layerzero:cronoszkevm->arbitrum: total=33, matched=0 (0.00%)
+- layerzero:cronos->arbitrum: total=39, matched=0 (0.00%)
+- across:unknown->arbitrum: total=10, matched=0 (0.00%)
+- across:arbitrum->zora: total=1, matched=0 (0.00%)
+- layerzero:base->vana: total=23, matched=0 (0.00%)
+- layerzero:sophon->base: total=12, matched=0 (0.00%)
+- layerzero:zircuit->base: total=5, matched=0 (0.00%)
+- layerzero:base->goat: total=8, matched=0 (0.00%)
+- layerzero:zircuit->arbitrum: total=7, matched=0 (0.00%)
+- layerzero:arbitrumnova->arbitrum: total=9, matched=0 (0.00%)
+- across:arbitrum->lisk: total=14, matched=0 (0.00%)
+- layerzero:arbitrum->initia: total=17, matched=0 (0.00%)
+- layerzero:optimism->tron: total=6, matched=0 (0.00%)
+- layerzero:initia->base: total=19, matched=0 (0.00%)
+- layerzero:base->aurora: total=6, matched=0 (0.00%)
+- layerzero:goat->base: total=30, matched=0 (0.00%)
+- layerzero:bsc->linea: total=121, matched=0 (0.00%)
+- across:zora->linea: total=20, matched=0 (0.00%)
+- layerzero:iota->linea: total=3, matched=0 (0.00%)
+- layerzero:linea->polygon: total=3, matched=0 (0.00%)
+- layerzero:linea->degen: total=6, matched=0 (0.00%)
+- across:linea->worldchain: total=3, matched=0 (0.00%)
+- layerzero:base->opbnb: total=8, matched=0 (0.00%)
+- layerzero:kava->base: total=4, matched=0 (0.00%)
+- layerzero:base->lightlink: total=8, matched=0 (0.00%)
+- layerzero:optimism->blast: total=2, matched=0 (0.00%)
+- layerzero:optimism->aptos: total=20, matched=0 (0.00%)
+- layerzero:aptos->optimism: total=20, matched=0 (0.00%)
+- layerzero:base->moonriver: total=1, matched=0 (0.00%)
+- layerzero:base->tenet: total=5, matched=0 (0.00%)
+- layerzero:base->harmony: total=4, matched=0 (0.00%)
+- layerzero:ethereum->bob: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->lyra: total=7, matched=0 (0.00%)
+- layerzero:sophon->arbitrum: total=6, matched=0 (0.00%)
+- layerzero:blast->arbitrum: total=24, matched=0 (0.00%)
+- layerzero:fantom->base: total=3, matched=0 (0.00%)
+- layerzero:arbitrum->blast: total=20, matched=0 (0.00%)
+- across:polygon->scroll: total=13, matched=0 (0.00%)
+- layerzero:optimism->arbitrumnova: total=4, matched=0 (0.00%)
+- layerzero:ink->polygon: total=4, matched=0 (0.00%)
+- layerzero:lightlink->ink: total=2, matched=0 (0.00%)
+- layerzero:aurora->ink: total=2, matched=0 (0.00%)
+- layerzero:nibiru->ink: total=2, matched=0 (0.00%)
+- layerzero:goat->ink: total=2, matched=0 (0.00%)
+- layerzero:ape->ink: total=2, matched=0 (0.00%)
+- layerzero:evmonflow->ink: total=2, matched=0 (0.00%)
+- layerzero:codex->ink: total=2, matched=0 (0.00%)
+- layerzero:peaq->ink: total=2, matched=0 (0.00%)
+- layerzero:cronoszkevm->ink: total=2, matched=0 (0.00%)
+- layerzero:xdc->ink: total=2, matched=0 (0.00%)
+- layerzero:vana->ink: total=4, matched=0 (0.00%)
+- layerzero:botanix->ink: total=2, matched=0 (0.00%)
+- layerzero:rootstock->ink: total=2, matched=0 (0.00%)
+- layerzero:ink->story: total=3, matched=0 (0.00%)
+- across:ink->blast: total=2, matched=0 (0.00%)
+- layerzero:ink->vana: total=2, matched=0 (0.00%)
+- layerzero:ink->aurora: total=2, matched=0 (0.00%)
+- layerzero:xchain->arbitrum: total=7, matched=0 (0.00%)
+- layerzero:ethereum->hedera: total=1, matched=0 (0.00%)
+- layerzero:ethereum->etherlink: total=12, matched=0 (0.00%)
+- layerzero:optimism->conflux: total=2, matched=0 (0.00%)
+- layerzero:opbnb->optimism: total=2, matched=0 (0.00%)
+- layerzero:fantom->ethereum: total=2, matched=0 (0.00%)
+- layerzero:ethereum->blast: total=5, matched=0 (0.00%)
+- layerzero:arbitrum->xpla: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->viction: total=4, matched=0 (0.00%)
+- layerzero:ton->base: total=4, matched=0 (0.00%)
+- layerzero:arbitrum->opbnb: total=559, matched=0 (0.00%)
+- layerzero:base->cronoszkevm: total=7, matched=0 (0.00%)
+- layerzero:arbitrum->fantom: total=8, matched=0 (0.00%)
+- layerzero:xchain->base: total=8, matched=0 (0.00%)
+- layerzero:zora->arbitrum: total=4, matched=0 (0.00%)
+- layerzero:base->astar: total=2, matched=0 (0.00%)
+- layerzero:opbnb->arbitrum: total=25, matched=0 (0.00%)
+- layerzero:rootstock->linea: total=5, matched=0 (0.00%)
+- layerzero:linea->aurora: total=2, matched=0 (0.00%)
+- layerzero:linea->coredao: total=3, matched=0 (0.00%)
+- layerzero:arbitrum->corn: total=13, matched=0 (0.00%)
+- layerzero:base->sophon: total=2, matched=0 (0.00%)
+- layerzero:base->hedera: total=2, matched=0 (0.00%)
+- layerzero:morph->base: total=3, matched=0 (0.00%)
+- layerzero:polygon->linea: total=2, matched=0 (0.00%)
+- across:linea->blast: total=4, matched=0 (0.00%)
+- layerzero:linea->gnosis: total=3, matched=0 (0.00%)
+- layerzero:optimism->corn: total=2, matched=0 (0.00%)
+- layerzero:hedera->ethereum: total=3, matched=0 (0.00%)
+- layerzero:ethereum->polygonzkevm: total=1, matched=0 (0.00%)
+- layerzero:ethereum->mode: total=3, matched=0 (0.00%)
+- layerzero:sanko->arbitrum: total=2, matched=0 (0.00%)
+- layerzero:zora->base: total=3, matched=0 (0.00%)
+- layerzero:hedera->base: total=2, matched=0 (0.00%)
+- layerzero:celo->base: total=1, matched=0 (0.00%)
+- layerzero:linea->astar: total=1, matched=0 (0.00%)
+- layerzero:linea->celo: total=2, matched=0 (0.00%)
+- across:linea->unknown: total=2, matched=0 (0.00%)
+- layerzero:base->conflux: total=2, matched=0 (0.00%)
+- layerzero:base->xchain: total=2, matched=0 (0.00%)
+- layerzero:avalanche->linea: total=2, matched=0 (0.00%)
+- layerzero:linea->flare: total=3, matched=0 (0.00%)
+- layerzero:arbitrum->zora: total=2, matched=0 (0.00%)
+- across:unknown->ethereum: total=6, matched=0 (0.00%)
+- layerzero:linea->ape: total=4, matched=0 (0.00%)
+- layerzero:linea->blast: total=1, matched=0 (0.00%)
+- layerzero:scroll->berachain: total=34, matched=0 (0.00%)
+- layerzero:unichain->scroll: total=13, matched=0 (0.00%)
+- layerzero:hemi->scroll: total=1, matched=0 (0.00%)
+- layerzero:cronoszkevm->scroll: total=1, matched=0 (0.00%)
+- layerzero:gravity->scroll: total=1, matched=0 (0.00%)
+- layerzero:kaia->scroll: total=1, matched=0 (0.00%)
+- layerzero:goat->scroll: total=1, matched=0 (0.00%)
+- layerzero:iota->scroll: total=1, matched=0 (0.00%)
+- layerzero:xchain->scroll: total=1, matched=0 (0.00%)
+- layerzero:lightlink->scroll: total=1, matched=0 (0.00%)
+- layerzero:peaq->scroll: total=1, matched=0 (0.00%)
+- layerzero:aurora->scroll: total=1, matched=0 (0.00%)
+- layerzero:ape->scroll: total=1, matched=0 (0.00%)
+- layerzero:xdc->scroll: total=1, matched=0 (0.00%)
+- layerzero:codex->scroll: total=1, matched=0 (0.00%)
+- layerzero:gnosis->scroll: total=1, matched=0 (0.00%)
+- layerzero:cronos->scroll: total=1, matched=0 (0.00%)
+- layerzero:taiko->scroll: total=1, matched=0 (0.00%)
+- layerzero:coredao->scroll: total=1, matched=0 (0.00%)
+- layerzero:rari->scroll: total=1, matched=0 (0.00%)
+- layerzero:degen->scroll: total=1, matched=0 (0.00%)
+- layerzero:botanix->scroll: total=1, matched=0 (0.00%)
+- layerzero:superposition->scroll: total=1, matched=0 (0.00%)
+- layerzero:polygon->scroll: total=1, matched=0 (0.00%)
+- layerzero:unknown->scroll: total=2, matched=0 (0.00%)
+- layerzero:scroll->unichain: total=22, matched=0 (0.00%)
+- layerzero:scroll->soneium: total=17, matched=0 (0.00%)
+- layerzero:scroll->avalanche: total=4, matched=0 (0.00%)
+- across:scroll->worldchain: total=5, matched=0 (0.00%)
+- layerzero:scroll->evmonflow: total=8, matched=0 (0.00%)
+- layerzero:avalanche->scroll: total=5, matched=0 (0.00%)
+- layerzero:blast->scroll: total=1, matched=0 (0.00%)
+- across:scroll->bsc: total=21, matched=0 (0.00%)
+- across:scroll->polygon: total=8, matched=0 (0.00%)
+- across:blast->scroll: total=6, matched=0 (0.00%)
+- layerzero:scroll->mantapacific: total=1, matched=0 (0.00%)
+- layerzero:scroll->bsc: total=13, matched=0 (0.00%)
+- across:scroll->unichain: total=4, matched=0 (0.00%)
+- layerzero:scroll->gnosis: total=8, matched=0 (0.00%)
+- layerzero:soneium->scroll: total=2, matched=0 (0.00%)
+- layerzero:scroll->abstract: total=14, matched=0 (0.00%)
+- across:scroll->soneium: total=12, matched=0 (0.00%)
+- across:mode->scroll: total=2, matched=0 (0.00%)
+- layerzero:scroll->hyperevm: total=1, matched=0 (0.00%)
+- layerzero:scroll->mantle: total=2, matched=0 (0.00%)
+- across:scroll->mode: total=2, matched=0 (0.00%)
+- across:lisk->scroll: total=2, matched=0 (0.00%)
+- across:bsc->scroll: total=5, matched=0 (0.00%)
+- layerzero:scroll->glue: total=1, matched=0 (0.00%)
+- layerzero:berachain->scroll: total=2, matched=0 (0.00%)
+- layerzero:base->xai: total=16, matched=0 (0.00%)
+- across:worldchain->scroll: total=3, matched=0 (0.00%)
+- layerzero:scroll->mode: total=1, matched=0 (0.00%)
+- layerzero:scroll->flare: total=13, matched=0 (0.00%)
+- across:scroll->lens: total=4, matched=0 (0.00%)
+- layerzero:scroll->plume: total=8, matched=0 (0.00%)
+- layerzero:scroll->unknown: total=1, matched=0 (0.00%)
+- layerzero:scroll->hemi: total=9, matched=0 (0.00%)
+- layerzero:mantle->scroll: total=2, matched=0 (0.00%)
+- layerzero:zircuit->optimism: total=1, matched=0 (0.00%)
+- layerzero:ethereum->skale: total=1, matched=0 (0.00%)
+- layerzero:kaia->linea: total=2, matched=0 (0.00%)
+- layerzero:linea->lightlink: total=1, matched=0 (0.00%)
+- layerzero:linea->story: total=1, matched=0 (0.00%)
+- across:scroll->blast: total=2, matched=0 (0.00%)
+- layerzero:scroll->iota: total=1, matched=0 (0.00%)
+- layerzero:scroll->rootstock: total=9, matched=0 (0.00%)
+- layerzero:scroll->ape: total=7, matched=0 (0.00%)
+- layerzero:scroll->metis: total=7, matched=0 (0.00%)
+- layerzero:scroll->fuse: total=7, matched=0 (0.00%)
+- layerzero:scroll->sei: total=7, matched=0 (0.00%)
+- layerzero:scroll->cronos: total=7, matched=0 (0.00%)
+- layerzero:scroll->story: total=9, matched=0 (0.00%)
+- layerzero:scroll->cronoszkevm: total=7, matched=0 (0.00%)
+- layerzero:scroll->telos: total=7, matched=0 (0.00%)
+- layerzero:scroll->xdc: total=10, matched=0 (0.00%)
+- layerzero:scroll->lightlink: total=8, matched=0 (0.00%)
+- layerzero:scroll->peaq: total=7, matched=0 (0.00%)
+- layerzero:scroll->kaia: total=6, matched=0 (0.00%)
+- layerzero:scroll->degen: total=6, matched=0 (0.00%)
+- layerzero:scroll->nibiru: total=7, matched=0 (0.00%)
+- layerzero:scroll->blast: total=1, matched=0 (0.00%)
+- across:soneium->scroll: total=7, matched=0 (0.00%)
+- layerzero:scroll->conflux: total=1, matched=0 (0.00%)
+- layerzero:scroll->polygon: total=1, matched=0 (0.00%)
+- layerzero:plume->scroll: total=1, matched=0 (0.00%)
+- layerzero:scroll->gravity: total=1, matched=0 (0.00%)
+- layerzero:zircuit->scroll: total=1, matched=0 (0.00%)
+- layerzero:sonic->scroll: total=1, matched=0 (0.00%)
+- layerzero:arbitrumnova->ethereum: total=1, matched=0 (0.00%)
+- layerzero:celo->optimism: total=1, matched=0 (0.00%)
+- layerzero:base->meter: total=2, matched=0 (0.00%)
+- layerzero:gnosis->ink: total=1, matched=0 (0.00%)
+- layerzero:ink->gnosis: total=1, matched=0 (0.00%)
+- layerzero:base->moonbeam: total=1, matched=0 (0.00%)
+- layerzero:linea->botanix: total=1, matched=0 (0.00%)
+- layerzero:linea->harmony: total=2, matched=0 (0.00%)
+- layerzero:base->arbitrumnova: total=2, matched=0 (0.00%)
+- layerzero:codex->arbitrum: total=8, matched=0 (0.00%)
+- layerzero:corn->arbitrum: total=4, matched=0 (0.00%)
+- layerzero:ethereum->japanopenchain: total=1, matched=0 (0.00%)
+- across:ink->zora: total=1, matched=0 (0.00%)
+- layerzero:taiko->ink: total=1, matched=0 (0.00%)
+- layerzero:optimism->hedera: total=2, matched=0 (0.00%)
+- layerzero:linea->viction: total=1, matched=0 (0.00%)
+- layerzero:linea->fuse: total=1, matched=0 (0.00%)
+- layerzero:linea->beam: total=1, matched=0 (0.00%)
+- layerzero:fuse->linea: total=1, matched=0 (0.00%)
+- layerzero:linea->peaq: total=1, matched=0 (0.00%)
+- layerzero:linea->cronos: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->astar: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->conflux: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->polygonzkevm: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->moonbeam: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->moonriver: total=1, matched=0 (0.00%)
+- layerzero:arbitrum->inevm: total=1, matched=0 (0.00%)
+- layerzero:base->ton: total=3, matched=0 (0.00%)
+- layerzero:ethereum->bitlayer: total=1, matched=0 (0.00%)
+
+== AppPayload: Match Rate per Payload Type per Route (sorted by % matched) ==
+- taxi:optimism->arbitrum: total=1503, matched=1503 (100.00%)
+- across:linea->ethereum: total=835, matched=835 (100.00%)
+- across:optimism->ethereum: total=1397, matched=1397 (100.00%)
+- across:ethereum->linea: total=1399, matched=1399 (100.00%)
+- across:ink->base: total=709, matched=709 (100.00%)
+- taxi:linea->base: total=2028, matched=2028 (100.00%)
+- taxi:optimism->base: total=4056, matched=4056 (100.00%)
+- taxi:arbitrum->base: total=5283, matched=5283 (100.00%)
+- bus:linea->arbitrum: total=120, matched=120 (100.00%)
+- across:linea->base: total=3132, matched=3132 (100.00%)
+- across:zksync->arbitrum: total=471, matched=471 (100.00%)
+- across:arbitrum->scroll: total=198, matched=198 (100.00%)
+- bus:scroll->ethereum: total=40, matched=40 (100.00%)
+- bus:linea->base: total=477, matched=477 (100.00%)
+- taxi:linea->arbitrum: total=808, matched=808 (100.00%)
+- across:base->linea: total=2307, matched=2307 (100.00%)
+- across:scroll->arbitrum: total=704, matched=704 (100.00%)
+- across:base->ink: total=485, matched=485 (100.00%)
+- across:arbitrum->zksync: total=111, matched=111 (100.00%)
+- across:ink->arbitrum: total=152, matched=152 (100.00%)
+- across:zksync->base: total=921, matched=921 (100.00%)
+- across:zksync->ethereum: total=204, matched=204 (100.00%)
+- across:ethereum->zksync: total=55, matched=55 (100.00%)
+- across:optimism->zksync: total=156, matched=156 (100.00%)
+- across:zksync->optimism: total=316, matched=316 (100.00%)
+- across:base->zksync: total=174, matched=174 (100.00%)
+- across:zksync->linea: total=452, matched=452 (100.00%)
+- bus:scroll->base: total=280, matched=280 (100.00%)
+- across:ink->ethereum: total=74, matched=74 (100.00%)
+- across:ethereum->ink: total=85, matched=85 (100.00%)
+- across:arbitrum->ink: total=85, matched=85 (100.00%)
+- across:linea->zksync: total=173, matched=173 (100.00%)
+- across:scroll->linea: total=545, matched=545 (100.00%)
+- across:linea->scroll: total=178, matched=178 (100.00%)
+- across:optimism->linea: total=1223, matched=1223 (100.00%)
+- taxi:linea->optimism: total=381, matched=381 (100.00%)
+- across:linea->optimism: total=909, matched=909 (100.00%)
+- across:optimism->scroll: total=426, matched=426 (100.00%)
+- across:scroll->optimism: total=486, matched=486 (100.00%)
+- across:linea->ink: total=103, matched=103 (100.00%)
+- across:ink->linea: total=104, matched=104 (100.00%)
+- taxi:scroll->base: total=510, matched=510 (100.00%)
+- across:scroll->ink: total=6, matched=6 (100.00%)
+- across:base->scroll: total=174, matched=174 (100.00%)
+- across:scroll->zksync: total=26, matched=26 (100.00%)
+- across:ethereum->scroll: total=56, matched=56 (100.00%)
+- taxi:scroll->ethereum: total=30, matched=30 (100.00%)
+- across:ink->zksync: total=5, matched=5 (100.00%)
+- across:zksync->scroll: total=16, matched=16 (100.00%)
+- across:ink->scroll: total=1, matched=1 (100.00%)
+- bus:linea->optimism: total=48, matched=48 (100.00%)
+- across:zksync->ink: total=2, matched=2 (100.00%)
+- across:ethereum->base: total=22706, matched=22702 (99.98%)
+- across:base->optimism: total=3481, matched=3480 (99.97%)
+- across:optimism->base: total=6012, matched=6010 (99.97%)
+- across:linea->arbitrum: total=1852, matched=1851 (99.95%)
+- across:base->arbitrum: total=8748, matched=8741 (99.92%)
+- across:arbitrum->base: total=8521, matched=8514 (99.92%)
+- across:base->ethereum: total=18860, matched=18844 (99.92%)
+- across:ethereum->arbitrum: total=5225, matched=5220 (99.90%)
+- across:scroll->base: total=990, matched=989 (99.90%)
+- across:arbitrum->optimism: total=1669, matched=1667 (99.88%)
+- across:arbitrum->ethereum: total=3887, matched=3882 (99.87%)
+- across:optimism->arbitrum: total=1941, matched=1938 (99.85%)
+- across:arbitrum->linea: total=1825, matched=1822 (99.84%)
+- across:ethereum->optimism: total=834, matched=832 (99.76%)
+- across:ink->optimism: total=748, matched=746 (99.73%)
+- across:optimism->ink: total=656, matched=654 (99.70%)
+- across:scroll->ethereum: total=315, matched=313 (99.37%)
+- taxi:ethereum->base: total=781, matched=775 (99.23%)
+- taxi:optimism->ethereum: total=118, matched=116 (98.31%)
+- bus:ethereum->base: total=507, matched=498 (98.22%)
+- taxi:linea->ethereum: total=112, matched=110 (98.21%)
+- taxi:arbitrum->ethereum: total=410, matched=384 (93.66%)
+- bus:linea->ethereum: total=48, matched=43 (89.58%)
+- taxi:scroll->arbitrum: total=336, matched=299 (88.99%)
+- bus:scroll->arbitrum: total=98, matched=85 (86.73%)
+- bus:scroll->optimism: total=50, matched=43 (86.00%)
+- taxi:scroll->optimism: total=264, matched=224 (84.85%)
+- bus:ethereum->scroll: total=21, matched=14 (66.67%)
+- bus:base->scroll: total=355, matched=232 (65.35%)
+- taxi:linea->scroll: total=80, matched=49 (61.25%)
+- bus:scroll->linea: total=142, matched=86 (60.56%)
+- taxi:scroll->linea: total=281, matched=106 (37.72%)
+- bus:base->ethereum: total=886, matched=284 (32.05%)
+- taxi:optimism->scroll: total=70, matched=21 (30.00%)
+- bus:linea->scroll: total=31, matched=9 (29.03%)
+- bus:base->arbitrum: total=4660, matched=1330 (28.54%)
+- bus:ethereum->arbitrum: total=637, matched=163 (25.59%)
+- bus:ethereum->optimism: total=155, matched=38 (24.52%)
+- bus:ethereum->linea: total=297, matched=55 (18.52%)
+- bus:base->optimism: total=4532, matched=679 (14.98%)
+- taxi:ethereum->arbitrum: total=595, matched=79 (13.28%)
+- bus:base->linea: total=3862, matched=314 (8.13%)
+- taxi:ethereum->linea: total=152, matched=11 (7.24%)
+- taxi:ethereum->optimism: total=84, matched=2 (2.38%)
+- taxi:arbitrum->optimism: total=1019, matched=6 (0.59%)
+- taxi:arbitrum->linea: total=982, matched=2 (0.20%)
+- taxi:base->ethereum: total=586, matched=1 (0.17%)
+- taxi:optimism->linea: total=1442, matched=2 (0.14%)
+- across:polygon->ethereum: total=2897, matched=0 (0.00%)
+- across:zora->ethereum: total=22, matched=0 (0.00%)
+- bus:unichain->arbitrum: total=255, matched=0 (0.00%)
+- taxi:arbitrum->hemi: total=28, matched=0 (0.00%)
+- across:bsc->ethereum: total=4244, matched=0 (0.00%)
+- across:polygon->arbitrum: total=1180, matched=0 (0.00%)
+- bus:plume->ethereum: total=181, matched=0 (0.00%)
+- across:unichain->optimism: total=4115, matched=0 (0.00%)
+- bus:berachain->ethereum: total=328, matched=0 (0.00%)
+- bus:plume->arbitrum: total=425, matched=0 (0.00%)
+- bus:optimism->ethereum: total=39, matched=0 (0.00%)
+- bus:sei->arbitrum: total=237, matched=0 (0.00%)
+- bus:sonic->arbitrum: total=430, matched=0 (0.00%)
+- across:ethereum->bsc: total=1205, matched=0 (0.00%)
+- across:bsc->arbitrum: total=938, matched=0 (0.00%)
+- across:ethereum->worldchain: total=109, matched=0 (0.00%)
+- across:unichain->ethereum: total=967, matched=0 (0.00%)
+- across:arbitrum->polygon: total=708, matched=0 (0.00%)
+- across:arbitrum->unichain: total=611, matched=0 (0.00%)
+- taxi:arbitrum->berachain: total=246, matched=0 (0.00%)
+- bus:bsc->ethereum: total=213, matched=0 (0.00%)
+- bus:optimism->arbitrum: total=592, matched=0 (0.00%)
+- across:ethereum->polygon: total=2201, matched=0 (0.00%)
+- across:ethereum->unichain: total=813, matched=0 (0.00%)
+- across:worldchain->ethereum: total=145, matched=0 (0.00%)
+- taxi:ethereum->unichain: total=55, matched=0 (0.00%)
+- across:ethereum->lisk: total=19, matched=0 (0.00%)
+- bus:bsc->base: total=927, matched=0 (0.00%)
+- across:base->unichain: total=1751, matched=0 (0.00%)
+- bus:mantle->ethereum: total=49, matched=0 (0.00%)
+- taxi:ethereum->bsc: total=259, matched=0 (0.00%)
+- bus:evmonflow->arbitrum: total=22, matched=0 (0.00%)
+- taxi:ethereum->abstract: total=172, matched=0 (0.00%)
+- bus:soneium->arbitrum: total=341, matched=0 (0.00%)
+- taxi:arbitrum->soneium: total=136, matched=0 (0.00%)
+- across:arbitrum->bsc: total=311, matched=0 (0.00%)
+- across:arbitrum->soneium: total=93, matched=0 (0.00%)
+- across:unichain->arbitrum: total=963, matched=0 (0.00%)
+- taxi:base->unichain: total=887, matched=0 (0.00%)
+- taxi:arbitrum->sonic: total=43, matched=0 (0.00%)
+- bus:berachain->arbitrum: total=251, matched=0 (0.00%)
+- bus:mantle->arbitrum: total=209, matched=0 (0.00%)
+- across:worldchain->base: total=661, matched=0 (0.00%)
+- bus:arbitrum->ethereum: total=226, matched=0 (0.00%)
+- bus:gnosis->ethereum: total=37, matched=0 (0.00%)
+- across:bsc->base: total=2452, matched=0 (0.00%)
+- bus:ink->base: total=274, matched=0 (0.00%)
+- taxi:ethereum->sei: total=33, matched=0 (0.00%)
+- across:lisk->ethereum: total=68, matched=0 (0.00%)
+- taxi:arbitrum->polygon: total=143, matched=0 (0.00%)
+- taxi:base->linea: total=2916, matched=0 (0.00%)
+- taxi:arbitrum->avalanche: total=134, matched=0 (0.00%)
+- across:base->bsc: total=1032, matched=0 (0.00%)
+- across:blast->arbitrum: total=366, matched=0 (0.00%)
+- bus:glue->arbitrum: total=74, matched=0 (0.00%)
+- taxi:base->arbitrum: total=4217, matched=0 (0.00%)
+- across:arbitrum->lens: total=43, matched=0 (0.00%)
+- across:unichain->base: total=2263, matched=0 (0.00%)
+- taxi:base->optimism: total=3522, matched=0 (0.00%)
+- across:arbitrum->worldchain: total=127, matched=0 (0.00%)
+- taxi:arbitrum->bsc: total=172, matched=0 (0.00%)
+- bus:polygon->ethereum: total=23, matched=0 (0.00%)
+- bus:hemi->arbitrum: total=66, matched=0 (0.00%)
+- across:mode->arbitrum: total=148, matched=0 (0.00%)
+- bus:sonic->ethereum: total=78, matched=0 (0.00%)
+- bus:sei->ethereum: total=40, matched=0 (0.00%)
+- taxi:base->gravity: total=4149, matched=0 (0.00%)
+- bus:arbitrum->base: total=4290, matched=0 (0.00%)
+- bus:avalanche->arbitrum: total=150, matched=0 (0.00%)
+- taxi:base->polygon: total=278, matched=0 (0.00%)
+- across:blast->ethereum: total=463, matched=0 (0.00%)
+- across:optimism->unichain: total=3885, matched=0 (0.00%)
+- taxi:arbitrum->mantle: total=21, matched=0 (0.00%)
+- across:soneium->base: total=679, matched=0 (0.00%)
+- taxi:ethereum->berachain: total=119, matched=0 (0.00%)
+- across:ethereum->soneium: total=48, matched=0 (0.00%)
+- across:ethereum->blast: total=39, matched=0 (0.00%)
+- bus:unichain->base: total=1034, matched=0 (0.00%)
+- across:lens->ethereum: total=29, matched=0 (0.00%)
+- bus:soneium->ethereum: total=38, matched=0 (0.00%)
+- bus:gnosis->arbitrum: total=86, matched=0 (0.00%)
+- taxi:arbitrum->gravity: total=106, matched=0 (0.00%)
+- bus:rari->arbitrum: total=14, matched=0 (0.00%)
+- taxi:ethereum->story: total=12, matched=0 (0.00%)
+- taxi:arbitrum->ink: total=52, matched=0 (0.00%)
+- across:arbitrum->blast: total=83, matched=0 (0.00%)
+- taxi:ethereum->hemi: total=14, matched=0 (0.00%)
+- taxi:arbitrum->rootstock: total=5, matched=0 (0.00%)
+- across:worldchain->arbitrum: total=118, matched=0 (0.00%)
+- bus:avalanche->ethereum: total=57, matched=0 (0.00%)
+- taxi:base->abstract: total=561, matched=0 (0.00%)
+- bus:arbitrum->optimism: total=1885, matched=0 (0.00%)
+- across:base->polygon: total=1723, matched=0 (0.00%)
+- bus:story->arbitrum: total=101, matched=0 (0.00%)
+- taxi:arbitrum->plume: total=301, matched=0 (0.00%)
+- taxi:ethereum->avalanche: total=44, matched=0 (0.00%)
+- taxi:arbitrum->abstract: total=310, matched=0 (0.00%)
+- bus:plume->base: total=1158, matched=0 (0.00%)
+- bus:ink->arbitrum: total=96, matched=0 (0.00%)
+- bus:abstract->arbitrum: total=323, matched=0 (0.00%)
+- across:blast->base: total=675, matched=0 (0.00%)
+- bus:mantapacific->arbitrum: total=42, matched=0 (0.00%)
+- taxi:arbitrum->botanix: total=8, matched=0 (0.00%)
+- bus:optimism->base: total=2444, matched=0 (0.00%)
+- bus:abstract->ethereum: total=167, matched=0 (0.00%)
+- bus:bsc->arbitrum: total=216, matched=0 (0.00%)
+- bus:berachain->base: total=278, matched=0 (0.00%)
+- across:ethereum->lens: total=42, matched=0 (0.00%)
+- across:unknown->arbitrum: total=8, matched=0 (0.00%)
+- bus:hemi->base: total=62, matched=0 (0.00%)
+- taxi:base->berachain: total=185, matched=0 (0.00%)
+- taxi:base->plume: total=1106, matched=0 (0.00%)
+- bus:rootstock->arbitrum: total=54, matched=0 (0.00%)
+- across:mode->ethereum: total=57, matched=0 (0.00%)
+- taxi:ethereum->soneium: total=21, matched=0 (0.00%)
+- bus:avalanche->base: total=245, matched=0 (0.00%)
+- across:base->soneium: total=279, matched=0 (0.00%)
+- taxi:base->glue: total=95, matched=0 (0.00%)
+- bus:rootstock->ethereum: total=6, matched=0 (0.00%)
+- taxi:base->scroll: total=65, matched=0 (0.00%)
+- bus:vana->arbitrum: total=8, matched=0 (0.00%)
+- taxi:arbitrum->unichain: total=172, matched=0 (0.00%)
+- taxi:arbitrum->scroll: total=77, matched=0 (0.00%)
+- bus:ink->ethereum: total=3, matched=0 (0.00%)
+- bus:soneium->base: total=649, matched=0 (0.00%)
+- taxi:base->story: total=53, matched=0 (0.00%)
+- bus:flare->arbitrum: total=33, matched=0 (0.00%)
+- across:mode->base: total=296, matched=0 (0.00%)
+- taxi:base->iota: total=22, matched=0 (0.00%)
+- across:zora->base: total=180, matched=0 (0.00%)
+- taxi:ethereum->gnosis: total=34, matched=0 (0.00%)
+- bus:hemi->ethereum: total=8, matched=0 (0.00%)
+- bus:xdc->arbitrum: total=7, matched=0 (0.00%)
+- across:lisk->base: total=180, matched=0 (0.00%)
+- taxi:base->avalanche: total=219, matched=0 (0.00%)
+- taxi:ethereum->plume: total=28, matched=0 (0.00%)
+- taxi:arbitrum->kaia: total=23, matched=0 (0.00%)
+- bus:cronos->base: total=5, matched=0 (0.00%)
+- bus:sei->base: total=176, matched=0 (0.00%)
+- bus:ape->base: total=45, matched=0 (0.00%)
+- across:zksync->bsc: total=35, matched=0 (0.00%)
+- across:polygon->zksync: total=9, matched=0 (0.00%)
+- across:bsc->zksync: total=26, matched=0 (0.00%)
+- across:zksync->polygon: total=26, matched=0 (0.00%)
+- across:zksync->zora: total=2, matched=0 (0.00%)
+- taxi:base->bsc: total=752, matched=0 (0.00%)
+- across:polygon->base: total=2540, matched=0 (0.00%)
+- across:zksync->soneium: total=4, matched=0 (0.00%)
+- across:zksync->blast: total=2, matched=0 (0.00%)
+- across:worldchain->zksync: total=4, matched=0 (0.00%)
+- across:zksync->unichain: total=17, matched=0 (0.00%)
+- across:unichain->zksync: total=6, matched=0 (0.00%)
+- bus:mantapacific->base: total=102, matched=0 (0.00%)
+- bus:gravity->base: total=235, matched=0 (0.00%)
+- across:blast->zksync: total=4, matched=0 (0.00%)
+- bus:abstract->optimism: total=330, matched=0 (0.00%)
+- taxi:base->ink: total=134, matched=0 (0.00%)
+- bus:polygon->base: total=222, matched=0 (0.00%)
+- across:soneium->zksync: total=4, matched=0 (0.00%)
+- taxi:ethereum->ink: total=3, matched=0 (0.00%)
+- taxi:base->evmonflow: total=133, matched=0 (0.00%)
+- across:unichain->ink: total=4643, matched=0 (0.00%)
+- across:mode->zksync: total=1, matched=0 (0.00%)
+- bus:kaia->base: total=29, matched=0 (0.00%)
+- across:ink->unichain: total=4463, matched=0 (0.00%)
+- across:soneium->ink: total=75, matched=0 (0.00%)
+- taxi:base->ape: total=53, matched=0 (0.00%)
+- across:optimism->worldchain: total=515, matched=0 (0.00%)
+- bus:botanix->arbitrum: total=4, matched=0 (0.00%)
+- across:ink->zora: total=1, matched=0 (0.00%)
+- bus:fuse->base: total=11, matched=0 (0.00%)
+- across:ink->soneium: total=103, matched=0 (0.00%)
+- taxi:arbitrum->ape: total=17, matched=0 (0.00%)
+- across:ink->mode: total=9, matched=0 (0.00%)
+- across:unichain->linea: total=302, matched=0 (0.00%)
+- bus:optimism->linea: total=1438, matched=0 (0.00%)
+- bus:arbitrum->linea: total=1253, matched=0 (0.00%)
+- bus:unichain->linea: total=220, matched=0 (0.00%)
+- bus:abstract->linea: total=139, matched=0 (0.00%)
+- across:zora->linea: total=23, matched=0 (0.00%)
+- across:bsc->linea: total=612, matched=0 (0.00%)
+- bus:hemi->linea: total=20, matched=0 (0.00%)
+- taxi:linea->unichain: total=171, matched=0 (0.00%)
+- bus:superposition->base: total=55, matched=0 (0.00%)
+- bus:gnosis->linea: total=26, matched=0 (0.00%)
+- across:mode->linea: total=108, matched=0 (0.00%)
+- across:polygon->linea: total=423, matched=0 (0.00%)
+- across:linea->mode: total=7, matched=0 (0.00%)
+- bus:sonic->base: total=387, matched=0 (0.00%)
+- taxi:linea->soneium: total=77, matched=0 (0.00%)
+- across:blast->linea: total=113, matched=0 (0.00%)
+- across:worldchain->linea: total=28, matched=0 (0.00%)
+- across:linea->soneium: total=43, matched=0 (0.00%)
+- bus:berachain->linea: total=18, matched=0 (0.00%)
+- bus:mantle->linea: total=62, matched=0 (0.00%)
+- across:soneium->optimism: total=408, matched=0 (0.00%)
+- across:optimism->mode: total=996, matched=0 (0.00%)
+- across:optimism->lisk: total=171, matched=0 (0.00%)
+- taxi:optimism->unichain: total=564, matched=0 (0.00%)
+- taxi:optimism->soneium: total=230, matched=0 (0.00%)
+- across:bsc->optimism: total=448, matched=0 (0.00%)
+- taxi:optimism->mantle: total=26, matched=0 (0.00%)
+- across:mode->optimism: total=344, matched=0 (0.00%)
+- across:lisk->optimism: total=879, matched=0 (0.00%)
+- bus:ink->optimism: total=85, matched=0 (0.00%)
+- across:polygon->optimism: total=546, matched=0 (0.00%)
+- bus:sonic->optimism: total=57, matched=0 (0.00%)
+- taxi:optimism->plume: total=373, matched=0 (0.00%)
+- bus:soneium->optimism: total=468, matched=0 (0.00%)
+- across:worldchain->optimism: total=617, matched=0 (0.00%)
+- across:zora->optimism: total=19, matched=0 (0.00%)
+- bus:hemi->optimism: total=151, matched=0 (0.00%)
+- bus:polygon->optimism: total=51, matched=0 (0.00%)
+- taxi:optimism->berachain: total=105, matched=0 (0.00%)
+- across:base->blast: total=103, matched=0 (0.00%)
+- taxi:optimism->abstract: total=315, matched=0 (0.00%)
+- taxi:optimism->polygon: total=116, matched=0 (0.00%)
+- bus:bsc->optimism: total=85, matched=0 (0.00%)
+- across:blast->optimism: total=338, matched=0 (0.00%)
+- across:optimism->polygon: total=627, matched=0 (0.00%)
+- bus:plume->optimism: total=387, matched=0 (0.00%)
+- taxi:optimism->hemi: total=175, matched=0 (0.00%)
+- bus:flare->optimism: total=60, matched=0 (0.00%)
+- taxi:base->soneium: total=365, matched=0 (0.00%)
+- taxi:optimism->avalanche: total=70, matched=0 (0.00%)
+- bus:unichain->optimism: total=481, matched=0 (0.00%)
+- bus:kaia->optimism: total=11, matched=0 (0.00%)
+- taxi:optimism->bsc: total=104, matched=0 (0.00%)
+- bus:avalanche->optimism: total=60, matched=0 (0.00%)
+- bus:berachain->optimism: total=59, matched=0 (0.00%)
+- taxi:optimism->lightlink: total=45, matched=0 (0.00%)
+- bus:lightlink->optimism: total=62, matched=0 (0.00%)
+- across:optimism->soneium: total=328, matched=0 (0.00%)
+- taxi:optimism->kaia: total=12, matched=0 (0.00%)
+- bus:story->optimism: total=19, matched=0 (0.00%)
+- bus:rootstock->optimism: total=3, matched=0 (0.00%)
+- bus:gravity->optimism: total=73, matched=0 (0.00%)
+- taxi:base->botanix: total=13, matched=0 (0.00%)
+- bus:rari->optimism: total=19, matched=0 (0.00%)
+- taxi:optimism->rari: total=11, matched=0 (0.00%)
+- bus:sei->optimism: total=199, matched=0 (0.00%)
+- bus:mantle->optimism: total=116, matched=0 (0.00%)
+- across:ethereum->zora: total=7, matched=0 (0.00%)
+- taxi:arbitrum->gnosis: total=51, matched=0 (0.00%)
+- across:soneium->arbitrum: total=219, matched=0 (0.00%)
+- taxi:arbitrum->sei: total=45, matched=0 (0.00%)
+- across:optimism->bsc: total=59, matched=0 (0.00%)
+- bus:gnosis->optimism: total=50, matched=0 (0.00%)
+- across:zora->arbitrum: total=108, matched=0 (0.00%)
+- taxi:optimism->sei: total=128, matched=0 (0.00%)
+- taxi:arbitrum->glue: total=99, matched=0 (0.00%)
+- across:lisk->arbitrum: total=77, matched=0 (0.00%)
+- taxi:arbitrum->coredao: total=5, matched=0 (0.00%)
+- taxi:arbitrum->mantapacific: total=10, matched=0 (0.00%)
+- bus:gravity->arbitrum: total=44, matched=0 (0.00%)
+- bus:superposition->optimism: total=29, matched=0 (0.00%)
+- taxi:arbitrum->degen: total=11, matched=0 (0.00%)
+- across:lens->base: total=189, matched=0 (0.00%)
+- bus:polygon->arbitrum: total=103, matched=0 (0.00%)
+- taxi:optimism->sonic: total=27, matched=0 (0.00%)
+- bus:superposition->arbitrum: total=46, matched=0 (0.00%)
+- bus:abstract->base: total=662, matched=0 (0.00%)
+- taxi:arbitrum->iota: total=5, matched=0 (0.00%)
+- taxi:arbitrum->story: total=61, matched=0 (0.00%)
+- taxi:arbitrum->flare: total=37, matched=0 (0.00%)
+- taxi:optimism->gravity: total=221, matched=0 (0.00%)
+- taxi:arbitrum->evmonflow: total=19, matched=0 (0.00%)
+- bus:botanix->base: total=12, matched=0 (0.00%)
+- across:linea->unichain: total=180, matched=0 (0.00%)
+- across:linea->bsc: total=116, matched=0 (0.00%)
+- taxi:linea->abstract: total=93, matched=0 (0.00%)
+- bus:soneium->linea: total=147, matched=0 (0.00%)
+- taxi:linea->plume: total=35, matched=0 (0.00%)
+- across:linea->polygon: total=167, matched=0 (0.00%)
+- across:base->unknown: total=69, matched=0 (0.00%)
+- across:lisk->linea: total=33, matched=0 (0.00%)
+- across:linea->lens: total=14, matched=0 (0.00%)
+- bus:flare->base: total=78, matched=0 (0.00%)
+- across:soneium->linea: total=63, matched=0 (0.00%)
+- taxi:ethereum->flare: total=25, matched=0 (0.00%)
+- taxi:optimism->botanix: total=9, matched=0 (0.00%)
+- bus:plume->linea: total=32, matched=0 (0.00%)
+- bus:flare->linea: total=12, matched=0 (0.00%)
+- taxi:linea->berachain: total=6, matched=0 (0.00%)
+- taxi:linea->nibiru: total=5, matched=0 (0.00%)
+- bus:mantapacific->linea: total=49, matched=0 (0.00%)
+- bus:flare->ethereum: total=20, matched=0 (0.00%)
+- across:lens->optimism: total=25, matched=0 (0.00%)
+- bus:unichain->ethereum: total=31, matched=0 (0.00%)
+- taxi:linea->gnosis: total=5, matched=0 (0.00%)
+- bus:lightlink->linea: total=26, matched=0 (0.00%)
+- bus:gravity->linea: total=13, matched=0 (0.00%)
+- bus:sei->linea: total=31, matched=0 (0.00%)
+- across:lens->linea: total=27, matched=0 (0.00%)
+- bus:unichain->scroll: total=23, matched=0 (0.00%)
+- across:scroll->unichain: total=34, matched=0 (0.00%)
+- across:scroll->polygon: total=54, matched=0 (0.00%)
+- across:scroll->bsc: total=78, matched=0 (0.00%)
+- across:scroll->lens: total=16, matched=0 (0.00%)
+- across:blast->scroll: total=45, matched=0 (0.00%)
+- taxi:scroll->unichain: total=26, matched=0 (0.00%)
+- across:polygon->scroll: total=33, matched=0 (0.00%)
+- taxi:scroll->soneium: total=31, matched=0 (0.00%)
+- bus:berachain->scroll: total=23, matched=0 (0.00%)
+- bus:arbitrum->scroll: total=191, matched=0 (0.00%)
+- across:bsc->scroll: total=18, matched=0 (0.00%)
+- taxi:scroll->mantapacific: total=6, matched=0 (0.00%)
+- bus:optimism->scroll: total=142, matched=0 (0.00%)
+- across:mode->scroll: total=12, matched=0 (0.00%)
+- across:unichain->scroll: total=21, matched=0 (0.00%)
+- bus:mantle->scroll: total=23, matched=0 (0.00%)
+- taxi:scroll->ape: total=10, matched=0 (0.00%)
+- taxi:scroll->ink: total=9, matched=0 (0.00%)
+- taxi:scroll->bsc: total=13, matched=0 (0.00%)
+- taxi:ethereum->polygon: total=14, matched=0 (0.00%)
+- across:soneium->ethereum: total=43, matched=0 (0.00%)
+- bus:soneium->scroll: total=7, matched=0 (0.00%)
+- bus:abstract->scroll: total=9, matched=0 (0.00%)
+- taxi:scroll->abstract: total=13, matched=0 (0.00%)
+- bus:bsc->scroll: total=9, matched=0 (0.00%)
+- taxi:scroll->berachain: total=15, matched=0 (0.00%)
+- across:soneium->scroll: total=4, matched=0 (0.00%)
+- bus:telos->base: total=21, matched=0 (0.00%)
+- bus:mantle->base: total=499, matched=0 (0.00%)
+- across:base->lens: total=244, matched=0 (0.00%)
+- across:base->worldchain: total=288, matched=0 (0.00%)
+- taxi:base->rari: total=38, matched=0 (0.00%)
+- bus:gnosis->base: total=178, matched=0 (0.00%)
+- across:base->zora: total=34, matched=0 (0.00%)
+- bus:rari->base: total=54, matched=0 (0.00%)
+- taxi:base->vana: total=11, matched=0 (0.00%)
+- taxi:base->kaia: total=37, matched=0 (0.00%)
+- taxi:base->flare: total=52, matched=0 (0.00%)
+- taxi:base->sonic: total=80, matched=0 (0.00%)
+- across:unknown->base: total=32, matched=0 (0.00%)
+- bus:story->base: total=79, matched=0 (0.00%)
+- taxi:base->hemi: total=30, matched=0 (0.00%)
+- bus:evmonflow->base: total=110, matched=0 (0.00%)
+- taxi:base->degen: total=5, matched=0 (0.00%)
+- taxi:base->sei: total=50, matched=0 (0.00%)
+- taxi:arbitrum->metis: total=8, matched=0 (0.00%)
+- bus:kaia->arbitrum: total=18, matched=0 (0.00%)
+- bus:fuse->arbitrum: total=8, matched=0 (0.00%)
+- across:worldchain->ink: total=17, matched=0 (0.00%)
+- across:ink->polygon: total=12, matched=0 (0.00%)
+- across:ink->blast: total=10, matched=0 (0.00%)
+- across:ink->lisk: total=35, matched=0 (0.00%)
+- across:polygon->ink: total=11, matched=0 (0.00%)
+- across:blast->ink: total=12, matched=0 (0.00%)
+- across:lisk->ink: total=36, matched=0 (0.00%)
+- across:lens->ink: total=7, matched=0 (0.00%)
+- across:ink->worldchain: total=11, matched=0 (0.00%)
+- across:mode->ink: total=8, matched=0 (0.00%)
+- taxi:base->coredao: total=34, matched=0 (0.00%)
+- taxi:linea->mantle: total=7, matched=0 (0.00%)
+- bus:story->ethereum: total=26, matched=0 (0.00%)
+- bus:glue->base: total=80, matched=0 (0.00%)
+- taxi:linea->vana: total=2, matched=0 (0.00%)
+- bus:rootstock->linea: total=7, matched=0 (0.00%)
+- taxi:linea->ape: total=4, matched=0 (0.00%)
+- taxi:linea->sei: total=7, matched=0 (0.00%)
+- taxi:arbitrum->superposition: total=25, matched=0 (0.00%)
+- across:unknown->linea: total=6, matched=0 (0.00%)
+- across:linea->unknown: total=3, matched=0 (0.00%)
+- across:base->mode: total=60, matched=0 (0.00%)
+- across:linea->worldchain: total=3, matched=0 (0.00%)
+- across:lens->arbitrum: total=38, matched=0 (0.00%)
+- taxi:scroll->avalanche: total=4, matched=0 (0.00%)
+- across:scroll->worldchain: total=2, matched=0 (0.00%)
+- bus:rootstock->base: total=12, matched=0 (0.00%)
+- across:scroll->soneium: total=3, matched=0 (0.00%)
+- across:scroll->mode: total=1, matched=0 (0.00%)
+- taxi:base->superposition: total=50, matched=0 (0.00%)
+- across:lisk->scroll: total=3, matched=0 (0.00%)
+- taxi:base->fuse: total=1, matched=0 (0.00%)
+- across:ethereum->mode: total=15, matched=0 (0.00%)
+- across:worldchain->scroll: total=4, matched=0 (0.00%)
+- taxi:scroll->plume: total=1, matched=0 (0.00%)
+- taxi:base->mantle: total=36, matched=0 (0.00%)
+- taxi:scroll->hemi: total=9, matched=0 (0.00%)
+- taxi:base->lightlink: total=2, matched=0 (0.00%)
+- bus:lightlink->arbitrum: total=19, matched=0 (0.00%)
+- taxi:scroll->sonic: total=1, matched=0 (0.00%)
+- taxi:arbitrum->lightlink: total=6, matched=0 (0.00%)
+- bus:taiko->arbitrum: total=3, matched=0 (0.00%)
+- bus:plume->scroll: total=2, matched=0 (0.00%)
+- bus:coredao->base: total=24, matched=0 (0.00%)
+- taxi:base->cronos: total=4, matched=0 (0.00%)
+- bus:nibiru->linea: total=4, matched=0 (0.00%)
+- bus:nibiru->base: total=62, matched=0 (0.00%)
+- taxi:optimism->xdc: total=48, matched=0 (0.00%)
+- taxi:optimism->nibiru: total=18, matched=0 (0.00%)
+- bus:xdc->optimism: total=28, matched=0 (0.00%)
+- taxi:optimism->story: total=29, matched=0 (0.00%)
+- bus:fuse->optimism: total=41, matched=0 (0.00%)
+- taxi:optimism->flare: total=21, matched=0 (0.00%)
+- taxi:optimism->superposition: total=14, matched=0 (0.00%)
+- bus:goat->optimism: total=22, matched=0 (0.00%)
+- taxi:optimism->fuse: total=29, matched=0 (0.00%)
+- taxi:optimism->ink: total=66, matched=0 (0.00%)
+- across:optimism->lens: total=30, matched=0 (0.00%)
+- bus:iota->base: total=20, matched=0 (0.00%)
+- bus:lightlink->base: total=50, matched=0 (0.00%)
+- taxi:base->goat: total=3, matched=0 (0.00%)
+- across:optimism->unknown: total=4, matched=0 (0.00%)
+- taxi:optimism->peaq: total=1, matched=0 (0.00%)
+- across:optimism->blast: total=12, matched=0 (0.00%)
+- taxi:optimism->goat: total=10, matched=0 (0.00%)
+- taxi:optimism->rootstock: total=1, matched=0 (0.00%)
+- across:arbitrum->mode: total=8, matched=0 (0.00%)
+- bus:metis->arbitrum: total=14, matched=0 (0.00%)
+- across:arbitrum->lisk: total=12, matched=0 (0.00%)
+- bus:aurora->arbitrum: total=4, matched=0 (0.00%)
+- across:optimism->zora: total=18, matched=0 (0.00%)
+- bus:metis->optimism: total=3, matched=0 (0.00%)
+- taxi:optimism->iota: total=18, matched=0 (0.00%)
+- bus:mantapacific->optimism: total=27, matched=0 (0.00%)
+- bus:ape->optimism: total=10, matched=0 (0.00%)
+- taxi:optimism->degen: total=16, matched=0 (0.00%)
+- taxi:base->taiko: total=8, matched=0 (0.00%)
+- bus:telos->optimism: total=4, matched=0 (0.00%)
+- across:base->lisk: total=53, matched=0 (0.00%)
+- taxi:base->gnosis: total=32, matched=0 (0.00%)
+- bus:metis->base: total=27, matched=0 (0.00%)
+- taxi:base->mantapacific: total=9, matched=0 (0.00%)
+- taxi:base->nibiru: total=7, matched=0 (0.00%)
+- bus:vana->base: total=15, matched=0 (0.00%)
+- across:linea->blast: total=6, matched=0 (0.00%)
+- taxi:linea->kaia: total=3, matched=0 (0.00%)
+- bus:story->linea: total=4, matched=0 (0.00%)
+- taxi:linea->story: total=3, matched=0 (0.00%)
+- taxi:linea->gravity: total=9, matched=0 (0.00%)
+- across:unknown->ink: total=2, matched=0 (0.00%)
+- across:bsc->ink: total=4, matched=0 (0.00%)
+- bus:xdc->base: total=6, matched=0 (0.00%)
+- bus:taiko->base: total=31, matched=0 (0.00%)
+- bus:botanix->optimism: total=4, matched=0 (0.00%)
+- bus:nibiru->optimism: total=28, matched=0 (0.00%)
+- across:unknown->optimism: total=14, matched=0 (0.00%)
+- bus:evmonflow->optimism: total=16, matched=0 (0.00%)
+- taxi:optimism->evmonflow: total=11, matched=0 (0.00%)
+- bus:iota->arbitrum: total=24, matched=0 (0.00%)
+- taxi:arbitrum->xdc: total=4, matched=0 (0.00%)
+- bus:aurora->base: total=19, matched=0 (0.00%)
+- taxi:ethereum->ape: total=1, matched=0 (0.00%)
+- taxi:ethereum->glue: total=12, matched=0 (0.00%)
+- bus:metis->ethereum: total=1, matched=0 (0.00%)
+- taxi:ethereum->gravity: total=39, matched=0 (0.00%)
+- bus:peaq->arbitrum: total=3, matched=0 (0.00%)
+- taxi:arbitrum->rari: total=9, matched=0 (0.00%)
+- bus:lightlink->ethereum: total=5, matched=0 (0.00%)
+- taxi:ethereum->rootstock: total=3, matched=0 (0.00%)
+- taxi:ethereum->aurora: total=5, matched=0 (0.00%)
+- bus:iota->ethereum: total=2, matched=0 (0.00%)
+- taxi:ethereum->sonic: total=23, matched=0 (0.00%)
+- bus:taiko->ethereum: total=1, matched=0 (0.00%)
+- taxi:ethereum->mantle: total=11, matched=0 (0.00%)
+- bus:glue->ethereum: total=24, matched=0 (0.00%)
+- taxi:base->telos: total=16, matched=0 (0.00%)
+- bus:mantapacific->ethereum: total=13, matched=0 (0.00%)
+- taxi:ethereum->scroll: total=7, matched=0 (0.00%)
+- bus:degen->base: total=3, matched=0 (0.00%)
+- taxi:arbitrum->telos: total=2, matched=0 (0.00%)
+- taxi:optimism->telos: total=6, matched=0 (0.00%)
+- taxi:optimism->coredao: total=3, matched=0 (0.00%)
+- taxi:base->aurora: total=5, matched=0 (0.00%)
+- bus:fuse->linea: total=1, matched=0 (0.00%)
+- bus:ape->linea: total=4, matched=0 (0.00%)
+- taxi:linea->peaq: total=1, matched=0 (0.00%)
+- taxi:linea->cronos: total=2, matched=0 (0.00%)
+- bus:metis->linea: total=6, matched=0 (0.00%)
+- bus:gravity->ethereum: total=2, matched=0 (0.00%)
+- bus:fuse->ethereum: total=6, matched=0 (0.00%)
+- taxi:linea->mantapacific: total=4, matched=0 (0.00%)
+- bus:taiko->optimism: total=5, matched=0 (0.00%)
+- bus:iota->optimism: total=18, matched=0 (0.00%)
+- across:ink->lens: total=5, matched=0 (0.00%)
+- taxi:arbitrum->nibiru: total=2, matched=0 (0.00%)
+- taxi:ethereum->evmonflow: total=3, matched=0 (0.00%)
+- bus:coredao->arbitrum: total=8, matched=0 (0.00%)
+- bus:kaia->ethereum: total=1, matched=0 (0.00%)
+- taxi:ethereum->peaq: total=2, matched=0 (0.00%)
+- bus:peaq->optimism: total=2, matched=0 (0.00%)
+- taxi:optimism->ape: total=5, matched=0 (0.00%)
+- taxi:arbitrum->vana: total=3, matched=0 (0.00%)
+- taxi:ethereum->fuse: total=3, matched=0 (0.00%)
+- bus:aurora->ethereum: total=4, matched=0 (0.00%)
+- bus:coredao->optimism: total=2, matched=0 (0.00%)
+- taxi:optimism->gnosis: total=2, matched=0 (0.00%)
+- taxi:arbitrum->goat: total=2, matched=0 (0.00%)
+- taxi:arbitrum->peaq: total=3, matched=0 (0.00%)
+- bus:vana->ethereum: total=2, matched=0 (0.00%)
+- across:scroll->zora: total=2, matched=0 (0.00%)
+- taxi:scroll->mantle: total=2, matched=0 (0.00%)
+- bus:sonic->scroll: total=2, matched=0 (0.00%)
+- bus:peaq->base: total=2, matched=0 (0.00%)
+- across:unknown->ethereum: total=1, matched=0 (0.00%)
+- bus:evmonflow->ethereum: total=1, matched=0 (0.00%)
+- taxi:ethereum->cronos: total=3, matched=0 (0.00%)
+- bus:ape->arbitrum: total=6, matched=0 (0.00%)
+- taxi:base->metis: total=2, matched=0 (0.00%)
+- taxi:base->rootstock: total=4, matched=0 (0.00%)
+- bus:telos->arbitrum: total=2, matched=0 (0.00%)
+- taxi:ethereum->botanix: total=1, matched=0 (0.00%)
+- taxi:base->peaq: total=2, matched=0 (0.00%)
+- bus:kaia->linea: total=2, matched=0 (0.00%)
+- taxi:optimism->hedera: total=2, matched=0 (0.00%)
+- across:ink->bsc: total=1, matched=0 (0.00%)
+- taxi:arbitrum->taiko: total=2, matched=0 (0.00%)
+- taxi:ethereum->lightlink: total=2, matched=0 (0.00%)
+- bus:superposition->ethereum: total=2, matched=0 (0.00%)
+- taxi:arbitrum->fuse: total=2, matched=0 (0.00%)
+- bus:aurora->optimism: total=10, matched=0 (0.00%)
+- bus:cronos->optimism: total=2, matched=0 (0.00%)
+- bus:goat->base: total=3, matched=0 (0.00%)
+- taxi:arbitrum->cronos: total=4, matched=0 (0.00%)
+- taxi:ethereum->nibiru: total=1, matched=0 (0.00%)
+- taxi:ethereum->iota: total=2, matched=0 (0.00%)
+- bus:nibiru->arbitrum: total=2, matched=0 (0.00%)
+
+== AppPayload: Latency per Protocol per Route (sorted by % matched; latencies in seconds) ==
+- across:linea->ethereum: total=835, matched=835 (100.00%) lat[min=1.00 avg=17.93 p50=10.00 p90=36.60 p99=152.62 max=359.00]
+- across:optimism->ethereum: total=1397, matched=1397 (100.00%) lat[min=-2.00 avg=11.39 p50=8.00 p90=22.80 p99=74.00 max=294.00]
+- across:ethereum->linea: total=1399, matched=1399 (100.00%) lat[min=-4.00 avg=44.12 p50=16.00 p90=52.00 p99=1465.94 max=2404.00]
+- across:ink->base: total=709, matched=709 (100.00%) lat[min=1.00 avg=2.12 p50=2.00 p90=3.00 p99=4.00 max=31.00]
+- layerzero:linea->base: total=2505, matched=2505 (100.00%) lat[min=31.00 avg=36.45 p50=35.00 p90=41.00 p99=53.00 max=259.00]
+- layerzero:linea->arbitrum: total=928, matched=928 (100.00%) lat[min=27.00 avg=31.43 p50=30.00 p90=35.00 p99=46.00 max=79.00]
+- across:linea->base: total=3132, matched=3132 (100.00%) lat[min=2.00 avg=5.64 p50=3.00 p90=4.00 p99=36.00 max=923.00]
+- across:zksync->arbitrum: total=471, matched=471 (100.00%) lat[min=1.00 avg=2.20 p50=2.00 p90=3.00 p99=4.00 max=20.00]
+- across:arbitrum->scroll: total=198, matched=198 (100.00%) lat[min=1.00 avg=32.07 p50=6.50 p90=33.00 p99=371.90 max=1468.00]
+- layerzero:scroll->ethereum: total=70, matched=70 (100.00%) lat[min=77.00 avg=106.96 p50=93.00 p90=160.00 p99=214.08 max=261.00]
+- across:base->linea: total=2307, matched=2307 (100.00%) lat[min=0.00 avg=8.04 p50=2.00 p90=10.00 p99=33.00 max=3617.00]
+- across:scroll->arbitrum: total=704, matched=704 (100.00%) lat[min=0.00 avg=2.43 p50=0.00 p90=2.00 p99=100.00 max=105.00]
+- across:base->ink: total=485, matched=485 (100.00%) lat[min=2.00 avg=2.91 p50=2.00 p90=3.00 p99=25.00 max=38.00]
+- across:arbitrum->zksync: total=111, matched=111 (100.00%) lat[min=-1.00 avg=4.38 p50=0.00 p90=20.00 p99=28.90 max=43.00]
+- across:ink->arbitrum: total=152, matched=152 (100.00%) lat[min=0.00 avg=1.07 p50=1.00 p90=1.00 p99=13.92 max=24.00]
+- across:zksync->base: total=921, matched=921 (100.00%) lat[min=2.00 avg=5.53 p50=4.00 p90=5.00 p99=22.00 max=1383.00]
+- across:zksync->ethereum: total=204, matched=204 (100.00%) lat[min=1.00 avg=11.43 p50=7.00 p90=21.00 p99=60.40 max=211.00]
+- across:ethereum->zksync: total=55, matched=55 (100.00%) lat[min=2.00 avg=19.93 p50=6.00 p90=32.60 p99=256.04 max=377.00]
+- across:optimism->zksync: total=156, matched=156 (100.00%) lat[min=-1.00 avg=3.22 p50=0.00 p90=17.00 p99=28.85 max=36.00]
+- across:zksync->optimism: total=316, matched=316 (100.00%) lat[min=2.00 avg=3.86 p50=4.00 p90=5.00 p99=11.85 max=12.00]
+- across:base->zksync: total=174, matched=174 (100.00%) lat[min=-1.00 avg=2.37 p50=0.00 p90=12.00 p99=23.00 max=27.00]
+- across:zksync->linea: total=452, matched=452 (100.00%) lat[min=2.00 avg=5.56 p50=4.00 p90=7.00 p99=37.00 max=93.00]
+- layerzero:scroll->base: total=790, matched=790 (100.00%) lat[min=53.00 avg=68.73 p50=63.00 p90=69.00 p99=227.11 max=284.00]
+- across:ink->ethereum: total=74, matched=74 (100.00%) lat[min=1.00 avg=8.78 p50=7.00 p90=15.70 p99=44.04 max=82.00]
+- across:ethereum->ink: total=85, matched=85 (100.00%) lat[min=4.00 avg=9.76 p50=8.00 p90=17.00 p99=29.00 max=29.00]
+- across:arbitrum->ink: total=85, matched=85 (100.00%) lat[min=2.00 avg=3.20 p50=3.00 p90=6.20 p99=12.00 max=12.00]
+- across:linea->zksync: total=173, matched=173 (100.00%) lat[min=0.00 avg=2.32 p50=2.00 p90=2.80 p99=20.00 max=20.00]
+- across:scroll->linea: total=545, matched=545 (100.00%) lat[min=1.00 avg=4.42 p50=2.00 p90=12.00 p99=39.00 max=103.00]
+- across:linea->scroll: total=178, matched=178 (100.00%) lat[min=3.00 avg=111.03 p50=3.50 p90=28.30 p99=1714.00 max=1876.00]
+- across:optimism->linea: total=1223, matched=1223 (100.00%) lat[min=0.00 avg=3.46 p50=2.00 p90=7.00 p99=27.00 max=53.00]
+- layerzero:linea->optimism: total=429, matched=429 (100.00%) lat[min=31.00 avg=36.36 p50=35.00 p90=40.00 p99=63.00 max=79.00]
+- across:linea->optimism: total=909, matched=909 (100.00%) lat[min=3.00 avg=15.93 p50=4.00 p90=6.00 p99=52.92 max=2261.00]
+- across:optimism->scroll: total=426, matched=426 (100.00%) lat[min=1.00 avg=29.71 p50=3.00 p90=33.50 p99=647.00 max=960.00]
+- across:scroll->optimism: total=486, matched=486 (100.00%) lat[min=1.00 avg=2.60 p50=2.00 p90=4.00 p99=24.70 max=40.00]
+- across:linea->ink: total=103, matched=103 (100.00%) lat[min=4.00 avg=4.01 p50=4.00 p90=4.00 p99=4.00 max=5.00]
+- across:ink->linea: total=104, matched=104 (100.00%) lat[min=1.00 avg=11.08 p50=2.00 p90=3.00 p99=466.66 max=481.00]
+- across:scroll->ink: total=6, matched=6 (100.00%) lat[min=2.00 avg=2.00 p50=2.00 p90=2.00 p99=2.00 max=2.00]
+- across:base->scroll: total=174, matched=174 (100.00%) lat[min=1.00 avg=7.25 p50=1.00 p90=4.00 p99=32.00 max=797.00]
+- across:scroll->zksync: total=26, matched=26 (100.00%) lat[min=-1.00 avg=-0.31 p50=0.00 p90=0.00 p99=0.00 max=0.00]
+- across:ethereum->scroll: total=56, matched=56 (100.00%) lat[min=2.00 avg=22.41 p50=16.50 p90=38.50 p99=76.60 max=92.00]
+- across:ink->zksync: total=5, matched=5 (100.00%) lat[min=0.00 avg=0.20 p50=0.00 p90=0.60 p99=0.96 max=1.00]
+- across:zksync->scroll: total=16, matched=16 (100.00%) lat[min=2.00 avg=4.94 p50=3.00 p90=4.00 p99=30.35 max=35.00]
+- across:ink->scroll: total=1, matched=1 (100.00%) lat[min=1.00 avg=1.00 p50=1.00 p90=1.00 p99=1.00 max=1.00]
+- across:zksync->ink: total=2, matched=2 (100.00%) lat[min=3.00 avg=3.50 p50=3.50 p90=3.90 p99=3.99 max=4.00]
+- across:ethereum->base: total=22706, matched=22702 (99.98%) lat[min=-28.00 avg=14.24 p50=10.00 p90=22.00 p99=40.00 max=438.00]
+- across:base->optimism: total=3481, matched=3480 (99.97%) lat[min=0.00 avg=5.72 p50=2.00 p90=4.00 p99=48.00 max=298.00]
+- across:optimism->base: total=6012, matched=6010 (99.97%) lat[min=2.00 avg=2.99 p50=2.00 p90=2.00 p99=19.82 max=1136.00]
+- across:linea->arbitrum: total=1852, matched=1851 (99.95%) lat[min=1.00 avg=10.23 p50=2.00 p90=3.00 p99=35.00 max=2859.00]
+- across:base->arbitrum: total=8748, matched=8741 (99.92%) lat[min=-5.00 avg=7.01 p50=0.00 p90=1.00 p99=29.00 max=4163.00]
+- across:arbitrum->base: total=8521, matched=8514 (99.92%) lat[min=-3.00 avg=3.74 p50=2.00 p90=3.00 p99=22.00 max=1152.00]
+- across:base->ethereum: total=18860, matched=18844 (99.92%) lat[min=-2.00 avg=9.13 p50=8.00 p90=18.00 p99=40.00 max=3714.00]
+- across:ethereum->arbitrum: total=5225, matched=5220 (99.90%) lat[min=-19.00 avg=23.11 p50=9.00 p90=28.00 p99=265.00 max=2040.00]
+- across:scroll->base: total=990, matched=989 (99.90%) lat[min=1.00 avg=2.01 p50=2.00 p90=2.00 p99=8.12 max=188.00]
+- across:arbitrum->optimism: total=1669, matched=1667 (99.88%) lat[min=0.00 avg=3.98 p50=2.00 p90=5.00 p99=29.34 max=157.00]
+- across:arbitrum->ethereum: total=3887, matched=3882 (99.87%) lat[min=-2.00 avg=12.37 p50=8.00 p90=23.00 p99=99.57 max=474.00]
+- across:optimism->arbitrum: total=1941, matched=1938 (99.85%) lat[min=0.00 avg=15.14 p50=0.00 p90=1.00 p99=27.00 max=9124.00]
+- across:arbitrum->linea: total=1825, matched=1822 (99.84%) lat[min=0.00 avg=17.04 p50=2.00 p90=9.00 p99=444.95 max=1936.00]
+- across:ethereum->optimism: total=834, matched=832 (99.76%) lat[min=2.00 avg=22.75 p50=10.00 p90=34.00 p99=413.66 max=606.00]
+- across:ink->optimism: total=748, matched=746 (99.73%) lat[min=1.00 avg=2.47 p50=2.00 p90=4.00 p99=8.00 max=19.00]
+- across:optimism->ink: total=656, matched=654 (99.70%) lat[min=-6.00 avg=2.60 p50=2.00 p90=3.00 p99=14.00 max=22.00]
+- across:scroll->ethereum: total=315, matched=313 (99.37%) lat[min=-1.00 avg=64.88 p50=8.00 p90=23.00 p99=84.08 max=8532.00]
+- layerzero:ethereum->base: total=1288, matched=1273 (98.84%) lat[min=192.00 avg=207.45 p50=198.00 p90=210.00 p99=272.56 max=1414.00]
+- layerzero:linea->ethereum: total=160, matched=153 (95.63%) lat[min=49.00 avg=81.25 p50=61.00 p90=148.00 p99=217.00 max=217.00]
+- layerzero:scroll->arbitrum: total=434, matched=384 (88.48%) lat[min=47.00 avg=65.65 p50=58.00 p90=65.00 p99=232.00 max=329.00]
+- layerzero:scroll->optimism: total=314, matched=267 (85.03%) lat[min=56.00 avg=67.77 p50=64.00 p90=69.00 p99=184.00 max=268.00]
+- layerzero:optimism->ethereum: total=157, matched=116 (73.89%) lat[min=66.00 avg=112.83 p50=76.00 p90=124.00 p99=1201.30 max=1324.00]
+- layerzero:optimism->arbitrum: total=2095, matched=1503 (71.74%) lat[min=45.00 avg=48.75 p50=48.00 p90=52.00 p99=59.00 max=72.00]
+- layerzero:optimism->base: total=6500, matched=4056 (62.40%) lat[min=50.00 avg=54.24 p50=54.00 p90=58.00 p99=68.00 max=322.00]
+- layerzero:arbitrum->ethereum: total=636, matched=384 (60.38%) lat[min=30.00 avg=59.48 p50=42.00 p90=105.00 p99=284.06 max=560.00]
+- layerzero:base->scroll: total=420, matched=232 (55.24%) lat[min=32.00 avg=38.39 p50=36.00 p90=44.00 p99=66.76 max=89.00]
+- layerzero:arbitrum->base: total=9573, matched=5283 (55.19%) lat[min=12.00 avg=19.64 p50=18.00 p90=22.00 p99=53.36 max=262.00]
+- layerzero:linea->scroll: total=111, matched=58 (52.25%) lat[min=36.00 avg=37.45 p50=37.00 p90=40.00 p99=41.00 max=41.00]
+- layerzero:ethereum->scroll: total=28, matched=14 (50.00%) lat[min=202.00 avg=222.00 p50=213.00 p90=240.00 p99=240.00 max=240.00]
+- layerzero:scroll->linea: total=423, matched=192 (45.39%) lat[min=55.00 avg=66.79 p50=65.00 p90=69.90 p99=85.31 max=139.00]
+- layerzero:ethereum->arbitrum: total=1232, matched=242 (19.64%) lat[min=189.00 avg=195.96 p50=193.00 p90=204.00 p99=216.54 max=309.00]
+- layerzero:base->ethereum: total=1472, matched=285 (19.36%) lat[min=46.00 avg=82.07 p50=60.00 p90=130.00 p99=281.44 max=426.00]
+- layerzero:ethereum->optimism: total=239, matched=40 (16.74%) lat[min=194.00 avg=200.60 p50=196.00 p90=208.20 p99=242.00 max=242.00]
+- layerzero:base->arbitrum: total=8877, matched=1330 (14.98%) lat[min=25.00 avg=29.33 p50=29.00 p90=33.00 p99=43.00 max=58.00]
+- layerzero:ethereum->linea: total=449, matched=66 (14.70%) lat[min=198.00 avg=203.83 p50=202.50 p90=211.00 p99=216.35 max=217.00]
+- layerzero:optimism->scroll: total=212, matched=21 (9.91%) lat[min=55.00 avg=57.95 p50=57.00 p90=62.00 p99=62.00 max=62.00]
+- layerzero:base->optimism: total=8054, matched=679 (8.43%) lat[min=30.00 avg=34.25 p50=34.00 p90=38.00 p99=52.00 max=66.00]
+- layerzero:base->linea: total=6778, matched=314 (4.63%) lat[min=32.00 avg=37.67 p50=36.00 p90=43.00 p99=54.00 max=54.00]
+- layerzero:arbitrum->optimism: total=2904, matched=6 (0.21%) lat[min=17.00 avg=17.50 p50=17.00 p90=18.50 p99=19.85 max=20.00]
+- layerzero:arbitrum->linea: total=2235, matched=2 (0.09%) lat[min=19.00 avg=19.00 p50=19.00 p90=19.00 p99=19.00 max=19.00]
+- layerzero:optimism->linea: total=2880, matched=2 (0.07%) lat[min=55.00 avg=55.00 p50=55.00 p90=55.00 p99=55.00 max=55.00]
+- across:polygon->ethereum: total=2897, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zora->ethereum: total=22, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->arbitrum: total=255, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->hemi: total=28, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->ethereum: total=4244, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->arbitrum: total=1180, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->ethereum: total=181, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->optimism: total=4115, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->ethereum: total=328, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->arbitrum: total=425, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sei->arbitrum: total=237, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sonic->arbitrum: total=430, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->bsc: total=1205, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->arbitrum: total=938, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->worldchain: total=109, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->ethereum: total=967, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->polygon: total=708, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->unichain: total=611, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->berachain: total=246, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:bsc->ethereum: total=213, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->polygon: total=2201, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->unichain: total=813, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->ethereum: total=145, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->unichain: total=55, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->lisk: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:bsc->base: total=927, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->unichain: total=1751, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->ethereum: total=49, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->bsc: total=259, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:evmonflow->arbitrum: total=22, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->abstract: total=172, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->arbitrum: total=341, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->soneium: total=136, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->bsc: total=311, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->soneium: total=93, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->arbitrum: total=963, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->unichain: total=887, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->sonic: total=43, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->arbitrum: total=251, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->arbitrum: total=209, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->base: total=661, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gnosis->ethereum: total=37, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->base: total=2452, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ink->base: total=274, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->sei: total=33, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->ethereum: total=68, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->polygon: total=143, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->avalanche: total=134, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->bsc: total=1032, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->arbitrum: total=366, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:glue->arbitrum: total=74, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->lens: total=43, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->base: total=2263, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->worldchain: total=127, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->bsc: total=172, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:polygon->ethereum: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:hemi->arbitrum: total=66, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->arbitrum: total=148, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sonic->ethereum: total=78, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sei->ethereum: total=40, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->gravity: total=4149, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:avalanche->arbitrum: total=150, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->polygon: total=278, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->ethereum: total=463, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->unichain: total=3885, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->mantle: total=21, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->base: total=679, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->berachain: total=119, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->soneium: total=48, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->blast: total=39, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->base: total=1034, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->ethereum: total=29, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->ethereum: total=38, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gnosis->arbitrum: total=86, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->gravity: total=106, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rari->arbitrum: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->story: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->ink: total=52, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->blast: total=83, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->hemi: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->rootstock: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->arbitrum: total=118, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:avalanche->ethereum: total=57, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->abstract: total=561, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->polygon: total=1723, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:story->arbitrum: total=101, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->plume: total=301, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->avalanche: total=44, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->abstract: total=310, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->base: total=1158, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ink->arbitrum: total=96, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->arbitrum: total=323, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->base: total=675, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantapacific->arbitrum: total=42, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->botanix: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->ethereum: total=167, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:bsc->arbitrum: total=216, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->base: total=278, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->lens: total=42, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->arbitrum: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:hemi->base: total=62, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->berachain: total=185, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->plume: total=1106, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rootstock->arbitrum: total=54, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->ethereum: total=57, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->soneium: total=21, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:avalanche->base: total=245, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->soneium: total=279, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->glue: total=95, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rootstock->ethereum: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:vana->arbitrum: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->unichain: total=172, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->scroll: total=268, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ink->ethereum: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->base: total=649, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->story: total=53, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:flare->arbitrum: total=33, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->base: total=296, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->iota: total=22, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zora->base: total=180, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->gnosis: total=34, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:hemi->ethereum: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:xdc->arbitrum: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->base: total=180, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->avalanche: total=219, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->plume: total=28, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->kaia: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:cronos->base: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sei->base: total=176, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ape->base: total=45, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->bsc: total=35, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->zksync: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->zksync: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->polygon: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->zora: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->bsc: total=752, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->base: total=2540, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->soneium: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->blast: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->zksync: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zksync->unichain: total=17, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->zksync: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantapacific->base: total=102, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gravity->base: total=235, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->zksync: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->optimism: total=330, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->ink: total=134, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:polygon->base: total=222, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->zksync: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->ink: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->evmonflow: total=133, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->ink: total=4643, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->zksync: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:kaia->base: total=29, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->unichain: total=4463, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->ink: total=75, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->ape: total=53, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->worldchain: total=515, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:botanix->arbitrum: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->zora: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:fuse->base: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->soneium: total=103, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->ape: total=17, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->mode: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->linea: total=302, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->linea: total=220, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->linea: total=139, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zora->linea: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->linea: total=612, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:hemi->linea: total=20, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->unichain: total=171, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:superposition->base: total=55, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gnosis->linea: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->linea: total=108, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->linea: total=423, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->mode: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sonic->base: total=387, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->soneium: total=77, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->linea: total=113, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->linea: total=28, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->soneium: total=43, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->linea: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->linea: total=62, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->optimism: total=408, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->mode: total=996, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->lisk: total=171, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->unichain: total=564, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->soneium: total=230, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->optimism: total=448, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->mantle: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->optimism: total=344, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->optimism: total=879, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ink->optimism: total=85, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->optimism: total=546, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sonic->optimism: total=57, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->plume: total=373, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->optimism: total=468, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->optimism: total=617, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zora->optimism: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:hemi->optimism: total=151, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:polygon->optimism: total=51, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->berachain: total=105, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->blast: total=103, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->abstract: total=315, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->polygon: total=116, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:bsc->optimism: total=85, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->optimism: total=338, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->polygon: total=627, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->optimism: total=387, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->hemi: total=175, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:flare->optimism: total=60, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->soneium: total=365, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->avalanche: total=70, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->optimism: total=481, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:kaia->optimism: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->bsc: total=104, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:avalanche->optimism: total=60, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->optimism: total=59, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->lightlink: total=45, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:lightlink->optimism: total=62, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->soneium: total=328, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->kaia: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:story->optimism: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rootstock->optimism: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gravity->optimism: total=73, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->botanix: total=13, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rari->optimism: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->rari: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sei->optimism: total=199, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->optimism: total=116, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->zora: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->gnosis: total=51, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->arbitrum: total=219, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->sei: total=45, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->bsc: total=59, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gnosis->optimism: total=50, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:zora->arbitrum: total=108, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->sei: total=128, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->glue: total=99, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->arbitrum: total=77, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->coredao: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->mantapacific: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gravity->arbitrum: total=44, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:superposition->optimism: total=29, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->degen: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->base: total=189, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:polygon->arbitrum: total=103, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->sonic: total=27, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:superposition->arbitrum: total=46, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->base: total=662, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->iota: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->story: total=61, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->flare: total=37, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->gravity: total=221, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->evmonflow: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:botanix->base: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->unichain: total=180, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->bsc: total=116, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->abstract: total=93, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->linea: total=147, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->plume: total=35, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->polygon: total=167, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->unknown: total=69, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->linea: total=33, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->lens: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:flare->base: total=78, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->linea: total=63, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->flare: total=25, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->botanix: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->linea: total=32, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:flare->linea: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->berachain: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->nibiru: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantapacific->linea: total=49, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:flare->ethereum: total=20, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->optimism: total=25, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->ethereum: total=31, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->gnosis: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:lightlink->linea: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gravity->linea: total=13, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sei->linea: total=31, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->linea: total=27, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:unichain->scroll: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->unichain: total=34, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->polygon: total=54, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->bsc: total=78, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->lens: total=16, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->scroll: total=45, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->unichain: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->scroll: total=33, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->soneium: total=31, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:berachain->scroll: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->scroll: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->mantapacific: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->scroll: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unichain->scroll: total=21, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->scroll: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->ape: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->ink: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->bsc: total=13, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->polygon: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->ethereum: total=43, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:soneium->scroll: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:abstract->scroll: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->abstract: total=13, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:bsc->scroll: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->berachain: total=15, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:soneium->scroll: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:telos->base: total=21, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantle->base: total=499, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->lens: total=244, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->worldchain: total=288, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->rari: total=38, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gnosis->base: total=178, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->zora: total=34, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rari->base: total=54, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->vana: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->kaia: total=37, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->flare: total=52, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->sonic: total=80, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->base: total=32, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:story->base: total=79, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->hemi: total=30, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:evmonflow->base: total=110, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->degen: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->sei: total=50, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->metis: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:kaia->arbitrum: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:fuse->arbitrum: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->ink: total=17, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->polygon: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->blast: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->lisk: total=35, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:polygon->ink: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:blast->ink: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->ink: total=36, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->ink: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->worldchain: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:mode->ink: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->coredao: total=34, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->mantle: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:story->ethereum: total=26, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:glue->base: total=80, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->vana: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rootstock->linea: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->ape: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->sei: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->superposition: total=25, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->linea: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->unknown: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->mode: total=60, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->worldchain: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lens->arbitrum: total=38, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->avalanche: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->worldchain: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:rootstock->base: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->soneium: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->mode: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->superposition: total=50, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:lisk->scroll: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->fuse: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ethereum->mode: total=15, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:worldchain->scroll: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->plume: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->mantle: total=36, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->hemi: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->lightlink: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:lightlink->arbitrum: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->sonic: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->lightlink: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:taiko->arbitrum: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:plume->scroll: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:coredao->base: total=24, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->cronos: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:nibiru->linea: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:nibiru->base: total=62, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->xdc: total=48, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->nibiru: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:xdc->optimism: total=28, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->story: total=29, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:fuse->optimism: total=41, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->flare: total=21, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->superposition: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:goat->optimism: total=22, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->fuse: total=29, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->ink: total=66, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->lens: total=30, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:iota->base: total=20, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:lightlink->base: total=50, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->goat: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->unknown: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->peaq: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->blast: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->goat: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->rootstock: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->mode: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:metis->arbitrum: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:arbitrum->lisk: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:aurora->arbitrum: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:optimism->zora: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:metis->optimism: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->iota: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantapacific->optimism: total=27, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ape->optimism: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->degen: total=16, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->taiko: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:telos->optimism: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:base->lisk: total=53, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->gnosis: total=32, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:metis->base: total=27, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->mantapacific: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->nibiru: total=7, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:vana->base: total=15, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:linea->blast: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->kaia: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:story->linea: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->story: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->gravity: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->ink: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:bsc->ink: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:xdc->base: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:taiko->base: total=31, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:botanix->optimism: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:nibiru->optimism: total=28, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->optimism: total=14, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:evmonflow->optimism: total=16, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->evmonflow: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:iota->arbitrum: total=24, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->xdc: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:aurora->base: total=19, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->ape: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->glue: total=12, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:metis->ethereum: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->gravity: total=39, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:peaq->arbitrum: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->rari: total=9, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:lightlink->ethereum: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->rootstock: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->aurora: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:iota->ethereum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->sonic: total=23, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:taiko->ethereum: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->mantle: total=11, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:glue->ethereum: total=24, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->telos: total=16, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:mantapacific->ethereum: total=13, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:degen->base: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->telos: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->telos: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->coredao: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->aurora: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:fuse->linea: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ape->linea: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->peaq: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->cronos: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:metis->linea: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:gravity->ethereum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:fuse->ethereum: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:linea->mantapacific: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:taiko->optimism: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:iota->optimism: total=18, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->lens: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->nibiru: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->evmonflow: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:coredao->arbitrum: total=8, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:kaia->ethereum: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->peaq: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:peaq->optimism: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->ape: total=5, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->vana: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->fuse: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:aurora->ethereum: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:coredao->optimism: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->gnosis: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->goat: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->peaq: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:vana->ethereum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:scroll->zora: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:scroll->mantle: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:sonic->scroll: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:peaq->base: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:unknown->ethereum: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:evmonflow->ethereum: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->cronos: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ape->arbitrum: total=6, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->metis: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->rootstock: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:telos->arbitrum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->botanix: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:base->peaq: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:kaia->linea: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:optimism->hedera: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- across:ink->bsc: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->taiko: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->lightlink: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:superposition->ethereum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->fuse: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:aurora->optimism: total=10, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:cronos->optimism: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:goat->base: total=3, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:arbitrum->cronos: total=4, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->nibiru: total=1, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:ethereum->iota: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+- layerzero:nibiru->arbitrum: total=2, matched=0 (0.00%) lat[min=- avg=- p50=- p90=- p99=- max=-]
+
+Done.
