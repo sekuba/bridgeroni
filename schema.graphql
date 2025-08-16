@@ -55,13 +55,13 @@ We avoid sequence buffering and instead link bus passengers via their GUID and t
 
 type BusRodeOftSentLfg {
   id: ID!
-  dstEid: BigInt!
-  ticketId: BigInt! @index
-  fare: BigInt!
-  passengerAssetId: String!
-  passengerReceiver: String!
-  passengerAmountSD: BigInt!
-  passengerNativeDrop: String!
+  dstEid: BigInt
+  ticketId: BigInt @index
+  fare: BigInt
+  passengerAssetId: String
+  passengerReceiver: String
+  passengerAmountSD: BigInt
+  passengerNativeDrop: String
   # Filled by OFTSent (same tx):
   fromAddress: String
   amountSentLD: BigInt
